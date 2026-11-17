@@ -20,12 +20,13 @@ const ITEMS = [
 
 export default function GlobalCreateMenu() {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement>(null);
   const can = usePermissionChecker();
-  const allowed = (p) => !p || can(p);
+  const allowed = (p?: string) => !p || can(p);
   useEffect(() => {
-    const onDoc = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && e.target instanceof Node && !ref.current.contains(e.target))
+        setOpen(false);
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);

@@ -37,9 +37,29 @@ export function useTickets(initial: TicketListParams = {}) {
     [params]
   );
 
+  // #95: setState only after the fetch resolves — the old effect called
+  // setLoading(true) synchronously (cascading renders + lint error).
   useEffect(() => {
-    refresh(params);
-  }, [params]); // eslint-disable-line
+    let cancelled = false;
+    getTickets(params)
+      .then((res) => {
+        if (cancelled) return;
+        setTickets(res.data);
+        setMeta(res.meta);
+        setError(null);
+      })
+      .catch((e: any) => {
+        if (cancelled) return;
+        setError(e?.message ?? 'Failed to load tickets');
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [params]);
 
   return { tickets, meta, loading, error, params, setParams, refresh };
 }
@@ -64,8 +84,27 @@ export function useTicket(id: string | null) {
   }, [id]);
 
   useEffect(() => {
-    reload();
-  }, [reload]);
+    let cancelled = false;
+    if (id) {
+      getTicket(id)
+        .then((res) => {
+          if (cancelled) return;
+          setTicket(res.data);
+          setError(null);
+        })
+        .catch((e: any) => {
+          if (cancelled) return;
+          setError(e?.message ?? 'Failed to load ticket');
+        })
+        .finally(() => {
+          if (cancelled) return;
+          setLoading(false);
+        });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const comment = async (message: string, isInternal: boolean) => {
     if (!id) return;

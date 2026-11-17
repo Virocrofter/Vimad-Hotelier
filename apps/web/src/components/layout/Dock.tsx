@@ -1,7 +1,7 @@
 /* Dock (plan section 1.2/2.2): compact icon rail - Home, permitted Offices,
  * Needs Attention with open-count, Setup at bottom, active pill, icon
  * collapse. Flag-gated (nav.dock); Sidebar preserved for rollback. */
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -25,17 +25,22 @@ export default function Dock() {
     queryFn: () => listExceptions('open'),
     staleTime: 30000,
   });
-  const excPayload = excQ.data?.data ?? excQ.data ?? {};
-  const openCount = excPayload.counts?.open ?? 0;
+  const openCount = excQ.data?.counts?.open ?? 0;
 
-  const items = [
+  const items: {
+    to: string;
+    label: string;
+    Icon: ComponentType<{ className?: string }>;
+    badge?: number;
+    end?: boolean;
+  }[] = [
     { to: '/app/dashboard', label: 'Home', Icon: LayoutGrid, end: true },
     { to: '/app/exceptions', label: 'Needs Attention', Icon: AlertTriangle, badge: openCount },
     { to: '/app/housekeeping', label: 'Housekeeping', Icon: BedDouble },
     ...(hasChain ? [{ to: '/app/chain-billing', label: 'Chain Billing', Icon: Building2 }] : []),
   ];
 
-  const itemCls = (isActive) =>
+  const itemCls = (isActive: boolean) =>
     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ' +
     (isActive
       ? 'bg-primary/10 font-medium text-primary'
@@ -68,7 +73,7 @@ export default function Dock() {
           >
             <span className="relative">
               <Icon className="h-4 w-4" />
-              {badge > 0 && (
+              {badge != null && badge > 0 && (
                 <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-white">
                   {badge > 99 ? '99+' : badge}
                 </span>
