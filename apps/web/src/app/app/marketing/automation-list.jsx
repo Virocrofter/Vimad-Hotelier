@@ -19,7 +19,6 @@ const NODE_TYPES = ['Trigger', 'Wait', 'Send Email', 'Condition', 'End'];
 
 export default function AutomationList({ workflows }) {
   const [selectedWorkflow, setSelectedWorkflow] = useState(null);
-  const [showLogs, setShowLogs] = useState(false);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -63,35 +62,6 @@ export default function AutomationList({ workflows }) {
 }
 
 function WorkflowCard({ workflow, onSelect, getStatusColor, getStatusIcon }) {
-  // Generate fake 7-day trend based on execution count
-  const trendData = useMemo(() => {
-    const base = workflow.executions / 7;
-    return Array.from({ length: 7 }, (_, i) =>
-      Math.round(base * (0.7 + seededRandom(workflow.id + i) * 0.6))
-    );
-  }, [workflow.executions, workflow.id]);
-
-  // Generate fake log entries
-  const [logBaseTime] = useState(() => Date.now());
-  const logEntries = useMemo(() => {
-    const entries = [];
-    const count = Math.min(20, Math.floor(workflow.executions / 100) + 5);
-    const now = logBaseTime;
-    for (let i = 0; i < count; i++) {
-      const seed = workflow.id + i;
-      const success = seededRandom(seed) > 0.05;
-      entries.push({
-        id: `log-${i}`,
-        timestamp: new Date(now - i * 3600000 * (1 + seededRandom(seed + 1) * 4)).toISOString(),
-        status: success ? 'success' : 'error',
-        node: NODE_TYPES[Math.floor(seededRandom(seed + 2) * NODE_TYPES.length)],
-        message: success ? 'Completed successfully' : 'SMTP timeout after 30s',
-        guest: `Guest #${10000 + Math.floor(seededRandom(seed + 3) * 5000)}`,
-      });
-    }
-    return entries;
-  }, [workflow.executions, workflow.id, logBaseTime]);
-
   return (
     <div
       className="rounded-lg border border-border p-4 hover:bg-background-secondary cursor-pointer transition-colors"
@@ -117,21 +87,7 @@ function WorkflowCard({ workflow, onSelect, getStatusColor, getStatusIcon }) {
             </p>
             <p className="text-xs text-text-secondary">executions</p>
           </div>
-          <button className="p-2 hover:bg-background rounded-lg">
-            <MoreHorizontal className="h-5 w-5 text-text-secondary" />
-          </button>
         </div>
-      </div>
-
-      {/* Mini trend chart */}
-      <div className="mt-4 flex items-end gap-1 h-8">
-        {trendData.map((value, i) => (
-          <div
-            key={i}
-            className="flex-1 bg-primary/20 rounded-sm"
-            style={{ height: `${(value / Math.max(...trendData)) * 100}%` }}
-          />
-        ))}
       </div>
     </div>
   );

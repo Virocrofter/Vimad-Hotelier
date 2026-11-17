@@ -140,6 +140,7 @@ const DEFAULT_BLOCKS = {
     headline: 'Experience Luxury Like Never Before',
     subheadline: 'Book your stay today and save 25% on your first reservation.',
     buttonText: 'Reserve Now',
+    url: '#',
     imageSrc: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=600&h=300&fit=crop',
     styles: {
       padding: '0',
@@ -456,7 +457,7 @@ function renderBlock(block, isSelected, isPreview, theme) {
               {block.subheadline}
             </p>
             <a
-              href="#"
+              href={block.url ?? '#'}
               style={{
                 display: 'inline-block',
                 backgroundColor: '#3B82F6',
@@ -1105,9 +1106,6 @@ export default function TemplateBuilderPage() {
 
           <Button variant="outline" size="sm" onClick={exportHtml}>
             <Download className="mr-1.5 h-3.5 w-3.5" /> Export
-          </Button>
-          <Button size="sm">
-            <Save className="mr-1.5 h-3.5 w-3.5" /> Save
           </Button>
         </div>
       </div>

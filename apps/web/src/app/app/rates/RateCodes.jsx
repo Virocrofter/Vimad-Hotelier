@@ -132,17 +132,11 @@ export default function RateCodes() {
             Manage pricing strategies and derivation rules
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
-          <Plus className="h-4 w-4" />
-          Add Rate Code
-        </button>
       </div>
 
       {isLoading && <p className="text-sm text-text-muted py-8 text-center">Loading rate codes…</p>}
       {!isLoading && ratePlans.length === 0 && (
-        <p className="text-sm text-text-muted py-8 text-center">
-          No rate plans found. Create one with the Add Rate Code button.
-        </p>
+        <p className="text-sm text-text-muted py-8 text-center">No rate plans found.</p>
       )}
 
       {!isLoading && ratePlans.length > 0 && (
@@ -237,13 +231,6 @@ export default function RateCodes() {
                   <p className="text-sm text-text-secondary mt-1">{describePlan(selected)}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-lg text-sm text-text-secondary hover:bg-surface-elevated"
-                    title="Edit (form coming soon)"
-                  >
-                    <Edit3 className="h-3.5 w-3.5" />
-                    Edit
-                  </button>
                   <button
                     onClick={() => handleDelete(selected)}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-danger/10 text-danger border border-danger/20 rounded-lg text-sm hover:bg-danger/20"

@@ -1,5 +1,5 @@
-/* apps/web/src/app/app/billing/dashboard/components/FolioOverview.jsx
- * Wired folio-billing overview for the billing dashboard.
+/* apps/web/src/app/app/billing/components/FolioOverview.jsx
+ * Wired folio-billing overview for the billing page.
  * Data: /v1/folios (open balances) + /v1/dashboard/stats (revenue KPIs).
  */
 import React, { useState, useEffect, useCallback } from 'react';

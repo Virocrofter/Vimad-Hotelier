@@ -215,7 +215,6 @@ export const router = createBrowserRouter([
         path: 'billing',
         children: [
           { index: true, ...page(() => import('./app/app/billing/page')) },
-          { path: 'dashboard', ...page(() => import('./app/app/billing/dashboard/page')) },
           { path: 'payments', ...page(() => import('./app/app/billing/payments/page')) },
           {
             path: 'payment-requests',
