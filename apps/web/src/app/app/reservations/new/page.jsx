@@ -19,6 +19,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { useProperties } from '../../../../hooks/useProperties';
+import { usePropertyScope } from '../../../../hooks/usePropertyScope';
 import { useRoomTypes } from '../../../../hooks/useRoomTypes';
 import { useRooms } from '../../../../hooks/useRooms';
 import { useGuestsList, useCreateGuest, useGuest } from '../../../../hooks/useGuests';
@@ -75,7 +76,9 @@ export default function NewReservationPage() {
   }, [preselectedGuest]);
 
   const { properties, isLoading: propertiesLoading } = useProperties();
-  const propertyId = properties[0]?.id ?? null;
+  const { current: scopeProperty, isLoading: scopeLoading } = usePropertyScope();
+  // #62: book into the switcher-selected property, not the first in the list.
+  const propertyId = scopeProperty?.id ?? properties[0]?.id ?? null;
 
   const { roomTypes, isLoading: roomTypesLoading } = useRoomTypes(propertyId ?? undefined);
   const { rooms } = useRooms();
@@ -544,7 +547,7 @@ export default function NewReservationPage() {
         <h1 className="mt-2 text-2xl font-bold text-text-primary">New Reservation</h1>
       </div>
 
-      {propertiesLoading ? (
+      {propertiesLoading || scopeLoading ? (
         <p className="text-sm text-text-muted">Loading...</p>
       ) : !propertyId ? (
         <div className="rounded-xl border border-warning/20 bg-warning/5 p-6 text-center">

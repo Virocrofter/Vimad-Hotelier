@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { channelApi, CHANNEL_PROVIDERS } from '../../../api/channel';
 import { apiGet } from '../../../api/client';
+import { usePropertyScope } from '../../../hooks/usePropertyScope';
 
 const STATUS_STYLES = {
   active: 'bg-accent/10 text-accent border-accent/20',
@@ -377,8 +378,9 @@ export default function ChannelManagerPage() {
 
 /* ─── Connect Modal — payload matches channelConnectSchema ─── */
 function ConnectModal({ properties, onClose, onConnect, busy }) {
+  const { current: scopeProperty } = usePropertyScope();
   const [provider, setProvider] = useState('bookingcom');
-  const [propertyId, setPropertyId] = useState(properties[0]?.id || '');
+  const [propertyId, setPropertyId] = useState(scopeProperty?.id || properties[0]?.id || '');
   const [hotelId, setHotelId] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [apiSecret, setApiSecret] = useState('');
@@ -510,9 +512,10 @@ function ConnectModal({ properties, onClose, onConnect, busy }) {
 
 /* ─── Push Modal — payload matches availabilityPushSchema / ratesPushSchema ─── */
 function PushModal({ kind, properties, onClose, onPush, busy }) {
+  const { current: scopeProperty } = usePropertyScope();
   const today = new Date().toISOString().slice(0, 10);
   const defEnd = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
-  const [propertyId, setPropertyId] = useState(properties[0]?.id || '');
+  const [propertyId, setPropertyId] = useState(scopeProperty?.id || properties[0]?.id || '');
   const [dateFrom, setDateFrom] = useState(today);
   const [dateTo, setDateTo] = useState(defEnd);
   const [codes, setCodes] = useState(''); // comma-separated roomTypeIds or ratePlanIds

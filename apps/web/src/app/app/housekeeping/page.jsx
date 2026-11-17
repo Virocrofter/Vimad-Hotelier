@@ -12,7 +12,7 @@ import {
   useBulkAssignHousekeeping,
 } from '../../../hooks/useHousekeeping';
 import { useRooms } from '../../../hooks/useRooms';
-import { useProperties } from '../../../hooks/useProperties';
+import { usePropertyScope } from '../../../hooks/usePropertyScope';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
@@ -474,8 +474,9 @@ function HousekeepingPage() {
   const [bulkSelected, setBulkSelected] = useState([]);
   const [minibarOpen, setMinibarOpen] = useState(false);
 
-  const { data: properties } = useProperties();
-  const propertyId = properties?.[0]?.id;
+  // #61: follow the property switcher instead of always showing property #1.
+  const { current: scopeProperty } = usePropertyScope();
+  const propertyId = scopeProperty?.id ?? null;
 
   const { data: stats } = useHousekeepingStats(propertyId);
   const { data: staff } = useHousekeepingStaff();

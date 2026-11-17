@@ -21,7 +21,7 @@ import {
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
 import { useGroups, useDeleteGroup } from '../../../hooks/useGroups';
-import { useProperties } from '../../../hooks/useProperties';
+import { usePropertyScope } from '../../../hooks/usePropertyScope';
 import { formatCurrency, fmtDate, groupColor } from './data';
 import { StatusBadge, BlockTypeBadge, PickupBar, GroupStatCard } from './components';
 
@@ -33,8 +33,9 @@ export default function GroupsPage() {
   const [sortConfig, setSortConfig] = useState({ key: 'arrivalDate', dir: 'asc' });
   const [cancelTarget, setCancelTarget] = useState(null);
 
-  const { properties } = useProperties();
-  const propertyId = properties?.[0]?.id;
+  // #89: follow the property switcher; null keeps the chain-wide list.
+  const { current: scopeProperty } = usePropertyScope();
+  const propertyId = scopeProperty?.id;
   const { groups, meta, isLoading, error, refetch } = useGroups(
     propertyId
       ? {
