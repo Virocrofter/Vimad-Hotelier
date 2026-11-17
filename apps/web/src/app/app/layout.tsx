@@ -7,8 +7,6 @@ import { OfflineBanner } from '../../components/OfflineBanner';
 import { StatusBanner } from '../../components/StatusBanner';
 import CommandPalette from '../../components/layout/CommandPalette';
 import SetupChip from '../../components/SetupChip';
-import { useLiveFlag } from '../../components/FlagsProvider';
-import Dock from '../../components/layout/Dock';
 import OnboardingGate from '../../components/OnboardingGate';
 
 function ShellCommandPalette() {
@@ -22,12 +20,9 @@ function ShellCommandPalette() {
 }
 
 export default function AppLayout() {
-  const dockOn = useLiveFlag('nav.dock', false);
-  const [collapsed] = useState(false);
-
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {dockOn ? <Dock /> : <Sidebar />}
+      <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
         <StatusBanner />

@@ -26,6 +26,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useTodayDashboard } from '../../../hooks/useTodayDashboard';
+import { usePropertyScope } from '../../../hooks/usePropertyScope';
 import { checkInReservation, checkOutReservation } from '../../../api/api-reservations';
 import { LINKS } from '../../../lib/dashLinks';
 import { cn } from '../../../lib/utils';
@@ -231,7 +232,12 @@ function WorklistColumn({ title, icon: Icon, items, busyId, actionError, onActio
 }
 
 export default function TodayCockpit({ propertyId, onMutated }) {
-  const today = useTodayDashboard(propertyId);
+  // The dashboard passes its raw store id, which is undefined until a
+  // property is chosen — /dashboard/today requires one explicitly (the
+  // legacy endpoints fall back to server stickiness, this one does not).
+  const { current: scopeProperty } = usePropertyScope();
+  const effectivePropertyId = propertyId ?? scopeProperty?.id ?? undefined;
+  const today = useTodayDashboard(effectivePropertyId);
   const queryClient = useQueryClient();
   const [busyId, setBusyId] = useState(null);
   const [actionError, setActionError] = useState(null);
@@ -253,6 +259,17 @@ export default function TodayCockpit({ propertyId, onMutated }) {
       setBusyId(null);
     }
   };
+
+  if (!effectivePropertyId) {
+    return (
+      <div className="rounded-xl border border-warning/40 bg-surface p-6 text-center">
+        <p className="text-sm font-medium text-text-primary">No property selected</p>
+        <p className="mt-1 text-xs text-text-secondary">
+          Pick a property from the switcher to load the today cockpit.
+        </p>
+      </div>
+    );
+  }
 
   if (today.isLoading) return <Skeleton />;
   if (today.isError) {
