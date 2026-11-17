@@ -24,11 +24,22 @@ async function pubGet(path: string, params?: Record<string, unknown>) {
   return body.data ?? body;
 }
 
+function newPubKey() {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `pub-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 async function pubPost(path: string, payload: unknown, idempotencyKey?: string) {
+  // #103: always send a key — without it a double-tap on "Book" could post
+  // two reservations.
   const res = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      'Idempotency-Key': idempotencyKey ?? newPubKey(),
+    },
     body: JSON.stringify(payload),
   });
   const body = await res.json().catch(() => ({}));

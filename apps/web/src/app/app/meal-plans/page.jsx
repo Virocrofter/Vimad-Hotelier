@@ -104,7 +104,7 @@ const inputCls =
   'w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-text-primary outline-none focus:border-accent';
 
 /* ─── Meal plan modal ─── */
-function MealPlanModal({ plan, restaurants, onClose, onSaved }) {
+function MealPlanModal({ plan, restaurants, propertyId, onClose, onSaved }) {
   const isEdit = !!plan;
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
@@ -138,7 +138,6 @@ function MealPlanModal({ plan, restaurants, onClose, onSaved }) {
     setSaving(true);
     try {
       const body = {
-        propertyId: 'demo-prop', // replaced below by caller
         ...form,
         price: Number(form.price),
         restaurantId: form.restaurantId || null,
@@ -147,13 +146,10 @@ function MealPlanModal({ plan, restaurants, onClose, onSaved }) {
         startDate: form.startDate || null,
         endDate: form.endDate || null,
       };
-      delete body.propertyId;
       if (isEdit) await mealPlansApi.update(plan.id, body);
-      else
-        await mealPlansApi.create({
-          ...body,
-          propertyId: plan?.propertyId || window.__vimadPropertyId || '',
-        });
+      // #76: use the propertyId prop from the page (switcher-aware) — the old
+      // path fell back to window.__vimadPropertyId, which is never set.
+      else await mealPlansApi.create({ ...body, propertyId: propertyId || '' });
       toast({ title: isEdit ? 'Meal plan updated' : 'Meal plan created' });
       onSaved();
       onClose();

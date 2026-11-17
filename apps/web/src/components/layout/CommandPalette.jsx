@@ -33,7 +33,6 @@ const ACTIONS = [
     to: LINKS.newReservation,
     keywords: 'new booking create',
   },
-  ,
   {
     label: 'Add Guest',
     perm: 'guest:create',
@@ -42,7 +41,6 @@ const ACTIONS = [
     to: '/app/guests',
     keywords: 'new guest create profile',
   },
-  ,
   {
     label: 'Create Task',
     perm: 'task:create',
@@ -51,7 +49,6 @@ const ACTIONS = [
     to: LINKS.tasks,
     keywords: 'new task assign department',
   },
-  ,
   {
     label: 'Message Guest',
     perm: 'sms:send',
@@ -60,7 +57,6 @@ const ACTIONS = [
     to: '/app/comms',
     keywords: 'message chat sms email guest',
   },
-  ,
   {
     label: 'Walk-In Check-in',
     perm: 'reservation:checkin',
@@ -69,7 +65,6 @@ const ACTIONS = [
     to: LINKS.arrivalsBoard,
     keywords: 'walkin checkin front desk arrivals',
   },
-  ,
   {
     label: 'Post Charge / Take Payment',
     perm: 'folio:payment',
@@ -78,7 +73,6 @@ const ACTIONS = [
     to: LINKS.billing,
     keywords: 'folio charge payment billing',
   },
-  ,
   {
     label: 'Tasks Board',
     perm: 'task:read',
@@ -87,7 +81,6 @@ const ACTIONS = [
     to: LINKS.tasks,
     keywords: 'tasks spine departments',
   },
-  ,
   {
     label: 'Night Audit',
     perm: 'night_audit:run',
@@ -96,7 +89,6 @@ const ACTIONS = [
     to: LINKS.nightAudit,
     keywords: 'roll date close day audit',
   },
-  ,
   {
     label: 'Reports',
     perm: 'report:read',
@@ -105,7 +97,6 @@ const ACTIONS = [
     to: LINKS.reports,
     keywords: 'reports revenue occupancy',
   },
-  ,
   {
     label: 'Room Plan / Tape Chart',
     perm: 'reservation:read',
@@ -242,7 +233,7 @@ export default function CommandPalette({ open, onOpen, onClose }) {
         to: p.to,
       })),
     ];
-  }, [query, guestHits, resHits, roomHits, taskHits, pageHits]);
+  }, [query, guestHits, resHits, roomHits, taskHits, pageHits, can]); // #101: was filtering with stale permissions
 
   useEffect(() => setIndex(0), [items.length, query]);
 

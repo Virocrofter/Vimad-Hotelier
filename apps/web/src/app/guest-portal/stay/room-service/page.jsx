@@ -66,6 +66,12 @@ function RoomServicePageInner() {
     if (!hasToken) navigate('/guest-portal/auth/login', { replace: true });
   }, [hasToken, navigate]);
 
+  // #99: menu + categories must exist before ANY early return — the useMemo
+  // used to sit after the loading/error returns, so a retry after a menu
+  // error changed the hook count and crashed the page.
+  const menu = menuData?.menu ?? [];
+  const categories = useMemo(() => [...new Set(menu.map((m) => m.category))], [menu]);
+
   if (!hasToken) return null;
 
   if (menuLoading) {
@@ -89,11 +95,8 @@ function RoomServicePageInner() {
     );
   }
 
-  const menu = menuData.menu ?? [];
   const orders = ordersData?.orders ?? [];
   const products = upsellsData?.products ?? [];
-
-  const categories = useMemo(() => [...new Set(menu.map((m) => m.category))], [menu]);
 
   const cartLines = Object.entries(cart)
     .map(([id, qty]) => ({ item: menu.find((m) => m.id === id), qty }))

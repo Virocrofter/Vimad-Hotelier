@@ -44,16 +44,25 @@ function formatCurrency(minor, currency = 'ZAR') {
 
 function daysUntil(dateStr) {
   if (!dateStr) return 999;
-  const target = new Date(dateStr);
+  // #83: parse as local calendar dates — `new Date('YYYY-MM-DD')` is UTC
+  // midnight and flipped the count around midnight.
+  const [yy, mm, dd] = dateStr.split('-').map(Number);
+  if (!yy || !mm || !dd) return 999;
   const now = new Date();
-  return Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(yy, mm - 1, dd);
+  return Math.round((target - today) / (1000 * 60 * 60 * 24));
 }
 
 function expDate(payment) {
   const m = payment.metadata || {};
   if (!m.expYear) return null;
-  const y = String(m.expYear).length === 2 ? `20${m.expYear}` : String(m.expYear);
-  return `${y}-${String(m.expMonth || '01').padStart(2, '0')}-28`;
+  const y = Number(String(m.expYear).length === 2 ? `20${m.expYear}` : String(m.expYear));
+  const mo = Number(m.expMonth || 1);
+  // #82: day was hardcoded to 28 — compute the month's real last day so
+  // every card shows its true expiry.
+  const lastDay = new Date(y, mo, 0).getDate();
+  return `${y}-${String(mo).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 }
 
 const newKey = () => `vcc-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -473,7 +482,6 @@ function RecordCaptureModal({ onClose, onCreated, showError }) {
                 onChange={(e) => setForm({ ...form, currency: e.target.value })}
                 className={inputCls}
               >
-                <option value="ZAR">ZAR</option>
                 <option value="ZAR">ZAR</option>
                 <option value="EUR">EUR</option>
                 <option value="GBP">GBP</option>

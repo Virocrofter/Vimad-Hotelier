@@ -1,12 +1,17 @@
 import { useAuthStore } from '../stores/authStores';
 import { useCallback } from 'react';
 
+// #100: one stable empty array — `|| []` inside the store selector created a
+// fresh array every render while permissions were unset, destabilising every
+// useCallback downstream (app-wide render churn).
+const EMPTY_PERMISSIONS: string[] = [];
+
 /**
  * Check if current user has a specific permission
  */
 export function usePermission(resource: string, action: string): boolean {
   const user = useAuthStore((s) => s.user);
-  const permissions = useAuthStore((s) => s.permissions) || [];
+  const permissions = useAuthStore((s) => s.permissions) ?? EMPTY_PERMISSIONS;
 
   if (!user) return false;
   if (user.role === 'owner') return true; // owner has all permissions
@@ -21,7 +26,7 @@ export function usePermission(resource: string, action: string): boolean {
  */
 export function useAnyPermission(...perms: [string, string][]): boolean {
   const user = useAuthStore((s) => s.user);
-  const permissions = useAuthStore((s) => s.permissions) || [];
+  const permissions = useAuthStore((s) => s.permissions) ?? EMPTY_PERMISSIONS;
 
   if (!user) return false;
   if (user.role === 'owner') return true;
@@ -38,7 +43,7 @@ export function useAnyPermission(...perms: [string, string][]): boolean {
  */
 export function useAllPermissions(...perms: [string, string][]): boolean {
   const user = useAuthStore((s) => s.user);
-  const permissions = useAuthStore((s) => s.permissions) || [];
+  const permissions = useAuthStore((s) => s.permissions) ?? EMPTY_PERMISSIONS;
 
   if (!user) return false;
   if (user.role === 'owner') return true;
@@ -57,7 +62,7 @@ export function useAllPermissions(...perms: [string, string][]): boolean {
  */
 export function usePermissionChecker(): (perm: string) => boolean {
   const user = useAuthStore((s) => s.user);
-  const permissions = useAuthStore((s) => s.permissions) || [];
+  const permissions = useAuthStore((s) => s.permissions) ?? EMPTY_PERMISSIONS;
 
   return useCallback(
     (perm: string) => {
