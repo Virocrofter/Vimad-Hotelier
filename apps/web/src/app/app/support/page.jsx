@@ -127,7 +127,7 @@ function SupportDesk() {
       setParams((p) => ({ ...p, q: q || undefined, page: 1 }));
     }, 300);
     return () => clearTimeout(t);
-  }, [q]); // eslint-disable-line
+  }, [q]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const applyFilter = (key, value) => {
     const setter = { status: setStatus, priority: setPriority, category: setCategory, sla: setSla }[
