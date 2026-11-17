@@ -1,5 +1,5 @@
 /* src/app/app/audit-trail/page.jsx */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Shield,
@@ -53,6 +53,7 @@ import {
 import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
+import { fetchTenantAuditLogs } from '../../../api/audit';
 
 /* ─── Mock Data ─── */
 const auditEntries = [
@@ -376,7 +377,7 @@ const actionTypeMeta = {
 /* ─── Helpers ─── */
 function formatTimestamp(ts) {
   const date = new Date(ts.replace(' ', 'T'));
-  const now = new Date('2026-08-12T15:00:00');
+  const now = new Date();
   const diff = Math.floor((now - date) / 1000 / 60);
   if (diff < 1) return 'Just now';
   if (diff < 60) return `${diff} min ago`;
@@ -609,7 +610,55 @@ function AuditDetailDrawer({ entry, onClose }) {
 
 /* ─── Main Page ─── */
 export default function AuditTrailPage() {
-  const [entries] = useState(auditEntries);
+  const [entries, setEntries] = useState([]);
+  const [loadingEntries, setLoadingEntries] = useState(true);
+  const [entriesError, setEntriesError] = useState('');
+
+  // #75: real audit feed — this page previously rendered a hardcoded mock
+  // array, showing invented compliance events to anyone who opened it.
+  useEffect(() => {
+    let cancelled = false;
+    fetchTenantAuditLogs({ pageSize: 200 })
+      .then((res) => {
+        if (cancelled) return;
+        const rows = (res?.data ?? []).map((e) => ({
+          ...e,
+          id: e.id ?? `${e.timestamp}-${Math.random().toString(36).slice(2, 8)}`,
+          timestamp:
+            typeof e.timestamp === 'string' ? e.timestamp.replace('T', ' ').slice(0, 19) : '',
+          severity:
+            e.severity === 'critical' || e.severity === 'high'
+              ? 'danger'
+              : e.severity === 'medium'
+                ? 'warning'
+                : 'info',
+          action: e.action?.type ?? e.action ?? '',
+          user: {
+            id: e.user?.id ?? e.user?.name ?? '?',
+            name: e.user?.name ?? 'Unknown',
+            role: e.user?.role ?? '—',
+            ip: e.user?.ip ?? '—',
+          },
+          resource: e.resource ?? { type: '', id: '', name: '' },
+          changes: Array.isArray(e.changes) ? e.changes : [],
+          description: e.description ?? e.action?.description ?? '',
+          sessionId: e.sessionId ?? '—',
+          userAgent: e.userAgent ?? '',
+        }));
+        setEntries(rows);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setEntriesError(err?.message ?? 'Failed to load audit events');
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoadingEntries(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [query, setQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [severityFilter, setSeverityFilter] = useState('all');
@@ -620,6 +669,20 @@ export default function AuditTrailPage() {
   const [expandedRows, setExpandedRows] = useState(new Set());
 
   /* ─── Computed Data ─── */
+  const matchesDateRange = (e) => {
+    if (dateRange === 'all' || !e.timestamp) return true;
+    const d = new Date(e.timestamp.replace(' ', 'T'));
+    if (Number.isNaN(d.getTime())) return true;
+    const now = new Date();
+    const dayMs = 86400000;
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (dateRange === 'today') return d >= startOfToday;
+    if (dateRange === 'yesterday')
+      return d >= new Date(startOfToday.getTime() - dayMs) && d < startOfToday;
+    if (dateRange === 'week') return d >= new Date(startOfToday.getTime() - 6 * dayMs);
+    if (dateRange === 'month') return d >= new Date(startOfToday.getTime() - 29 * dayMs);
+    return true; // custom: no range pickers yet — show all
+  };
   const filteredEntries = useMemo(() => {
     let result = entries.filter((e) => {
       const matchesQuery =
@@ -631,7 +694,7 @@ export default function AuditTrailPage() {
         e.action.toLowerCase().includes(query.toLowerCase());
       const matchesCategory = categoryFilter === 'all' || e.category === categoryFilter;
       const matchesSeverity = severityFilter === 'all' || e.severity === severityFilter;
-      return matchesQuery && matchesCategory && matchesSeverity;
+      return matchesQuery && matchesCategory && matchesSeverity && matchesDateRange(e);
     });
 
     result.sort((a, b) => {
@@ -644,7 +707,7 @@ export default function AuditTrailPage() {
     });
 
     return result;
-  }, [entries, query, categoryFilter, severityFilter, sortConfig]);
+  }, [entries, query, categoryFilter, severityFilter, sortConfig, dateRange]);
 
   const stats = useMemo(
     () => ({
@@ -810,160 +873,174 @@ export default function AuditTrailPage() {
         {entries.length} audit entries
       </p>
 
+      {entriesError && (
+        <div className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+          {entriesError}
+        </div>
+      )}
+
       {/* Audit Table */}
-      <div className="rounded-xl border border-border bg-surface overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-background border-b border-border">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-10"></th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
-                  Time
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
-                  Severity
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
-                  User
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
-                  Action
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
-                  Resource
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-20"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {filteredEntries.map((entry) => {
-                const meta = actionTypeMeta[entry.action] || {
-                  label: entry.action,
-                  icon: Activity,
-                };
-                const ActionIcon = meta.icon;
-                const isExpanded = expandedRows.has(entry.id);
+      {loadingEntries ? (
+        <div className="rounded-xl border border-border bg-surface p-10 text-center text-sm text-text-muted">
+          Loading audit events…
+        </div>
+      ) : (
+        <div className="rounded-xl border border-border bg-surface overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-background border-b border-border">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-10"></th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Time
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Severity
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Action
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Resource
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-20"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredEntries.map((entry) => {
+                  const meta = actionTypeMeta[entry.action] || {
+                    label: entry.action,
+                    icon: Activity,
+                  };
+                  const ActionIcon = meta.icon;
+                  const isExpanded = expandedRows.has(entry.id);
 
-                return (
-                  <>
-                    <tr
-                      key={entry.id}
-                      className="hover:bg-background/50 transition-colors group cursor-pointer"
-                      onClick={() => toggleRow(entry.id)}
-                    >
-                      <td className="px-4 py-3">
-                        <button className="text-text-muted hover:text-text-primary">
-                          {isExpanded ? (
-                            <ChevronUp className="h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="h-4 w-4" />
-                          )}
-                        </button>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="text-text-secondary text-xs">
-                          {formatTimestamp(entry.timestamp)}
-                        </div>
-                        <div className="text-[10px] text-text-muted font-mono">
-                          {entry.timestamp.split(' ')[1]}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <SeverityBadge severity={entry.severity} />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/10 text-[10px] font-bold text-secondary">
-                            {entry.user.name
-                              .split(' ')
-                              .map((n) => n[0])
-                              .join('')}
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-text-primary">
-                              {entry.user.name}
-                            </p>
-                            <p className="text-[10px] text-text-muted">{entry.user.role}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <ActionIcon className="h-4 w-4 text-text-muted" />
-                          <span className="text-sm text-text-primary">{meta.label}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="text-sm text-text-primary">{entry.resource.name}</p>
-                        <p className="text-[10px] text-text-muted font-mono">{entry.resource.id}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <CategoryBadge category={entry.category} />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedEntry(entry);
-                            }}
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
-                            title="View Details"
-                          >
-                            <Eye className="h-4 w-4" />
+                  return (
+                    <>
+                      <tr
+                        key={entry.id}
+                        className="hover:bg-background/50 transition-colors group cursor-pointer"
+                        onClick={() => toggleRow(entry.id)}
+                      >
+                        <td className="px-4 py-3">
+                          <button className="text-text-muted hover:text-text-primary">
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* Expanded Row */}
-                    {isExpanded && (
-                      <tr>
-                        <td colSpan={8} className="px-4 py-4 bg-background/50">
-                          <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
-                            <p className="text-sm text-text-secondary">{entry.description}</p>
-                            <div className="space-y-2">
-                              {entry.changes.map((change, i) => (
-                                <div key={i} className="flex items-center gap-3 text-xs">
-                                  <span className="font-medium text-text-muted w-24">
-                                    {change.field}
-                                  </span>
-                                  <span className="rounded bg-danger/5 border border-danger/20 px-2 py-0.5 font-mono text-danger">
-                                    {change.old}
-                                  </span>
-                                  <ArrowUpDown className="h-3 w-3 text-text-muted" />
-                                  <span className="rounded bg-accent/5 border border-accent/20 px-2 py-0.5 font-mono text-accent">
-                                    {change.new}
-                                  </span>
-                                </div>
-                              ))}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="text-text-secondary text-xs">
+                            {formatTimestamp(entry.timestamp)}
+                          </div>
+                          <div className="text-[10px] text-text-muted font-mono">
+                            {entry.timestamp.split(' ')[1]}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <SeverityBadge severity={entry.severity} />
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/10 text-[10px] font-bold text-secondary">
+                              {entry.user.name
+                                .split(' ')
+                                .map((n) => n[0])
+                                .join('')}
                             </div>
-                            <div className="flex items-center gap-4 pt-2 border-t border-border text-[10px] text-text-muted">
-                              <span className="font-mono">Session: {entry.sessionId}</span>
-                              <span>IP: {entry.user.ip}</span>
+                            <div>
+                              <p className="text-sm font-medium text-text-primary">
+                                {entry.user.name}
+                              </p>
+                              <p className="text-[10px] text-text-muted">{entry.user.role}</p>
                             </div>
                           </div>
                         </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <ActionIcon className="h-4 w-4 text-text-muted" />
+                            <span className="text-sm text-text-primary">{meta.label}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className="text-sm text-text-primary">{entry.resource.name}</p>
+                          <p className="text-[10px] text-text-muted font-mono">
+                            {entry.resource.id}
+                          </p>
+                        </td>
+                        <td className="px-4 py-3">
+                          <CategoryBadge category={entry.category} />
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedEntry(entry);
+                              }}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
+                              title="View Details"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
-                    )}
-                  </>
-                );
-              })}
-              {filteredEntries.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-text-muted">
-                    <ClipboardList className="mx-auto h-10 w-10 mb-3" />
-                    <p>No audit entries match your filters.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+
+                      {/* Expanded Row */}
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={8} className="px-4 py-4 bg-background/50">
+                            <div className="rounded-lg border border-border bg-surface p-4 space-y-3">
+                              <p className="text-sm text-text-secondary">{entry.description}</p>
+                              <div className="space-y-2">
+                                {entry.changes.map((change, i) => (
+                                  <div key={i} className="flex items-center gap-3 text-xs">
+                                    <span className="font-medium text-text-muted w-24">
+                                      {change.field}
+                                    </span>
+                                    <span className="rounded bg-danger/5 border border-danger/20 px-2 py-0.5 font-mono text-danger">
+                                      {change.old}
+                                    </span>
+                                    <ArrowUpDown className="h-3 w-3 text-text-muted" />
+                                    <span className="rounded bg-accent/5 border border-accent/20 px-2 py-0.5 font-mono text-accent">
+                                      {change.new}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="flex items-center gap-4 pt-2 border-t border-border text-[10px] text-text-muted">
+                                <span className="font-mono">Session: {entry.sessionId}</span>
+                                <span>IP: {entry.user.ip}</span>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  );
+                })}
+                {filteredEntries.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-12 text-center text-text-muted">
+                      <ClipboardList className="mx-auto h-10 w-10 mb-3" />
+                      <p>No audit entries match your filters.</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Compliance Footer */}
       <div className="rounded-lg border border-border bg-surface p-4 flex items-start gap-3">
