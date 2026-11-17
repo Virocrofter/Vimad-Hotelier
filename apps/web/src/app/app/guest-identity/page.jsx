@@ -48,7 +48,7 @@ function MergeModal({ open, onClose, onMerged }) {
   const guestsQuery = useQuery({
     queryKey: ['guest-identity-pool'],
     queryFn: async () => {
-      const res = await apiGet('/v1/guests', { pageSize: 100 });
+      const res = await apiGet('/v1/guests', { pageSize: 500 });
       return Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
     },
     enabled: open,

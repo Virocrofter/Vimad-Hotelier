@@ -921,7 +921,7 @@ export default function VCCPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await listPayments({ type: 'vcc_charge', page: 1, pageSize: 500 });
+      const res = await listPayments({ type: 'vcc_charge', page: 1, pageSize: 2000 });
       setPayments(res.data);
       setSummary(res.summary);
     } catch (err) {

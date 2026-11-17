@@ -52,7 +52,7 @@ function BookingModal({ search, target, onClose }) {
   const guestsQuery = useQuery({
     queryKey: ['central-guest-pool'],
     queryFn: async () => {
-      const res = await apiGet('/v1/guests', { pageSize: 100 });
+      const res = await apiGet('/v1/guests', { pageSize: 500 });
       return Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
     },
     enabled: !!target,
@@ -193,7 +193,7 @@ function BookingModal({ search, target, onClose }) {
                   />
                 </div>
                 <div className="max-h-44 overflow-y-auto">
-                  {filteredGuests.slice(0, 30).map((g) => (
+                  {filteredGuests.slice(0, 100).map((g) => (
                     <label
                       key={g.id}
                       className={`flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-surface-elevated ${guestId === g.id ? 'bg-primary/5' : ''}`}
