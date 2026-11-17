@@ -571,6 +571,7 @@ export default function NightAuditPage() {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [selectedAudit, setSelectedAudit] = useState(null);
   const [rollingBack, setRollingBack] = useState(null);
+  const [rollbackArmed, setRollbackArmed] = useState(null);
 
   // Automation tab state
   const [schedule, setSchedule] = useState(null);
@@ -694,12 +695,16 @@ export default function NightAuditPage() {
   };
 
   const handleRollback = async (auditId) => {
-    if (
-      !confirm(
-        'Are you sure you want to rollback this audit? This will reverse posted charges and reset the business date.'
-      )
-    )
+    // #57: replaces the blocking native confirm — first click arms (toast
+    // explains the stakes), second click executes.
+    if (rollbackArmed !== auditId) {
+      setRollbackArmed(auditId);
+      toast.error(
+        'Click rollback again to confirm — this reverses posted charges and resets the business date.'
+      );
       return;
+    }
+    setRollbackArmed(null);
     setRollingBack(auditId);
     try {
       await nightAuditApi.rollback(auditId);

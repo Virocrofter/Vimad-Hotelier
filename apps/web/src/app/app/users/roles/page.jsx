@@ -645,7 +645,9 @@ export default function RolesPage() {
   const handleDeleteRole = async (id) => {
     const role = roles.find((r) => r.id === id);
     if (role?.userCount > 0) {
-      alert(`Cannot delete role with ${role.userCount} assigned users. Reassign users first.`);
+      setLoadError(
+        `Cannot delete role with ${role.userCount} assigned users. Reassign users first.`
+      );
       return;
     }
     if (!window.confirm(`Delete role "${role?.name}"?`)) return;
@@ -654,7 +656,7 @@ export default function RolesPage() {
       setRoles((prev) => prev.filter((r) => r.id !== id));
       if (selectedRole?.id === id) setSelectedRole(null);
     } catch (err) {
-      alert(err?.response?.data?.error?.message || 'Delete failed');
+      setLoadError(err?.response?.data?.error?.message || 'Delete failed');
     }
   };
 

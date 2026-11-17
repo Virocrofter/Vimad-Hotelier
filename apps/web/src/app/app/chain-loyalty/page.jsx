@@ -188,6 +188,7 @@ function PostTab() {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [result, setResult] = useState(null);
+  const [postError, setPostError] = useState('');
 
   const num = Number(amount);
   const preview =
@@ -215,7 +216,7 @@ function PostTab() {
       setAmount('');
       setDescription('');
     } catch (e) {
-      alert(errMsg(e));
+      setPostError(errMsg(e));
     }
   };
 
@@ -304,6 +305,19 @@ function PostTab() {
         </div>
       </div>
 
+      {postError && (
+        <div
+          style={{
+            padding: '8px 12px',
+            borderRadius: 8,
+            border: '1px solid rgba(220,38,38,0.4)',
+            color: '#dc2626',
+            fontSize: 13,
+          }}
+        >
+          {postError}
+        </div>
+      )}
       {result && (
         <div className="cl-card">
           <div className="cl-card-title">Posted</div>
@@ -406,13 +420,14 @@ function ConfigTab() {
   const [redeemValue, setRedeemValue] = useState('');
   const [tiers, setTiers] = useState([]);
   const [saved, setSaved] = useState(false);
+  const [cfgError, setCfgError] = useState('');
 
   // hydrate from server once
   const [hydrated, setHydrated] = useState(false);
   if (config && !hydrated) {
     setEarnRate(String(config.earnRate));
     setRedeemValue(String(config.redeemValue));
-    setTiers(config.tiers.map((t) => ({ ...t })));
+    setTiers(config.tiers.map((t) => ({ ...t, _k: crypto.randomUUID() })));
     setHydrated(true);
   }
 
@@ -426,7 +441,7 @@ function ConfigTab() {
       });
       setSaved(true);
     } catch (e) {
-      alert(errMsg(e));
+      setCfgError(errMsg(e));
     }
   };
 
@@ -450,7 +465,7 @@ function ConfigTab() {
         />
         <label className="cl-label">Tiers (threshold = lifetime points)</label>
         {tiers.map((t, i) => (
-          <div key={i} className="cl-row">
+          <div key={t._k} className="cl-row">
             <input
               className="cl-input cl-input-sm"
               value={t.name}
@@ -479,7 +494,12 @@ function ConfigTab() {
           <button
             type="button"
             className="cl-btn cl-btn-ghost"
-            onClick={() => setTiers([...tiers, { name: `tier${tiers.length + 1}`, threshold: 0 }])}
+            onClick={() =>
+              setTiers([
+                ...tiers,
+                { name: `tier${tiers.length + 1}`, threshold: 0, _k: crypto.randomUUID() },
+              ])
+            }
           >
             Add tier
           </button>
@@ -494,6 +514,19 @@ function ConfigTab() {
             {saveConfig.isPending ? 'Saving…' : 'Save config'}
           </button>
         </div>
+        {cfgError && (
+          <div
+            style={{
+              padding: '8px 12px',
+              borderRadius: 8,
+              border: '1px solid rgba(220,38,38,0.4)',
+              color: '#dc2626',
+              fontSize: 13,
+            }}
+          >
+            {cfgError}
+          </div>
+        )}
         {saved && <div className="cl-banner cl-banner-ok">Config saved — applies chain-wide.</div>}
       </div>
     </div>

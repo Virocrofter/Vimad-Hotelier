@@ -75,6 +75,7 @@ function CsvTab() {
   const [fileName, setFileName] = useState('properties.csv');
   const [stagedId, setStagedId] = useState(null);
   const [executed, setExecuted] = useState(null);
+  const [csvError, setCsvError] = useState('');
 
   const { data: recent } = useOnboardingImports();
   const { data: staged, isFetching: staging } = useOnboardingImport(stagedId);
@@ -106,7 +107,7 @@ function CsvTab() {
       setStagedId(imp.id);
     } catch (e) {
       uploadCsv.reset();
-      alert(errMsg(e));
+      setCsvError(errMsg(e));
     }
   };
 
@@ -115,7 +116,7 @@ function CsvTab() {
       const done = await executeImport.mutateAsync(stagedId);
       setExecuted(done?.stats?.executed ?? null);
     } catch (e) {
-      alert(errMsg(e));
+      setCsvError(errMsg(e));
     }
   };
 
@@ -163,6 +164,7 @@ function CsvTab() {
             {uploadCsv.isPending || staging ? 'Validating…' : 'Upload & validate'}
           </button>
         </div>
+        {csvError && <div className="ob-banner ob-banner-error">{csvError}</div>}
         {uploadCsv.isError && (
           <div className="ob-banner ob-banner-error">{errMsg(uploadCsv.error)}</div>
         )}
@@ -331,6 +333,7 @@ function CloneTab() {
   const [sourceId, setSourceId] = useState('');
   const [form, setForm] = useState({ name: '', code: '', city: '' });
   const [result, setResult] = useState(null);
+  const [cloneError, setCloneError] = useState('');
 
   const run = async () => {
     setResult(null);
@@ -343,7 +346,7 @@ function CloneTab() {
       });
       setResult(r);
     } catch (e) {
-      alert(errMsg(e));
+      setCloneError(errMsg(e));
     }
   };
 
@@ -397,6 +400,7 @@ function CloneTab() {
           </button>
         </div>
       </div>
+      {cloneError && <div className="ob-banner ob-banner-error">{cloneError}</div>}
       {result && (
         <div className="ob-card">
           <div className="ob-card-title">Clone complete</div>
@@ -420,13 +424,15 @@ function TemplatesTab() {
   const [applying, setApplying] = useState(null);
   const [applyForm, setApplyForm] = useState({ name: '', code: '', city: '' });
   const [applied, setApplied] = useState(null);
+  const [tplError, setTplError] = useState('');
+  const [armedDelete, setArmedDelete] = useState(null);
 
   const doCapture = async () => {
     try {
       await captureTemplate.mutateAsync(capture);
       setCapture({ propertyId: '', name: '' });
     } catch (e) {
-      alert(errMsg(e));
+      setTplError(errMsg(e));
     }
   };
 
@@ -437,7 +443,7 @@ function TemplatesTab() {
       setApplying(null);
       setApplyForm({ name: '', code: '', city: '' });
     } catch (e) {
-      alert(errMsg(e));
+      setTplError(errMsg(e));
     }
   };
 
@@ -524,11 +530,15 @@ function TemplatesTab() {
                           type="button"
                           className="ob-btn ob-btn-danger ob-btn-xs"
                           onClick={() => {
-                            if (window.confirm(`Delete template "${t.name}"?`))
+                            if (armedDelete === t.id) {
+                              setArmedDelete(null);
                               deleteTemplate.mutate(t.id);
+                            } else {
+                              setArmedDelete(t.id);
+                            }
                           }}
                         >
-                          Delete
+                          {armedDelete === t.id ? 'Confirm?' : 'Delete'}
                         </button>
                       </td>
                     </tr>
@@ -574,6 +584,7 @@ function TemplatesTab() {
           </div>
         )}
 
+        {tplError && <div className="ob-banner ob-banner-error">{tplError}</div>}
         {applied && (
           <div className="ob-banner ob-banner-ok">
             <span className="ob-code">{applied.property.code}</span> {applied.property.name} created
@@ -594,6 +605,7 @@ function ChainTab() {
   const [sourceId, setSourceId] = useState('');
   const [name, setName] = useState('Chain Standard');
   const [saved, setSaved] = useState(false);
+  const [chainError, setChainError] = useState('');
 
   const save = async () => {
     setSaved(false);
@@ -602,7 +614,7 @@ function ChainTab() {
       setSaved(true);
       setSourceId('');
     } catch (e) {
-      alert(errMsg(e));
+      setChainError(errMsg(e));
     }
   };
 
@@ -688,6 +700,7 @@ function ChainTab() {
             {saveChainStandard.isPending ? 'Saving…' : 'Save as chain standard'}
           </button>
         </div>
+        {chainError && <div className="ob-banner ob-banner-error">{chainError}</div>}
         {saved && <div className="ob-banner ob-banner-ok">Chain standard updated.</div>}
       </div>
     </div>
