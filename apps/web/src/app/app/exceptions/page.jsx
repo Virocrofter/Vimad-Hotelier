@@ -27,8 +27,6 @@ import {
 } from '../../../api/exceptions';
 import { flags } from '../../../lib/flags';
 import { cn } from '../../../lib/utils';
-import { useFlags, useLiveFlag } from '../../../components/FlagsProvider';
-import ExceptionsV2Screen from './page.v2.jsx';
 
 const SEV = {
   critical: 'border-danger/30 bg-danger/10 text-danger',
@@ -320,7 +318,4 @@ function ExceptionsPage() {
   );
 }
 
-export default function ExceptionsGate(props) {
-  const excV2 = useLiveFlag('exceptions.v2', false);
-  return excV2 ? <ExceptionsV2Screen {...props} /> : <ExceptionsPage {...props} />;
-}
+export default ExceptionsPage;

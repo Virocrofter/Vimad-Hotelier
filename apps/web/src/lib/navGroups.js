@@ -33,7 +33,6 @@ export const NAV_GROUPS = [
     items: [
       { label: 'Reservations', to: '/app/reservations' },
       { label: 'Front Desk', to: '/app/reservations/front-desk' },
-      { label: 'Front Office', to: '/app/offices/front' },
       { label: 'Room Plan', to: '/app/room-plan' },
       { label: 'Groups', to: '/app/groups' },
       { label: 'Central Reservations', to: '/app/central-reservations' },
@@ -47,7 +46,6 @@ export const NAV_GROUPS = [
     items: [
       { label: 'Room Board', to: '/app/rooms' },
       { label: 'Housekeeping', to: '/app/housekeeping' },
-      { label: 'Maintenance', to: '/app/offices/maintenance' },
       { label: 'Space Status', to: '/app/housekeeping/space-status' },
       { label: 'HK Activity', to: '/app/housekeeping/activity' },
       { label: 'Tasks', to: '/app/tasks' },

@@ -474,14 +474,4 @@ function AppDashboardV1() {
   );
 }
 
-// Stage 3 dash.v2 gate (plan section 11.1): live-flag only. ready+on -> v2;
-// anything else -> v1. Legacy build-time flags.todayV2 stays untouched.
-import { useFlags, useLiveFlag } from '../../../components/FlagsProvider';
-import TodayV2Screen from './page.v2';
-
-export default function AppDashboard() {
-  const { ready } = useFlags();
-  const dashV2 = useLiveFlag('dash.v2', false);
-  if (ready && dashV2 === true) return <TodayV2Screen />;
-  return <AppDashboardV1 />;
-}
+export default AppDashboardV1;

@@ -12,18 +12,12 @@ import {
   ChevronsRight,
   LayoutGrid,
   Settings,
-  Sparkles,
-  Wrench,
 } from 'lucide-react';
-import { useLiveFlag } from '../../components/FlagsProvider';
 import { listExceptions } from '../../api/exceptions';
 import { getScope } from '../../api/chains';
 
 export default function Dock() {
   const [expanded, setExpanded] = useState(false);
-  const hkOn = useLiveFlag('housekeeping.v2', false);
-  const maintOn = useLiveFlag('offices.maintenance', false);
-  const frontOn = useLiveFlag('offices.front', false);
   const scopeQ = useQuery({ queryKey: ['nav-scope'], queryFn: getScope, staleTime: 60000 });
   const hasChain = (scopeQ.data?.properties?.length ?? 0) > 1;
   const excQ = useQuery({
@@ -37,9 +31,7 @@ export default function Dock() {
   const items = [
     { to: '/app/dashboard', label: 'Home', Icon: LayoutGrid, end: true },
     { to: '/app/exceptions', label: 'Needs Attention', Icon: AlertTriangle, badge: openCount },
-    ...(frontOn ? [{ to: '/app/offices/front', label: 'Front Office', Icon: Sparkles }] : []),
-    ...(hkOn ? [{ to: '/app/housekeeping', label: 'Housekeeping', Icon: BedDouble }] : []),
-    ...(maintOn ? [{ to: '/app/offices/maintenance', label: 'Maintenance', Icon: Wrench }] : []),
+    { to: '/app/housekeeping', label: 'Housekeeping', Icon: BedDouble },
     ...(hasChain ? [{ to: '/app/chain-billing', label: 'Chain Billing', Icon: Building2 }] : []),
   ];
 

@@ -69,8 +69,6 @@ import {
   Wine,
 } from 'lucide-react';
 
-import { useFlags, useLiveFlag } from '../../../components/FlagsProvider';
-import HousekeepingV2Screen from './page.v2.jsx';
 // ─── Constants ───
 
 const STATUS_COLUMNS = [
@@ -799,7 +797,4 @@ function HousekeepingPage() {
   );
 }
 
-export default function HousekeepingGate(props) {
-  const hkV2 = useLiveFlag('housekeeping.v2', false);
-  return hkV2 ? <HousekeepingV2Screen {...props} /> : <HousekeepingPage {...props} />;
-}
+export default HousekeepingPage;

@@ -240,8 +240,6 @@ export const router = createBrowserRouter([
         ],
       },
       { path: 'housekeeping', ...page(() => import('./app/app/housekeeping/page')) },
-      { path: 'offices/maintenance', ...page(() => import('./app/app/offices/maintenance/page')) },
-      { path: 'offices/front', ...page(() => import('./app/app/offices/front/page')) },
       {
         path: 'housekeeping/space-status',
         ...page(() => import('./app/app/housekeeping/space-status/page')),
