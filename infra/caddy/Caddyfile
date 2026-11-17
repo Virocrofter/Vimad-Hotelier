@@ -1,0 +1,64 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# VIMAD — Caddy Configuration
+# TLS termination + reverse proxy
+# ══════════════════════════════════════════════════════════════════════════════
+
+# API subdomain
+api.yourdomain.com {
+    reverse_proxy api:3001
+    
+    # Security headers
+    header {
+        -Server
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    # Compress responses
+    encode gzip zstd
+}
+
+# Web app
+app.yourdomain.com {
+    reverse_proxy web:80
+    
+    # Security headers
+    header {
+        -Server
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+    
+    # Compress responses
+    encode gzip zstd
+}
+
+# Guest portal
+portal.yourdomain.com {
+    reverse_proxy web:80
+    
+    header {
+        -Server
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+    }
+    
+    encode gzip zstd
+}
+
+# Marketing site (if separate)
+yourdomain.com, www.yourdomain.com {
+    reverse_proxy web:80
+    
+    header {
+        -Server
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+    }
+    
+    encode gzip zstd
+}

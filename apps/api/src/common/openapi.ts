@@ -1,0 +1,204 @@
+/* apps/api/src/common/openapi.ts */
+import { z } from 'zod';
+import { extendZodWithOpenApi, OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
+import * as authModule from '../modules/auth/auth.routes.js';
+import * as propertiesModule from '../modules/properties/properties.routes.js';
+import * as guestsModule from '../modules/guests/guests.routes.js';
+import * as reservationsModule from '../modules/reservations/reservations.routes.js';
+import * as roomsModule from '../modules/rooms/rooms.routes.js';
+import * as roomTypesModule from '../modules/room-types/room-types.routes.js';
+import * as ratesModule from '../modules/rates/rates.routes.js';
+import * as foliosModule from '../modules/folios/folios.routes.js';
+import * as channelModule from '../modules/channel/channel.routes.js';
+import * as housekeepingModule from '../modules/housekeeping/housekeeping.routes.js';
+import * as nightAuditModule from '../modules/night-audit/night-audit.routes.js';
+import * as smsModule from '../modules/sms/sms.routes.js';
+import * as guestPortalModule from '../modules/guest-portal/guest-portal.routes.js';
+import * as healthModule from '../modules/health/health.routes.js';
+import * as notificationModule from '../modules/notifications/notification.routes.js';
+import * as apiKeyModule from '../modules/rbac/api-key.routes.js';
+import * as rbacModule from '../modules/rbac/rbac.routes.js';
+import * as pushModule from '../modules/push/push.routes.js';
+import * as filesModule from '../modules/files/files.routes.js';
+// [A1] Payments (Paystack) + public webhook
+import * as paymentsModule from '../modules/payments/payments.routes.js';
+import * as paymentsWebhookModule from '../modules/payments/payments.webhook.js';
+// [A2] Payment requests (deposit automation)
+import * as paymentRequestsModule from '../modules/payments/payment-requests.routes.js';
+// [A3] Transactional email center
+import * as transactionalEmailModule from '../modules/notifications/transactional.routes.js';
+// [A4] Public booking engine
+import * as publicModule from '../modules/public/public.routes.js';
+// [A5] SARS-compliant tax invoices & receipts
+import * as invoicesModule from '../modules/invoices/invoices.routes.js';
+// Dashboard (registry existed but was never wired into the document)
+import * as dashboardModule from '../modules/dashboard/dashboard.routes.js';
+import * as crmModule from '../modules/crm/crm.routes.js';
+// [S&C] Sales & Catering
+import * as salesCateringModule from '../modules/sales-catering/sales-catering.routes.js';
+// [I1] Sellable room inventory
+import * as inventoryModule from '../modules/inventory/inventory.routes.js';
+// [T7] Meal plans — board-basis packages, restaurants, covers & posting log
+import * as mealsModule from '../modules/meals/meals.routes.js';
+// [SUPPORT] Guest support tickets — SLA, escalation, CSAT
+import * as ticketsModule from '../modules/tickets/tickets.routes.js';
+import * as onboardingModule from '../modules/onboarding/onboarding.routes.js';
+import * as chainLoyaltyModule from '../modules/chain-loyalty/chain-loyalty.routes.js';
+import * as adminModule from '../modules/admin/admin.routes.js';
+
+extendZodWithOpenApi(z);
+
+// ─── Shared Schemas (re-exported from the cycle-free schemas module) ───
+export {
+  ErrorResponseSchema,
+  MessageResponseSchema,
+  IdParamSchema,
+  PaginationMetaSchema,
+  PaginatedResponseSchema,
+} from './openapi-schemas.js';
+
+// ─── Registry Extractor ───
+// Each route module exports a `registry` (OpenAPIRegistry). We support both
+// direct exports and the case where the module is wrapped in a default export.
+function getRegistry(mod: unknown): { definitions: any[] } | null {
+  if (!mod || typeof mod !== 'object') return null;
+
+  // Direct named export
+  if ('registry' in mod && mod.registry && typeof (mod as any).registry === 'object') {
+    return (mod as any).registry;
+  }
+
+  // Default export wrapper
+  if ('default' in mod && (mod as any).default && typeof (mod as any).default === 'object') {
+    const def = (mod as any).default;
+    if ('registry' in def && def.registry) return def.registry;
+  }
+
+  // If the module itself IS the registry (duck-type check for definitions array)
+  if ('definitions' in mod && Array.isArray((mod as any).definitions)) {
+    return mod as any;
+  }
+
+  return null;
+}
+
+// ─── Document Generator ───
+export function generateOpenAPIDocument() {
+  const modules = [
+    authModule,
+    propertiesModule,
+    guestsModule,
+    reservationsModule,
+    roomsModule,
+    roomTypesModule,
+    ratesModule,
+    foliosModule,
+    channelModule,
+    housekeepingModule,
+    nightAuditModule,
+    smsModule,
+    guestPortalModule,
+    notificationModule,
+    apiKeyModule,
+    rbacModule,
+    pushModule,
+    healthModule,
+    filesModule,
+    adminModule,
+    // A1–A5 + dashboard — previously missing from the generated document
+    paymentsModule,
+    paymentsWebhookModule,
+    paymentRequestsModule,
+    transactionalEmailModule,
+    publicModule,
+    invoicesModule,
+    dashboardModule,
+    // [S&C] Sales & Catering
+    salesCateringModule,
+    // [CRM]
+    crmModule,
+    // [I1] Sellable room inventory
+    inventoryModule,
+    // [T7] Meal plans
+    mealsModule,
+    // [SUPPORT] Support tickets
+    ticketsModule,
+    onboardingModule,
+    chainLoyaltyModule,
+  ];
+
+  const allDefinitions: any[] = [];
+
+  for (const mod of modules) {
+    const registry = getRegistry(mod);
+    if (registry && Array.isArray(registry.definitions)) {
+      allDefinitions.push(...registry.definitions);
+    }
+  }
+
+  const generator = new OpenApiGeneratorV3(allDefinitions);
+
+  return generator.generateDocument({
+    openapi: '3.0.0',
+    info: {
+      title: 'Vimad PMS API',
+      version: '0.0.0',
+      description: 'Unified Property Management System API',
+      contact: {
+        name: 'Vimad Support',
+        email: 'api@vimad.io',
+      },
+    },
+    servers: [
+      { url: 'http://localhost:3001', description: 'Local development' },
+      { url: 'https://api.vimad.io', description: 'Production' },
+    ],
+    tags: [
+      { name: 'Auth', description: 'Authentication & authorization' },
+      { name: 'Properties', description: 'Property management' },
+      { name: 'Guests', description: 'Guest management' },
+      { name: 'Reservations', description: 'Reservation management' },
+      { name: 'Rooms', description: 'Room management' },
+      { name: 'Room Types', description: 'Room type management' },
+      { name: 'Rates', description: 'Rate plan management' },
+      { name: 'Folios', description: 'Folio & billing management' },
+      { name: 'Channel', description: 'Channel manager integrations' },
+      { name: 'Housekeeping', description: 'Housekeeping task management' },
+      { name: 'Night Audit', description: 'Night audit operations' },
+      { name: 'SMS', description: 'SMS messaging' },
+      { name: 'Guest Portal', description: 'Guest self-service portal' },
+      { name: 'Health', description: 'System health checks' },
+      { name: 'Notifications', description: 'Real-time notifications' },
+      { name: 'API Keys', description: 'API key management' },
+      { name: 'RBAC', description: 'Roles, permissions, and role assignments' },
+      { name: 'Push', description: 'Web Push subscriptions & notifications' },
+      { name: 'Files', description: 'File downloads and storage' },
+      { name: 'Admin', description: 'Platform admin dashboard endpoints' },
+      { name: 'Dashboard', description: 'Property dashboard stats, alerts & activity' },
+      { name: 'Payments', description: 'Paystack payments (A1) + webhook receiver' },
+      { name: 'Payment Requests', description: 'Deposit automation pay-now links (A2)' },
+      { name: 'Communications', description: 'Transactional email center (A3)' },
+      { name: 'Public Booking', description: 'Unauthenticated booking engine (A4)' },
+      { name: 'Invoices', description: 'SARS-compliant tax invoices & receipts (A5)' },
+      {
+        name: 'Sales & Catering',
+        description: 'Events pipeline, clients, BEOs, catering catalogs (S&C)',
+      },
+      { name: 'CRM', description: 'Guest 360, segments, follow-ups, corporate accounts' },
+      {
+        name: 'Inventory',
+        description:
+          'Sellable room inventory — availability grid, holds, restrictions, overbooking (I1)',
+      },
+      {
+        name: 'Meal Plans',
+        description:
+          'Board-basis meal packages, restaurants, covers forecast & folio auto-posting (T7)',
+      },
+      {
+        name: 'Support',
+        description: 'Guest support tickets — SLA, escalation, CSAT (staff desk + guest portal)',
+      },
+    ],
+  });
+}

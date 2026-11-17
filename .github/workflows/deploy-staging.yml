@@ -1,0 +1,22 @@
+name: Deploy Staging
+
+# Runs after CI succeeds on main. No real staging target is configured yet —
+# replace the placeholder step with an actual deploy (Railway, Render, Fly.io, ...).
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy (placeholder)
+        run: |
+          echo "No staging deploy target configured yet."
+          echo "Add the real deploy command here once Railway/Render/Fly.io (or similar) is set up."

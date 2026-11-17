@@ -1,0 +1,690 @@
+/* apps/api/src/modules/exceptions/exceptions.routes.ts
+ * Phase 4 — operational exception queue (roadmap audit §6).
+ * ONE queue for work needing a human. Detectors run synchronously on GET and
+ * are idempotent (upsert by tenantId+dedupeKey); a human decision
+ * (resolved/dismissed) is NEVER re-opened by detectors — dismissal is a
+ * decision, not a data state (the P11 lesson). Lifecycle:
+ *   open → acknowledged → (in_progress) → resolved | dismissed(reason)
+ * MVP types: payment_failed, payment_stale, room_readiness, overdue_request,
+ * channel_sync. Every mutation writes an audit row.
+ */
+import { Router, type Request, type Response } from 'express';
+import { prisma } from '../../common/prisma.js';
+import {
+  authMiddleware,
+  tenantScope,
+  requirePermission,
+  resolveAllowedPropertyIds,
+} from '../auth/auth.middleware.js';
+
+export const exceptionsRouter = Router();
+exceptionsRouter.use(authMiddleware, tenantScope);
+exceptionsRouter.use(requirePermission('exception', 'read'));
+
+const STALE_MS = 2 * 3600 * 1000;
+const SYNC_STALE_MS = 24 * 3600 * 1000;
+const ACTIVE = ['open', 'acknowledged', 'in_progress'];
+const SEVERITY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+
+const tenantOf = (req: Request): string =>
+  ((req as any).auth?.user?.tenantId ??
+    (req as any).auth?.tenantId ??
+    (req as any).tenantId) as string;
+const actorOf = (req: Request): string | null => {
+  const u: any = (req as any).auth ?? {};
+  return (u.userId ?? u.id ?? u.sub ?? null) as string | null;
+};
+
+interface Detected {
+  type: string;
+  severity: string;
+  title: string;
+  detail: string;
+  recommendedAction: string;
+  actionUrl: string;
+  dedupeKey: string;
+  slaDueAt: Date | undefined;
+  propertyId?: string;
+  reservationId?: string;
+  guestId?: string;
+  roomId?: string;
+  paymentId?: string;
+  taskId?: string;
+  connectionId?: string;
+}
+
+async function upsert(tenantId: string, d: Detected): Promise<void> {
+  const existing = await prisma.exception.findUnique({
+    where: { tenantId_dedupeKey: { tenantId, dedupeKey: d.dedupeKey } },
+  });
+  if (existing) {
+    // Human decisions stand; refresh only the facts on still-active rows.
+    if (existing.status === 'resolved' || existing.status === 'dismissed') return;
+    await prisma.exception.update({
+      where: { id: existing.id },
+      data: { title: d.title, detail: d.detail, severity: d.severity, slaDueAt: d.slaDueAt },
+    });
+    return;
+  }
+  await prisma.exception.create({ data: { tenantId, ...d } });
+}
+
+async function detect(tenantId: string): Promise<void> {
+  const now = new Date();
+  const start = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  const cancelledWithPay = await prisma.reservation.findMany({
+    where: { tenantId, status: 'cancelled' },
+    include: { payments: true, guest: true },
+    take: 100,
+  });
+  const [failedPays, stalePays, arrivals, overdueTasks, conns] = await Promise.all([
+    prisma.payment.findMany({
+      where: { tenantId, status: 'failed' },
+      include: { guest: true, reservation: true },
+      take: 100,
+    }),
+    prisma.payment.findMany({
+      where: { tenantId, status: 'pending', createdAt: { lt: new Date(now.getTime() - STALE_MS) } },
+      include: { guest: true, reservation: true },
+      take: 100,
+    }),
+    prisma.reservation.findMany({
+      where: {
+        tenantId,
+        arrivalDate: { gte: start, lt: end },
+        status: { in: ['confirmed', 'checked_in'] },
+      },
+      include: {
+        guest: true,
+        stays: { where: { date: { gte: start, lt: end } }, include: { room: true } },
+      },
+      take: 100,
+    }),
+    prisma.task.findMany({
+      where: { tenantId, status: { in: ['open', 'in_progress'] }, dueAt: { lt: now } },
+      orderBy: { dueAt: 'asc' },
+      take: 500,
+    }),
+    prisma.channelConnection.findMany({ where: { tenantId }, take: 50 }),
+  ]);
+
+  for (const p of failedPays) {
+    if ((p.metadata as any)?.exception?.dismissedAt) continue;
+    await upsert(tenantId, {
+      type: 'payment_failed',
+      severity: 'critical',
+      title: `Failed payment ${p.reference}`,
+      detail: `${p.guest ? `${p.guest.firstName} ${p.guest.lastName} — ` : ''}${(p.amountMinor / 100).toFixed(2)} ${p.currency}${p.failureReason ? ` — ${String(p.failureReason ?? '').replace(/_/g, ' ')}` : ''}`,
+      recommendedAction: 'Verify, retry or send the guest a payment link',
+      actionUrl: '/app/billing',
+      dedupeKey: `pay-failed:${p.id}`,
+      slaDueAt: new Date(now.getTime() + 2 * 3600_000),
+      propertyId: p.propertyId ?? undefined,
+      reservationId: p.reservationId ?? undefined,
+      guestId: p.guestId ?? undefined,
+      paymentId: p.id,
+    });
+  }
+  for (const p of stalePays) {
+    await upsert(tenantId, {
+      type: 'payment_stale',
+      severity: 'high',
+      title: `Unsettled payment ${p.reference}`,
+      detail: `Pending ${Math.floor((now.getTime() - new Date(p.createdAt).getTime()) / 60000)}m — never retry a pending charge; verify with the provider`,
+      recommendedAction: 'Verify settlement with the provider',
+      actionUrl: '/app/billing',
+      dedupeKey: `pay-stale:${p.id}`,
+      slaDueAt: new Date(now.getTime() + 2 * 3600_000),
+      propertyId: p.propertyId ?? undefined,
+      reservationId: p.reservationId ?? undefined,
+      guestId: p.guestId ?? undefined,
+      paymentId: p.id,
+    });
+  }
+  for (const r of arrivals) {
+    for (const s of r.stays) {
+      const room = s.room;
+      if (room.housekeepingStatus === 'ready' && room.serviceStatus === 'active') continue;
+      const why =
+        room.serviceStatus !== 'active'
+          ? `out of service${room.serviceReason ? ` (${room.serviceReason})` : ''}`
+          : `housekeeping: ${room.housekeepingStatus}`;
+      await upsert(tenantId, {
+        type: 'room_readiness',
+        severity: 'high',
+        title: `Arrival room ${room.number} not ready`,
+        detail: `${r.guest.firstName} ${r.guest.lastName} arrives today (${r.confirmationNumber}) — ${why}`,
+        recommendedAction: 'Open the room board and prioritize this room',
+        actionUrl: '/app/rooms',
+        dedupeKey: `room-ready:${r.id}:${start.toISOString().slice(0, 10)}`,
+        slaDueAt: new Date(start.getTime() + 14 * 3600_000),
+        propertyId: r.propertyId,
+        reservationId: r.id,
+        guestId: r.guestId,
+        roomId: room.id,
+      });
+    }
+  }
+  for (const t of overdueTasks) {
+    await upsert(tenantId, {
+      type: 'overdue_request',
+      severity: t.dueAt && t.dueAt.getTime() < now.getTime() ? 'high' : 'medium', // #42: live, not the stored boolean
+      title: `Overdue task: ${t.title}`,
+      detail: `${t.department} — due ${t.dueAt ? t.dueAt.toISOString().slice(11, 16) : '—'} (${Math.floor((now.getTime() - new Date(t.dueAt!).getTime()) / 60000)}m overdue)`,
+      recommendedAction: 'Open tasks — reassign or complete',
+      actionUrl: '/app/tasks',
+      dedupeKey: `task-overdue:${t.id}`,
+      slaDueAt: t.dueAt ?? undefined,
+      propertyId: t.propertyId,
+      taskId: t.id,
+      roomId: t.roomId ?? undefined,
+      reservationId: t.reservationId ?? undefined,
+      guestId: t.guestId ?? undefined,
+    });
+  }
+  for (const r of cancelledWithPay) {
+    const kept = r.payments.filter(
+      (p) => Number(p.amountMinor) > 0 && Number(p.refundedMinor ?? 0) < Number(p.amountMinor)
+    );
+    if (kept.length === 0) continue;
+    const keptMinor = kept.reduce(
+      (sum, p) => sum + (Number(p.amountMinor) - Number(p.refundedMinor ?? 0)),
+      0
+    );
+    await upsert(tenantId, {
+      type: 'payment_policy',
+      severity: 'high',
+      title: `Cancelled reservation with payment: ${r.confirmationNumber}`,
+      detail: `${r.guest?.firstName ?? ''} ${r.guest?.lastName ?? ''} — ${(keptMinor / 100).toFixed(2)} kept on a cancelled reservation (cancelled ${r.cancelledAt ? new Date(r.cancelledAt).toISOString().slice(0, 10) : '—'})`,
+      recommendedAction: 'Review — refund or record a policy decision',
+      actionUrl: `/app/reservations/${r.id}`,
+      dedupeKey: `cancelled-with-payment:${r.id}`,
+      slaDueAt: new Date(now.getTime() + 24 * 3600_000),
+      propertyId: r.propertyId ?? undefined,
+      reservationId: r.id,
+      guestId: r.guestId,
+      paymentId: kept[0].id,
+    });
+  }
+  for (const c of conns) {
+    const failed = /fail|error/i.test(c.lastSyncStatus ?? '');
+    const staleSync =
+      c.status === 'active' &&
+      (!c.lastSyncAt || now.getTime() - new Date(c.lastSyncAt).getTime() > SYNC_STALE_MS);
+    if (!failed && !staleSync) continue;
+    await upsert(tenantId, {
+      type: 'channel_sync',
+      severity: failed ? 'critical' : 'high',
+      title: `Channel ${c.provider}: ${failed ? 'sync failing' : 'not syncing'}`,
+      detail: `${c.hotelId} — last sync ${c.lastSyncAt ? new Date(c.lastSyncAt).toISOString() : 'never'}${c.lastSyncStatus ? ` (${c.lastSyncStatus})` : ''}`,
+      recommendedAction: 'Open channel manager — check credentials, replay safely',
+      actionUrl: '/app/channel-manager',
+      dedupeKey: `chan:${c.id}`,
+      slaDueAt: new Date(now.getTime() + 4 * 3600_000),
+      propertyId: c.propertyId,
+      connectionId: c.id,
+    });
+  }
+
+  // Auto-resolve (plan 8.2): detector-owned, still-unacknowledged items whose
+  // condition cleared -> resolved with note. Acknowledged items NEVER auto-resolve.
+  const nowMs = Date.now();
+  const activeDetector = await prisma.exception.findMany({
+    where: { tenantId, dedupeKey: { startsWith: 'task-overdue:' }, status: 'open' },
+    select: { id: true, dedupeKey: true },
+  });
+  for (const ex of activeDetector) {
+    const taskId = ex.dedupeKey.slice('task-overdue:'.length);
+    const t = await prisma.task.findFirst({
+      where: { id: taskId },
+      select: { status: true, dueAt: true },
+    });
+    const cleared =
+      !t || !['open', 'in_progress'].includes(t.status) || (t.dueAt && t.dueAt.getTime() >= nowMs);
+    if (cleared) {
+      await prisma.exception.update({
+        where: { id: ex.id },
+        data: {
+          status: 'resolved',
+          resolvedAt: new Date(),
+          resolutionNote: 'auto: condition cleared',
+        },
+      });
+    }
+  }
+  // Restore to open: auto-resolved items whose condition returned (plan 8.2).
+  const reopenable = await prisma.exception.findMany({
+    where: {
+      tenantId,
+      dedupeKey: { startsWith: 'task-overdue:' },
+      status: 'resolved',
+      resolutionNote: 'auto: condition cleared',
+    },
+    select: { id: true, dedupeKey: true },
+  });
+  for (const ex of reopenable) {
+    const t = await prisma.task.findFirst({
+      where: { id: ex.dedupeKey.slice('task-overdue:'.length) },
+      select: { status: true, dueAt: true },
+    });
+    const overdueAgain =
+      t && ['open', 'in_progress'].includes(t.status) && t.dueAt && t.dueAt.getTime() < nowMs;
+    if (overdueAgain) {
+      await prisma.exception.update({
+        where: { id: ex.id },
+        data: { status: 'open', resolvedAt: null, resolutionNote: null },
+      });
+    }
+  }
+  // P13 auto-resolve: cleared when fully refunded or no longer cancelled.
+  const activeP13 = await prisma.exception.findMany({
+    where: { tenantId, dedupeKey: { startsWith: 'cancelled-with-payment:' }, status: 'open' },
+    select: { id: true, dedupeKey: true },
+  });
+  for (const ex of activeP13) {
+    const r = await prisma.reservation.findFirst({
+      where: { id: ex.dedupeKey.slice('cancelled-with-payment:'.length) },
+      select: { status: true, payments: { select: { amountMinor: true, refundedMinor: true } } },
+    });
+    const kept = r?.payments.some(
+      (p) => Number(p.amountMinor) > 0 && Number(p.refundedMinor ?? 0) < Number(p.amountMinor)
+    );
+    if (!r || r.status !== 'cancelled' || !kept) {
+      await prisma.exception.update({
+        where: { id: ex.id },
+        data: {
+          status: 'resolved',
+          resolvedAt: new Date(),
+          resolutionNote: 'auto: condition cleared',
+        },
+      });
+    }
+  }
+  // P13 restore: auto-resolved items whose violation returned.
+  const reopenableP13 = await prisma.exception.findMany({
+    where: {
+      tenantId,
+      dedupeKey: { startsWith: 'cancelled-with-payment:' },
+      status: 'resolved',
+      resolutionNote: 'auto: condition cleared',
+    },
+    select: { id: true, dedupeKey: true },
+  });
+  for (const ex of reopenableP13) {
+    const r = await prisma.reservation.findFirst({
+      where: { id: ex.dedupeKey.slice('cancelled-with-payment:'.length) },
+      select: { status: true, payments: { select: { amountMinor: true, refundedMinor: true } } },
+    });
+    const violatedAgain =
+      r?.status === 'cancelled' &&
+      r.payments.some(
+        (p) => Number(p.amountMinor) > 0 && Number(p.refundedMinor ?? 0) < Number(p.amountMinor)
+      );
+    if (violatedAgain) {
+      await prisma.exception.update({
+        where: { id: ex.id },
+        data: { status: 'open', resolvedAt: null, resolutionNote: null },
+      });
+    }
+  }
+}
+
+// GET /v1/exceptions?status=active|open|acknowledged|in_progress|resolved|dismissed|all
+exceptionsRouter.get('/', async (req: Request, res: Response) => {
+  const tenantId = tenantOf(req);
+  const requestedPropId = String(req.query.propertyId ?? '');
+  const allowedProps = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+  if (requestedPropId && Array.isArray(allowedProps) && !allowedProps.includes(requestedPropId)) {
+    return res.status(403).json({ error: 'Forbidden', message: 'No access to this property' });
+  }
+  // Property scope (plan 8.2): explicit param wins; restricted users with no
+  // param default to their allowed properties; global users stay tenant-wide.
+  const propertyScope =
+    requestedPropId && (!allowedProps || allowedProps.includes(requestedPropId))
+      ? requestedPropId
+      : Array.isArray(allowedProps)
+        ? { in: allowedProps }
+        : undefined;
+  const status = String(req.query.status ?? 'active');
+  const where = {
+    tenantId,
+    ...(propertyScope ? { propertyId: propertyScope } : {}),
+    ...(status === 'all' ? {} : status === 'active' ? { status: { in: ACTIVE } } : { status }),
+  };
+  const [rows, counts] = await Promise.all([
+    prisma.exception.findMany({ where, take: 300 }),
+    prisma.exception.groupBy({ by: ['status'], where, _count: { _all: true } }),
+  ]);
+  rows.sort(
+    (a, b) =>
+      (SEVERITY_RANK[a.severity] ?? 9) - (SEVERITY_RANK[b.severity] ?? 9) ||
+      (a.slaDueAt?.getTime() ?? 9e15) - (b.slaDueAt?.getTime() ?? 9e15)
+  );
+  const nowMs = Date.now();
+  const items = rows.map((r) => ({
+    ...r,
+    overdue: r.slaDueAt ? r.slaDueAt.getTime() < nowMs : false,
+  }));
+  return res.json({
+    data: {
+      generatedAt: new Date().toISOString(),
+      items,
+      counts: Object.fromEntries(counts.map((c) => [c.status, c._count._all])),
+    },
+  });
+});
+
+async function loadActive(req: Request, res: Response) {
+  const ex = await prisma.exception.findFirst({
+    where: { id: String(req.params.id), tenantId: tenantOf(req) },
+  });
+  if (!ex) {
+    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'exception not found' } });
+    return null;
+  }
+  const actorAllowedProps = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+  if (
+    Array.isArray(actorAllowedProps) &&
+    (!ex.propertyId || !actorAllowedProps.includes(ex.propertyId))
+  ) {
+    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'exception not found' } });
+    return null;
+  }
+  if (!ACTIVE.includes(ex.status)) {
+    res
+      .status(409)
+      .json({ error: { code: 'INVALID_STATE', message: `exception is '${ex.status}'` } });
+    return null;
+  }
+  return ex;
+}
+
+async function audit(
+  tenantId: string,
+  actor: string | null,
+  action: string,
+  ex: any,
+  metadata: object
+) {
+  await prisma.auditLog.create({
+    data: {
+      tenantId,
+      userId: actor,
+      action,
+      entity: 'exception',
+      entityId: ex.id,
+      propertyId: ex?.propertyId ?? null,
+      metadata: { type: ex.type, ...metadata },
+    },
+  });
+}
+
+// GET /v1/exceptions/assignees?propertyId= - picker source for /assign.
+// Tenant-scoped active users only (no cross-tenant by construction); restricted
+// callers get 403 on foreign propertyId (plan 8.2 assignee picker contract).
+exceptionsRouter.get(
+  '/assignees',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const tenantId = tenantOf(req)!;
+    const requested = String(req.query.propertyId ?? '');
+    const allowed = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+    if (requested && Array.isArray(allowed) && !allowed.includes(requested)) {
+      return res.status(403).json({ error: 'Forbidden', message: 'No access to this property' });
+    }
+    if (requested) {
+      const prop = await prisma.property.findFirst({ where: { id: requested, tenantId } });
+      if (!prop) {
+        return res.status(400).json({ error: { code: 'VALIDATION', message: 'unknown property' } });
+      }
+    }
+    const users = await prisma.user.findMany({
+      where: { tenantId, status: 'active' },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        roleAssignments: { select: { propertyId: true, role: { select: { name: true } } } },
+      },
+      orderBy: { firstName: 'asc' },
+      take: 100,
+    });
+    const items = users.map((u) => ({
+      id: u.id,
+      name: (u.firstName + ' ' + (u.lastName ?? '')).trim(),
+      roles: [...new Set(u.roleAssignments.map((r) => r.role.name))],
+      propertyIds: [...new Set(u.roleAssignments.map((r) => r.propertyId).filter(Boolean))],
+    }));
+    return res.json({ data: { generatedAt: new Date().toISOString(), items } });
+  }
+);
+
+// POST /v1/exceptions/detect - manual detection run (dev/proof/ops).
+exceptionsRouter.post(
+  '/detect',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const tenantId = tenantOf(req)!;
+    await detect(tenantId);
+    return res.json({ data: { ran: true, at: new Date().toISOString() } });
+  }
+);
+
+// Heartbeat-registered detection cadence (plan 8.2 / addendum #4): one timer
+// per process, in-process mutex against overlap. GET / is read-only.
+// Multi-instance Redis SET-NX lock ships with the deployment session.
+let detectRunning = false;
+export function startExceptionsCadence(intervalMs = 60000) {
+  const timer = setInterval(async () => {
+    await prisma
+      .$executeRawUnsafe(
+        "CREATE TABLE IF NOT EXISTS exception_cadence_lease (id int PRIMARY KEY, locked_at timestamptz NOT NULL DEFAULT 'epoch')"
+      )
+      .catch(() => {});
+    await prisma
+      .$executeRawUnsafe(
+        'INSERT INTO exception_cadence_lease (id) VALUES (1) ON CONFLICT (id) DO NOTHING'
+      )
+      .catch(() => {});
+    const lease = await prisma.$queryRawUnsafe<Array<{ id: number }>>(
+      "UPDATE exception_cadence_lease SET locked_at = now() WHERE id = 1 AND locked_at < now() - interval '3 minutes' RETURNING id"
+    );
+    if (!lease?.length) return;
+    try {
+      if (detectRunning) return;
+      detectRunning = true;
+      try {
+        const tenants = await prisma.tenant.findMany({
+          where: { status: 'active' },
+          select: { id: true },
+        });
+        for (const t of tenants) await detect(t.id);
+      } catch {
+        // failed run stays visible: next heartbeat retries
+      } finally {
+        detectRunning = false;
+      }
+    } finally {
+      await prisma
+        .$queryRawUnsafe("UPDATE exception_cadence_lease SET locked_at = 'epoch' WHERE id = 1")
+        .catch(() => {});
+    }
+  }, intervalMs);
+  timer.unref?.();
+  return timer;
+}
+
+// POST /v1/exceptions/bulk { action: 'resolve'|'dismiss', ids, reason?, note? }
+// Per-item scope check, transition and audit; partial failures itemized,
+// never silent (plan 8.3). Registered before /:id/* routes by convention.
+exceptionsRouter.post(
+  '/bulk',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const tenantId = tenantOf(req);
+    const action = String((req.body as any)?.action ?? '');
+    const ids = Array.isArray((req.body as any)?.ids)
+      ? ((req.body as any).ids as unknown[]).map(String)
+      : [];
+    const reason = (req.body as any)?.reason ? String((req.body as any).reason).trim() : '';
+    const note = (req.body as any)?.note ? String((req.body as any).note).trim() : null;
+    if (action !== 'resolve' && action !== 'dismiss') {
+      return res.status(400).json({
+        error: { code: 'VALIDATION', message: "action must be 'resolve' or 'dismiss'" },
+      });
+    }
+    if (ids.length === 0 || ids.length > 200) {
+      return res.status(400).json({
+        error: { code: 'VALIDATION', message: 'ids must contain 1..200 entries' },
+      });
+    }
+    if (action === 'dismiss' && !reason) {
+      return res.status(400).json({
+        error: { code: 'REASON_REQUIRED', message: 'a dismissal reason is required (audited)' },
+      });
+    }
+    const actor = actorOf(req);
+    const allowedProps = await resolveAllowedPropertyIds((req as any).auth?.user?.id);
+    const results: Array<{ id: string; ok: boolean; error?: string }> = [];
+    for (const id of ids) {
+      try {
+        const ex = await prisma.exception.findFirst({ where: { id, tenantId } });
+        if (
+          !ex ||
+          (Array.isArray(allowedProps) && (!ex.propertyId || !allowedProps.includes(ex.propertyId)))
+        ) {
+          results.push({ id, ok: false, error: 'not_found' });
+          continue;
+        }
+        if (!ACTIVE.includes(ex.status)) {
+          results.push({ id, ok: false, error: 'invalid_state:' + ex.status });
+          continue;
+        }
+        if (action === 'resolve') {
+          await prisma.exception.update({
+            where: { id: ex.id },
+            data: { status: 'resolved', resolvedAt: new Date(), resolutionNote: note },
+          });
+          await audit(ex.tenantId, actor, 'exception.resolve', ex, { note, bulk: true });
+        } else {
+          await prisma.exception.update({
+            where: { id: ex.id },
+            data: {
+              status: 'dismissed',
+              dismissedAt: new Date(),
+              dismissedBy: actor,
+              dismissReason: reason,
+            },
+          });
+          await audit(ex.tenantId, actor, 'exception.dismiss', ex, { reason, bulk: true });
+        }
+        results.push({ id, ok: true });
+      } catch {
+        results.push({ id, ok: false, error: 'server_error' });
+      }
+    }
+    const succeeded = results.filter((r) => r.ok).length;
+    return res.json({
+      data: { succeeded, failed: results.length - succeeded, results },
+    });
+  }
+);
+
+// POST /v1/exceptions/:id/ack
+exceptionsRouter.post(
+  '/:id/ack',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const ex = await loadActive(req, res);
+    if (!ex) return;
+    if (ex.status !== 'open') {
+      return res.status(409).json({
+        error: { code: 'INVALID_STATE', message: `cannot acknowledge from '${ex.status}'` },
+      });
+    }
+    const actor = actorOf(req);
+    const bodyOwner = (req.body as any)?.ownerId ? String((req.body as any).ownerId) : undefined;
+    const updated = await prisma.exception.update({
+      where: { id: ex.id },
+      data: {
+        status: 'acknowledged',
+        ownerId: actor ?? bodyOwner ?? undefined,
+        acknowledgedAt: new Date(),
+      },
+    });
+    await audit(ex.tenantId, actor, 'exception.acknowledge', ex, {});
+    return res.json({ data: updated });
+  }
+);
+
+// POST /v1/exceptions/:id/assign  (assignee = the caller; body optional)
+exceptionsRouter.post(
+  '/:id/assign',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const ex = await loadActive(req, res);
+    if (!ex) return;
+    const actor = actorOf(req);
+    const assigneeId = String((req.body as any)?.assigneeId ?? actor ?? '');
+    if (!assigneeId) {
+      return res.status(400).json({
+        error: { code: 'ASSIGNEE_REQUIRED', message: 'assigneeId required when actor is unknown' },
+      });
+    }
+    const updated = await prisma.exception.update({
+      where: { id: ex.id },
+      data: { assigneeId, status: ex.status === 'open' ? 'in_progress' : ex.status },
+    });
+    await audit(ex.tenantId, actor, 'exception.assign', ex, { assigneeId });
+    return res.json({ data: updated });
+  }
+);
+
+// POST /v1/exceptions/:id/resolve { note? }
+exceptionsRouter.post(
+  '/:id/resolve',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const ex = await loadActive(req, res);
+    if (!ex) return;
+    const actor = actorOf(req);
+    const note = (req.body as any)?.note ? String((req.body as any).note).trim() : null;
+    const updated = await prisma.exception.update({
+      where: { id: ex.id },
+      data: { status: 'resolved', resolvedAt: new Date(), resolutionNote: note },
+    });
+    await audit(ex.tenantId, actor, 'exception.resolve', ex, { note });
+    return res.json({ data: updated });
+  }
+);
+
+// POST /v1/exceptions/:id/dismiss { reason } — reason REQUIRED, audited
+exceptionsRouter.post(
+  '/:id/dismiss',
+  requirePermission('exception', 'manage'),
+  async (req: Request, res: Response) => {
+    const ex = await loadActive(req, res);
+    if (!ex) return;
+    const reason = (req.body as any)?.reason ? String((req.body as any).reason).trim() : '';
+    if (!reason) {
+      return res.status(400).json({
+        error: { code: 'REASON_REQUIRED', message: 'a dismissal reason is required (audited)' },
+      });
+    }
+    const actor = actorOf(req);
+    const updated = await prisma.exception.update({
+      where: { id: ex.id },
+      data: {
+        status: 'dismissed',
+        dismissedAt: new Date(),
+        dismissedBy: actor,
+        dismissReason: reason,
+      },
+    });
+    await audit(ex.tenantId, actor, 'exception.dismiss', ex, { reason });
+    return res.json({ data: updated });
+  }
+);

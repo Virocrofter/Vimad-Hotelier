@@ -1,0 +1,65 @@
+# ─── Secrets & local env ───
+.env
+.env.*
+!.env.example
+!.env.sample
+*.local
+
+# ─── Dependencies ───
+node_modules/
+.pnp/
+.pnp.js
+
+# ─── Build output ───
+dist/
+build/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# ─── Test & coverage ───
+coverage/
+*.lcov
+.nyc_output/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# ─── Runtime data ───
+storage/
+*.log
+logs/
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ─── Prisma ───
+# Keep migrations; ignore local client artifacts if generated outside node_modules
+# (default output is node_modules/.prisma which is already ignored)
+
+# ─── Docker / infra ───
+docker-compose.override.yml
+
+# ─── OS / editor ───
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.swp
+*.swo
+*~
+
+# ─── Misc ───
+.cache/
+tmp/
+temp/repomix-output.xml
+.s0_backups/
+apps/api/.backups/
+*.bak
+bulk3-recon.txt
+apps/api/minted-post.cjs
