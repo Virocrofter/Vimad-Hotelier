@@ -29,11 +29,9 @@ export const flags = {
   groups: env('FLAG_GROUPS'),
   todayV2: env('FLAG_DASHBOARD_TODAY_V2'),
   reservationWorkspace: env('FLAG_RESERVATION_WORKSPACE'),
-  roomBoard: env('FLAG_ROOM_BOARD'),
   paymentExceptions: env('FLAG_PAYMENT_EXCEPTIONS'),
   exceptions: env('FLAG_EXCEPTIONS'),
   reports: env('FLAG_REPORTS'),
-  staffKeys: env('FLAG_STAFF_KEYS'),
   guestReviews: env('FLAG_GUEST_REVIEWS'),
   guestBilling: env('FLAG_GUEST_BILLING'),
 } as const;
