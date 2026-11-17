@@ -1,14 +1,5 @@
 import { useState, useMemo } from 'react';
-import {
-  Play,
-  Pause,
-  Square,
-  MoreHorizontal,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-} from 'lucide-react';
+import { Play, Pause, AlertCircle, Clock } from 'lucide-react';
 
 function seededRandom(seed) {
   const x = Math.sin(seed) * 10000;

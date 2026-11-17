@@ -90,7 +90,7 @@ export default function SalesCateringPage() {
     .sort((a, b) => new Date(a.eventDate) - new Date(b.eventDate))
     .slice(0, 6);
   const needsAction = events.filter(
-    (e) => (e.status === 'lead' && e.beos?.length === 0) || e.status === 'quoted'
+    (e) => (e.status === 'lead' && (e.beos?.length ?? 0) === 0) || e.status === 'quoted'
   );
 
   const createEvent = async () => {

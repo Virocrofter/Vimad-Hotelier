@@ -82,6 +82,12 @@ export function useApiFetch(endpoint, options = {}) {
     setRefetchIndex((prev) => prev + 1);
   }, []);
 
+  // #102: serialize caller deps so inline array identities can't refire the
+  // effect every render (fetch storms in every consumer of this hook).
+  const depsKey = JSON.stringify(
+    typeof endpoint === 'function' ? (Array.isArray(options) ? options : []) : [endpoint]
+  );
+
   useEffect(() => {
     // Don't fetch if auth is still loading
     if (authLoading) return;
@@ -144,10 +150,9 @@ export function useApiFetch(endpoint, options = {}) {
     refetchIndex,
     isAuthenticated,
     authLoading,
-    // Two dialects: string callers track the endpoint; function callers track
-    // the caller-provided deps array (their inline fetcher identity changes
-    // every render and must NOT refire the effect).
-    ...(typeof endpoint === 'function' ? (Array.isArray(options) ? options : []) : [endpoint]),
+    // Two dialects, one stable key: string callers track the endpoint;
+    // function callers track their (serialized) deps array.
+    depsKey,
   ]);
 
   // FIX: Remove ref access during render - track aborted state in a ref that's safe to read

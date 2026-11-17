@@ -1,7 +1,7 @@
 /* apps/web/src/app/app/rates/RateCodes.jsx */
 import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Edit3, Trash2, Tag } from 'lucide-react';
+import { Trash2, Tag } from 'lucide-react';
 import { listRatePlans, deleteRatePlan, getChannelStatus } from '../../../api/rates-api';
 import { listRoomTypes } from '../../../api/room-types';
 import { cn } from '../../../lib/utils';

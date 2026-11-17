@@ -62,8 +62,10 @@ export function useMealPlanSummary(propertyId?: string) {
     try {
       const res = await mealPlansApi.summary(propertyId);
       setSummary(res.data);
-    } catch {
-      /* non-fatal — cards stay empty */
+    } catch (e) {
+      // #114: was a silent catch — summary cards froze at empty zeros and
+      // nobody could tell the API was down.
+      console.error('meal-plans summary failed', e);
     }
   }, [propertyId]);
 
