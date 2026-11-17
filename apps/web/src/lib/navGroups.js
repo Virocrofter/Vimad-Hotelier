@@ -51,7 +51,6 @@ export const NAV_GROUPS = [
       { label: 'Tasks', to: '/app/tasks' },
       { label: 'Concierge', to: '/app/concierge' },
       { label: 'Parking', to: '/app/parking' },
-      { label: 'Keys', to: '/app/keys' },
       { label: 'Night Audit', to: '/app/night-audit' },
     ],
   },

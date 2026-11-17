@@ -292,15 +292,6 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: 'keys',
-        children: [
-          { index: true, ...page(() => import('./app/app/keys/page')) },
-          { path: 'rack', ...page(() => import('./app/app/keys/rack/page')) },
-          { path: 'digital', ...page(() => import('./app/app/keys/digital/page')) },
-          { path: 'master', ...page(() => import('./app/app/keys/master/page')) },
-        ],
-      },
-      {
         path: 'parking',
         children: [
           { index: true, ...page(() => import('./app/app/parking/page')) },
