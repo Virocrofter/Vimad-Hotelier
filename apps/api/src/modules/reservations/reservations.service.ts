@@ -384,6 +384,52 @@ async function rebuildStays(
   }
 }
 
+/* Multi-room bridge (addendum #3): the booking-level room list, from
+ * confirmation. Stays remain the nightly occupancy truth; this row makes
+ * pre-arrival "rooms arriving today" countable and carries the current
+ * room across moves. */
+async function syncBridgeRoom(
+  tenantId: string,
+  propertyId: string,
+  reservationId: string,
+  roomId: string,
+  client: Prisma.TransactionClient | PrismaClient = prisma
+) {
+  const room = await client.room.findFirst({ where: { id: roomId }, select: { roomTypeId: true } });
+  const existing = await client.reservationRoom.findFirst({
+    where: { reservationId, roomId: { not: null } },
+    orderBy: { createdAt: 'asc' },
+  });
+  if (existing && existing.roomId === roomId) {
+    if (existing.roomTypeId !== (room?.roomTypeId ?? null)) {
+      await client.reservationRoom.update({
+        where: { id: existing.id },
+        data: { roomTypeId: room?.roomTypeId ?? null },
+      });
+    }
+    return;
+  }
+  if (existing) {
+    // Room move = mutate the bridge row (stays keep the historical record).
+    await client.reservationRoom.update({
+      where: { id: existing.id },
+      data: { roomId, roomTypeId: room?.roomTypeId ?? null },
+    });
+    return;
+  }
+  await client.reservationRoom.create({
+    data: {
+      tenantId,
+      propertyId,
+      reservationId,
+      roomId,
+      roomTypeId: room?.roomTypeId ?? null,
+      role: 'primary',
+      status: 'upcoming',
+    },
+  });
+}
+
 /* Recalculate reservation total/balance from stay rows + folio payments,
  * then mirror the balance onto the folio. Single write path for both.
  * Pass a transaction client to run inside an existing transaction. */
@@ -624,6 +670,21 @@ async function createReservationInner(
 
   if (input.roomId) {
     await rebuildStays(reservation.id, input.roomId, input.arrivalDate, input.nights, rate, client);
+    await syncBridgeRoom(tenantId, property.id, reservation.id, input.roomId, client);
+  } else if (resolvedRoomTypeId) {
+    // Unassigned booking: bridge row with the room type only, so
+    // "rooms arriving today" is countable before a room is picked.
+    await client.reservationRoom.create({
+      data: {
+        tenantId,
+        propertyId: property.id,
+        reservationId: reservation.id,
+        roomId: null,
+        roomTypeId: resolvedRoomTypeId,
+        role: 'primary',
+        status: 'upcoming',
+      },
+    });
   }
 
   const full = await getReservation(tenantId, reservation.id, client);
@@ -701,6 +762,7 @@ export async function assignRoom(
         tx
       );
       await rebuildStays(id, input.roomId, reservation.arrivalDate, reservation.nights, rate, tx);
+      await syncBridgeRoom(reservation.tenantId, reservation.propertyId, id, input.roomId, tx);
       await syncReservationTotals(id, tx);
     },
     { maxWait: 15000, timeout: 15000 }
@@ -809,6 +871,7 @@ export async function updateReservation(
           await assertRoomFree(tenantId, targetRoomId!, newArrival, newNights, id, tx);
         }
         await rebuildStays(id, targetRoomId!, newArrival, newNights, rate, tx);
+        await syncBridgeRoom(existing.tenantId, existing.propertyId, id, targetRoomId!, tx);
         await tx.reservation.update({ where: { id }, data: reservationData });
         await syncReservationTotals(id, tx);
       },
@@ -871,6 +934,11 @@ export async function checkInReservation(
     throw new AppError(409, 'Reservation was already checked in by another request', 'CONFLICT');
   }
 
+  await prisma.reservationRoom.updateMany({
+    where: { reservationId: id },
+    data: { status: 'checked_in', checkedInAt: new Date() },
+  });
+
   const updated = await prisma.reservation.findUniqueOrThrow({
     where: { id },
     include: {
@@ -921,6 +989,11 @@ export async function checkOutReservation(
   if (guard.count === 0) {
     throw new AppError(409, 'Reservation was already checked out by another request', 'CONFLICT');
   }
+
+  await prisma.reservationRoom.updateMany({
+    where: { reservationId: id },
+    data: { status: 'checked_out', checkedOutAt: new Date() },
+  });
 
   const today = day(new Date());
 
@@ -998,6 +1071,10 @@ export async function cancelReservation(
         property: { select: { id: true, name: true } },
       },
     }),
+    prisma.reservationRoom.updateMany({
+      where: { reservationId: id },
+      data: { status: 'cancelled' },
+    }),
     prisma.reservationStay.deleteMany({ where: { reservationId: id } }),
   ]);
 
@@ -1043,6 +1120,10 @@ export async function markNoShow(tenantId: string, id: string, actor: AuditActor
         guest: { select: { id: true, firstName: true, lastName: true } },
         property: { select: { id: true, name: true } },
       },
+    }),
+    prisma.reservationRoom.updateMany({
+      where: { reservationId: id },
+      data: { status: 'no_show' },
     }),
     prisma.reservationStay.deleteMany({ where: { reservationId: id } }),
   ]);
