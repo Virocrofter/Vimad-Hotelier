@@ -4,13 +4,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessageSquare, Star, CheckCircle2, XCircle, Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { commsApi } from '../../../api/comms';
+import { GuestCardDrawer } from '../../../components/guests/GuestCardDrawer';
+import { getReservation } from '../../../api/api-reservations';
+import { formatCurrency } from '../../../lib/guest-utils';
 
 export default function CommsDeskPage() {
   const [tab, setTab] = useState('chat');
+  const [cardGuestId, setCardGuestId] = useState(null);
   const qc = useQueryClient();
 
   return (
-    <div className="space-y-4 p-4 md:p-6">
+    <div className="hq-surface-0 min-h-full space-y-4 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold">Comms Desk</h1>
@@ -44,12 +48,18 @@ export default function CommsDeskPage() {
         ))}
       </div>
 
-      {tab === 'chat' ? <ChatInbox /> : <ReviewQueue />}
+      {tab === 'chat' ? <ChatInbox onOpenCard={setCardGuestId} /> : <ReviewQueue />}
+
+      <GuestCardDrawer
+        guestId={cardGuestId}
+        open={!!cardGuestId}
+        onClose={() => setCardGuestId(null)}
+      />
     </div>
   );
 }
 
-function ChatInbox() {
+function ChatInbox({ onOpenCard }) {
   const qc = useQueryClient();
   const [activeId, setActiveId] = useState(null);
   const [draft, setDraft] = useState('');
@@ -85,7 +95,7 @@ function ChatInbox() {
   });
 
   return (
-    <div className="grid gap-4 md:grid-cols-[320px_1fr]">
+    <div className="grid gap-4 lg:grid-cols-[300px_1fr_280px]">
       <div className="rounded-lg border divide-y max-h-[70vh] overflow-y-auto">
         {threads.length === 0 && (
           <p className="p-4 text-sm text-muted-foreground">No conversations yet.</p>
@@ -147,6 +157,12 @@ function ChatInbox() {
                       <p className="text-[10px] font-semibold">{m.authorName}</p>
                     )}
                     <p className="whitespace-pre-wrap">{m.body}</p>
+                    <p className="mt-1 text-[10px] opacity-70">
+                      {new Date(m.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -170,6 +186,72 @@ function ChatInbox() {
           </>
         )}
       </div>
+
+      <div className="hidden lg:block">
+        {active ? (
+          <ReservationContextPane thread={active} onOpenCard={onOpenCard} />
+        ) : (
+          <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+            Select a conversation to see reservation context.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* 3rd pane (blueprint S8 Inbox): reservation context for the active thread —
+ * room, dates, balance (magenta-reserved), one click to the Guest Card. */
+function ReservationContextPane({ thread, onOpenCard }) {
+  const { data } = useQuery({
+    queryKey: ['comms-res-context', thread.reservationId],
+    queryFn: () => getReservation(thread.reservationId),
+    enabled: Boolean(thread.reservationId),
+  });
+  const res = data?.data ?? data;
+  const balance = Number(res?.folio?.balance ?? res?.balance ?? 0);
+  return (
+    <div className="space-y-3 rounded-lg border p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+        Reservation
+      </p>
+      <div>
+        <p className="text-sm font-medium text-text-primary">{thread.guestName}</p>
+        <p className="text-xs text-muted-foreground">
+          {thread.confirmationNumber} · {thread.status}
+        </p>
+      </div>
+      {res && (
+        <div className="space-y-1 text-xs">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Room</span>
+            <span className="text-text-primary">
+              {res.roomTypeName ?? '—'}
+              {res.roomNumber ? ` ${res.roomNumber}` : ''}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Dates</span>
+            <span className="text-text-primary">
+              {res.arrivalDate} → {res.departureDate}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Balance</span>
+            <span className={balance > 0 ? 'hq-revenue font-semibold' : 'text-text-primary'}>
+              {formatCurrency(balance)}
+            </span>
+          </div>
+        </div>
+      )}
+      <Button
+        size="sm"
+        variant="outline"
+        className="w-full"
+        onClick={() => onOpenCard(thread.guestId)}
+      >
+        Open guest card
+      </Button>
     </div>
   );
 }
