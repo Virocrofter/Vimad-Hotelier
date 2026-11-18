@@ -132,7 +132,7 @@
   --hq-hairline-strong: rgb(19 43 58 / 0.16);
   /* Accent-soft pair (15% alpha) + reserved accents */
   --hq-accent-soft: color-mix(in srgb, var(--primary) 15%, transparent);
-  --hq-magenta: #f453a4;
+  --hq-magenta: #ea4f9d;
   --hq-magenta-soft: color-mix(in srgb, #f453a4 15%, transparent);
   --hq-lime: #65a30d;
 
