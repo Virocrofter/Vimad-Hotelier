@@ -96,6 +96,9 @@ jobs:
       - name: Run migrations
         run: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
 
+      - name: Verify zero schema drift (drift-safe rule A.4)
+        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel apps/api/prisma/schema.prisma --exit-code
+
       - name: Run tests
         run: npm run test
 
