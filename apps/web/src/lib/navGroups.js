@@ -1,122 +1,129 @@
 /* apps/web/src/lib/navGroups.js
- * Job-based navigation groups (roadmap audit §5.1, Phase 3 nav restructure).
- * LINKS ONLY: every route here already exists in the app — this file decides
- * where users FIND it, nothing else. Group order = task frequency.
- * To add or move a destination: edit one line here. The sidebar renders
- * groups automatically; no component changes needed.
+ * Blueprint S4 chassis map (Phase 3, 2026-11-18): rail-and-flyout groups,
+ * <=6 items each, permission-projected by the sidebar. LINKS ONLY: every
+ * route here already exists in the app — this file decides where users FIND
+ * it. Group order = task frequency. Naming is binding: Inbox (not Comms),
+ * Tape Chart (not Room Plan/calendar). Needs Attention is NOT a nav item —
+ * it lives in the topbar alert cluster (P3.1b) and links to /app/exceptions.
  */
 import {
-  Building2,
   LayoutDashboard,
   CalendarDays,
   BedDouble,
-  Users,
+  LineChart,
   Wallet,
+  Building2,
   BarChart3,
+  Users,
+  Store,
   Settings,
 } from 'lucide-react';
 
 export const NAV_GROUPS = [
   {
-    key: 'today',
-    label: 'Today',
+    key: 'command',
+    label: 'Command Center',
     icon: LayoutDashboard,
-    items: [
-      { label: 'Dashboard', to: '/app/dashboard' },
-      { label: 'Needs Attention', to: '/app/exceptions' },
-    ],
+    items: [{ label: 'Dashboard', to: '/app/dashboard' }],
   },
   {
-    key: 'reservations',
-    label: 'Reservations',
+    key: 'front-desk',
+    label: 'Front Desk',
     icon: CalendarDays,
     items: [
+      { label: 'Tape Chart', to: '/app/room-plan' },
       { label: 'Reservations', to: '/app/reservations' },
-      { label: 'Front Desk', to: '/app/reservations/front-desk' },
-      { label: 'Room Plan', to: '/app/room-plan' },
-      { label: 'Groups', to: '/app/groups' },
-      { label: 'Central Reservations', to: '/app/central-reservations' },
-      { label: 'Channel Manager', to: '/app/channel-manager' },
+      { label: 'Guests', to: '/app/guests' },
+      { label: 'Groups & Events', to: '/app/groups' },
+      { label: 'Concierge', to: '/app/concierge' },
+      { label: 'Inbox', to: '/app/comms' },
     ],
   },
   {
-    key: 'rooms',
-    label: 'Rooms & Operations',
+    key: 'house-ops',
+    label: 'House Ops',
     icon: BedDouble,
     items: [
-      { label: 'Room Board', to: '/app/rooms' },
       { label: 'Housekeeping', to: '/app/housekeeping' },
-      { label: 'Space Status', to: '/app/housekeeping/space-status' },
-      { label: 'HK Activity', to: '/app/housekeeping/activity' },
-      { label: 'Tasks', to: '/app/tasks' },
-      { label: 'Concierge', to: '/app/concierge' },
-      { label: 'Parking', to: '/app/parking' },
+      { label: 'Tickets', to: '/app/tasks' },
       { label: 'Night Audit', to: '/app/night-audit' },
-    ],
-  },
-  {
-    key: 'guests',
-    label: 'Guests & Experience',
-    icon: Users,
-    items: [
-      { label: 'Guests', to: '/app/guests' },
-      { label: 'CRM', to: '/app/crm' },
-      { label: 'Guest Identity', to: '/app/guest-identity' },
-      { label: 'Loyalty', to: '/app/loyalty' },
-      { label: 'Comms', to: '/app/comms' },
-      { label: 'Marketing', to: '/app/marketing' },
-      { label: 'Support', to: '/app/support' },
+      // Logbook lands here with its engine (master plan Phase 6)
     ],
   },
   {
     key: 'revenue',
-    label: 'Revenue & Finance',
+    label: 'Revenue',
+    icon: LineChart,
+    items: [
+      { label: 'Rates & Availability', to: '/app/rates' },
+      { label: 'Inventory', to: '/app/inventory' },
+      { label: 'Channels', to: '/app/channel-manager' },
+      // Upsells (U1-prime) + Booking Engine config land here in Phase 8
+    ],
+  },
+  {
+    key: 'finance',
+    label: 'Finance',
     icon: Wallet,
     items: [
-      { label: 'Rates', to: '/app/rates' },
-      { label: 'Pricing', to: '/app/rates/pricing' },
-      { label: 'Inventory', to: '/app/inventory' },
-      { label: 'Billing', to: '/app/billing' },
-      { label: 'Invoices', to: '/app/billing/invoices' },
+      { label: 'Folios & Billing', to: '/app/billing' },
       { label: 'Payments', to: '/app/billing/payments' },
       { label: 'Payment Requests', to: '/app/billing/payment-requests' },
+      { label: 'Invoices', to: '/app/billing/invoices' },
       { label: 'AR', to: '/app/ar' },
       { label: 'VCC', to: '/app/vcc' },
     ],
   },
   {
-    key: 'insights',
-    label: 'Insights',
-    icon: BarChart3,
-    items: [{ label: 'Reports', to: '/app/reports' }],
-  },
-  {
-    key: 'setup',
-    label: 'More / Setup',
-    icon: Settings,
-    items: [
-      { label: 'Properties', to: '/app/properties' },
-      { label: 'Users', to: '/app/users' },
-      { label: 'Onboarding', to: '/app/onboarding' },
-      { label: 'Meal Plans', to: '/app/meal-plans' },
-      { label: 'Sales & Catering', to: '/app/sales-catering' },
-      { label: 'Chain Dashboard', to: '/app/chain-dashboard' },
-      { label: 'Chain Billing', to: '/app/chain-billing' },
-      { label: 'Chain Loyalty', to: '/app/chain-loyalty' },
-      { label: 'Settings', to: '/app/settings' },
-      { label: 'Email Settings', to: '/app/settings/email' },
-      { label: 'Audit Trail', to: '/app/audit-trail' },
-    ],
-  },
-  {
-    key: 'portfolio',
-    label: 'Portfolio',
+    key: 'chain',
+    label: 'Chain',
     icon: Building2,
     context: 'chain',
     items: [
       { label: 'Chain Overview', to: '/app/chain-dashboard' },
-      { label: 'Chain Billing', to: '/app/chain-billing' },
+      { label: 'Central Reservations', to: '/app/central-reservations' },
       { label: 'Chain Loyalty', to: '/app/chain-loyalty' },
+      { label: 'Properties', to: '/app/properties' },
+    ],
+  },
+  {
+    key: 'insight',
+    label: 'Insight',
+    icon: BarChart3,
+    items: [{ label: 'Reports', to: '/app/reports' }],
+  },
+  {
+    key: 'grow',
+    label: 'Grow',
+    icon: Users,
+    items: [
+      { label: 'CRM', to: '/app/crm' },
+      { label: 'Loyalty', to: '/app/loyalty' },
+      { label: 'Marketing', to: '/app/marketing' },
+    ],
+  },
+  {
+    key: 'property',
+    label: 'Property',
+    icon: Store,
+    items: [
+      { label: 'Rooms', to: '/app/rooms' },
+      { label: 'Meal Plans', to: '/app/meal-plans' },
+      { label: 'Parking', to: '/app/parking' },
+      { label: 'Sales & Catering', to: '/app/sales-catering' },
+    ],
+  },
+  {
+    key: 'system',
+    label: 'System',
+    icon: Settings,
+    items: [
+      { label: 'Settings', to: '/app/settings' },
+      { label: 'Onboarding', to: '/app/onboarding' },
+      { label: 'Audit Trail', to: '/app/audit-trail' },
+      { label: 'Users', to: '/app/users' },
+      { label: 'Support', to: '/app/support' },
+      // Settings becomes a separate mode with its own left nav (4-menu model)
     ],
   },
 ];
