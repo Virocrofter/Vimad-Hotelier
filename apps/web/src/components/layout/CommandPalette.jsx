@@ -31,6 +31,7 @@ import { guestUrl, LINKS, reservationUrl } from '../../lib/dashLinks';
 import { usePermissionChecker } from '../../hooks/usePermissions';
 import { useAuth } from '../../hooks/useAuth';
 import { NAV_GROUPS } from '../../lib/navGroups';
+import { GuestCardDrawer } from '../guests/GuestCardDrawer';
 
 const STORAGE_KEY = 'palette.frecency.v1';
 const HALF_LIFE_H = 168; // 7 days
@@ -164,6 +165,7 @@ export default function CommandPalette({ open, onOpen, onClose }) {
   const [searching, setSearching] = useState(false);
   const [index, setIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [cardGuestId, setCardGuestId] = useState(null);
   const [frecency, setFrecency] = useState(() => loadStore(userId));
   const inputRef = useRef(null);
   const listRef = useRef(null);
@@ -244,6 +246,15 @@ export default function CommandPalette({ open, onOpen, onClose }) {
 
   const can = usePermissionChecker();
 
+  const openCard = (id) => {
+    onClose();
+    setCardGuestId(id);
+  };
+  const copyText = (text) => {
+    navigator.clipboard?.writeText(String(text)).catch(() => {});
+    setCopied(true);
+  };
+
   const hereBoost = (to) =>
     to && (location.pathname === to || location.pathname.startsWith(to + '/')) ? 1.6 : 1;
 
@@ -287,6 +298,28 @@ export default function CommandPalette({ open, onOpen, onClose }) {
       to: guestUrl(g.id),
       group: 'Guests',
       score: frecencyScore(frecency[`guest-${g.id}`]) * 1.2,
+      // Blueprint S5 action panel: never only the primary guess.
+      actions: [
+        { label: 'Open card', run: () => openCard(g.id) },
+        {
+          label: 'New reservation',
+          run: () => {
+            onClose();
+            navigate('/app/reservations/new');
+          },
+        },
+        {
+          label: 'Message',
+          run: () => {
+            onClose();
+            navigate('/app/comms');
+          },
+        },
+        {
+          label: 'Copy contact',
+          run: () => copyText(g.phone ?? g.email ?? `${g.firstName ?? ''} ${g.lastName ?? ''}`),
+        },
+      ],
     }));
     const res = resHits.map((r) => ({
       key: `res-${r.id}`,
@@ -337,7 +370,15 @@ export default function CommandPalette({ open, onOpen, onClose }) {
   useEffect(() => setIndex(0), [items.length, query]);
   useEffect(() => setCopied(false), [index, query]);
 
-  if (!open) return null;
+  // Drawer must render even when the palette is closed — it opens after onClose.
+  if (!open)
+    return (
+      <GuestCardDrawer
+        guestId={cardGuestId}
+        open={!!cardGuestId}
+        onClose={() => setCardGuestId(null)}
+      />
+    );
 
   const record = (item) => {
     const next = {
@@ -369,6 +410,12 @@ export default function CommandPalette({ open, onOpen, onClose }) {
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setIndex((i) => Math.max(i - 1, 0));
+    } else if (/^[1-9]$/.test(e.key)) {
+      const act = items[index]?.actions?.[Number(e.key) - 1];
+      if (act) {
+        e.preventDefault();
+        act.run();
+      }
     } else if (e.key === 'Enter') {
       e.preventDefault();
       go(items[index]);
@@ -491,6 +538,27 @@ export default function CommandPalette({ open, onOpen, onClose }) {
                       </kbd>
                     )}
                   </button>
+                  {i === index && item.actions && (
+                    <div className="mb-1 ml-9 mt-0.5 flex flex-wrap gap-1">
+                      {item.actions.map((a, ai) => (
+                        <button
+                          key={a.label}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            a.run();
+                          }}
+                          className="rounded-md px-2 py-1 text-[11px]"
+                          style={{
+                            background: 'var(--hq-surface-2)',
+                            color: 'var(--text-secondary)',
+                          }}
+                        >
+                          <span className="hq-keycap mr-1">{ai + 1}</span>
+                          {a.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })
@@ -502,9 +570,15 @@ export default function CommandPalette({ open, onOpen, onClose }) {
           style={{ borderColor: 'var(--hq-hairline)', color: 'var(--text-muted)' }}
         >
           <span>&gt; actions · @ guests · # rooms · ? help</span>
-          <span>{copied ? 'Copied' : '↵ open · tab copy · esc close'}</span>
+          <span>{copied ? 'Copied' : '↵ open · 1-4 row actions · tab copy · esc'}</span>
         </div>
       </div>
+
+      <GuestCardDrawer
+        guestId={cardGuestId}
+        open={!!cardGuestId}
+        onClose={() => setCardGuestId(null)}
+      />
     </div>
   );
 }
