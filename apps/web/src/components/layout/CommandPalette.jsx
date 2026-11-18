@@ -1,10 +1,17 @@
-/* apps/web/src/app/app/dashboard/CommandPalette.jsx
- * D3 — Ctrl/Cmd+K command palette: jump to a guest, a reservation, or an
- * action. Search reuses GET /v1/guests?search= and /v1/reservations?search=
- * — no new backend. Flat item list, arrow-key navigation, Enter to go.
+/* apps/web/src/components/layout/CommandPalette.jsx
+ * Blueprint S5 command palette (Phase 3 chassis).
+ * - Frecency ranking per user: executions score with a 7-day half-life
+ *   decay, stored in localStorage keyed by user id.
+ * - Context scoping: items matching the current route rank higher.
+ * - Mode prefixes: > actions · @ guests · # rooms/reservations · ? help.
+ *   Placeholder text confirms the mode; Backspace on empty input walks back.
+ * - Empty query shows recents, never a wall of commands; the AI group is
+ *   structurally last and never outranks real commands (no AI items yet).
+ * - Active row action panel: Enter opens, Tab copies the label, Esc closes.
+ * - Search reuses GET /guests|reservations|rooms|tasks — no new backend.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   BedDouble,
   CalendarCheck,
@@ -22,13 +29,16 @@ import { apiClient } from '../../api/client';
 import { cn } from '../../lib/utils';
 import { guestUrl, LINKS, reservationUrl } from '../../lib/dashLinks';
 import { usePermissionChecker } from '../../hooks/usePermissions';
+import { useAuth } from '../../hooks/useAuth';
 import { NAV_GROUPS } from '../../lib/navGroups';
+
+const STORAGE_KEY = 'palette.frecency.v1';
+const HALF_LIFE_H = 168; // 7 days
 
 const ACTIONS = [
   {
     label: 'New Reservation',
     perm: 'reservation:create',
-    hint: 'action',
     icon: CalendarCheck,
     to: LINKS.newReservation,
     keywords: 'new booking create',
@@ -36,7 +46,6 @@ const ACTIONS = [
   {
     label: 'Add Guest',
     perm: 'guest:create',
-    hint: 'action',
     icon: Users,
     to: '/app/guests',
     keywords: 'new guest create profile',
@@ -44,7 +53,6 @@ const ACTIONS = [
   {
     label: 'Create Task',
     perm: 'task:create',
-    hint: 'action',
     icon: ClipboardList,
     to: LINKS.tasks,
     keywords: 'new task assign department',
@@ -52,7 +60,6 @@ const ACTIONS = [
   {
     label: 'Message Guest',
     perm: 'sms:send',
-    hint: 'action',
     icon: MessagesSquare,
     to: '/app/comms',
     keywords: 'message chat sms email guest',
@@ -60,7 +67,6 @@ const ACTIONS = [
   {
     label: 'Walk-In Check-in',
     perm: 'reservation:checkin',
-    hint: 'action',
     icon: LogIn,
     to: LINKS.arrivalsBoard,
     keywords: 'walkin checkin front desk arrivals',
@@ -68,7 +74,6 @@ const ACTIONS = [
   {
     label: 'Post Charge / Take Payment',
     perm: 'folio:payment',
-    hint: 'action',
     icon: DollarSign,
     to: LINKS.billing,
     keywords: 'folio charge payment billing',
@@ -76,7 +81,6 @@ const ACTIONS = [
   {
     label: 'Tasks Board',
     perm: 'task:read',
-    hint: 'action',
     icon: ClipboardList,
     to: LINKS.tasks,
     keywords: 'tasks spine departments',
@@ -84,7 +88,6 @@ const ACTIONS = [
   {
     label: 'Night Audit',
     perm: 'night_audit:run',
-    hint: 'action',
     icon: MoonStar,
     to: LINKS.nightAudit,
     keywords: 'roll date close day audit',
@@ -92,7 +95,6 @@ const ACTIONS = [
   {
     label: 'Reports',
     perm: 'report:read',
-    hint: 'action',
     icon: TrendingUp,
     to: LINKS.reports,
     keywords: 'reports revenue occupancy',
@@ -100,15 +102,60 @@ const ACTIONS = [
   {
     label: 'Room Plan / Tape Chart',
     perm: 'reservation:read',
-    hint: 'action',
     icon: BedDouble,
     to: LINKS.roomPlan,
     keywords: 'rooms tape chart availability grid',
   },
 ];
 
+const HELP_ITEMS = [
+  { label: 'Support desk', to: '/app/support', keywords: 'help support ticket' },
+  { label: 'Onboarding checklist', to: '/app/onboarding', keywords: 'getting started setup' },
+];
+
+const PLACEHOLDERS = {
+  all: 'Search guests, reservations, rooms, tasks — or type an action…',
+  action: '> action — new reservation, walk-in, night audit…',
+  guest: '@ guest — name, email, phone…',
+  room: '# room or reservation — number, conf #…',
+  help: '? help — support, getting started…',
+};
+
+const MODES = [
+  { prefix: '>', mode: 'action', label: 'Actions' },
+  { prefix: '@', mode: 'guest', label: 'Guests' },
+  { prefix: '#', mode: 'room', label: 'Rooms & Reservations' },
+  { prefix: '?', mode: 'help', label: 'Help' },
+];
+
+function loadStore(userId) {
+  try {
+    const all = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
+    return all[userId ?? 'anonymous'] ?? {};
+  } catch {
+    return {};
+  }
+}
+
+function saveStore(userId, map) {
+  try {
+    const all = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
+    all[userId ?? 'anonymous'] = map;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  } catch {}
+}
+
+function frecencyScore(rec) {
+  if (!rec) return 0;
+  const ageH = (Date.now() - rec.last) / 3.6e6;
+  return rec.count * Math.pow(2, -ageH / HALF_LIFE_H);
+}
+
 export default function CommandPalette({ open, onOpen, onClose }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const auth = useAuth();
+  const userId = auth?.user?.id;
   const [query, setQuery] = useState('');
   const [guestHits, setGuestHits] = useState([]);
   const [resHits, setResHits] = useState([]);
@@ -116,11 +163,26 @@ export default function CommandPalette({ open, onOpen, onClose }) {
   const [taskHits, setTaskHits] = useState([]);
   const [searching, setSearching] = useState(false);
   const [index, setIndex] = useState(0);
+  const [copied, setCopied] = useState(false);
+  const [frecency, setFrecency] = useState(() => loadStore(userId));
   const inputRef = useRef(null);
   const listRef = useRef(null);
   const debounceRef = useRef(null);
 
-  // Global hotkey — works whether the palette is open or not
+  const { mode, term } = useMemo(() => {
+    const t = query.trim();
+    const m = MODES.find((x) => t.startsWith(x.prefix));
+    return m ? { mode: m.mode, term: t.slice(1).trim() } : { mode: 'all', term: t };
+  }, [query]);
+
+  useEffect(() => {
+    if (open) setTimeout(() => inputRef.current?.focus(), 50);
+  }, [open]);
+
+  useEffect(() => {
+    listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
+  }, [index]);
+
   useEffect(() => {
     const onKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -130,6 +192,8 @@ export default function CommandPalette({ open, onOpen, onClose }) {
           setQuery('');
           setGuestHits([]);
           setResHits([]);
+          setRoomHits([]);
+          setTaskHits([]);
           setIndex(0);
           onOpen();
         }
@@ -140,14 +204,8 @@ export default function CommandPalette({ open, onOpen, onClose }) {
   }, [open, onOpen, onClose]);
 
   useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 50);
-  }, [open]);
-
-  // Debounced live search (guests + reservations in parallel)
-  useEffect(() => {
     if (!open) return undefined;
-    const q = query.trim();
-    if (q.length < 2) {
+    if (mode === 'action' || mode === 'help' || term.length < 2) {
       setGuestHits([]);
       setResHits([]);
       setRoomHits([]);
@@ -159,12 +217,16 @@ export default function CommandPalette({ open, onOpen, onClose }) {
       setSearching(true);
       try {
         const [g, r, rm, t] = await Promise.all([
-          apiClient.get('/guests', { params: { search: q, pageSize: 5 } }),
-          apiClient.get('/reservations', { params: { search: q, pageSize: 5 } }),
-          apiClient.get('/rooms', { params: { search: q, pageSize: 5 } }),
-          apiClient.get('/tasks', { params: { q, pageSize: 5 } }),
+          apiClient.get('/guests', { params: { search: term, pageSize: 5 } }),
+          apiClient.get('/reservations', { params: { search: term, pageSize: 5 } }),
+          apiClient.get('/rooms', { params: { search: term, pageSize: 5 } }),
+          apiClient.get('/tasks', { params: { q: term, pageSize: 5 } }),
         ]);
-        setGuestHits(g.data?.data ?? []);
+        setGuestHits(
+          mode === 'guest'
+            ? (g.data?.data ?? [])
+            : (g.data?.data?.slice(0, mode === 'all' ? 3 : 0) ?? [])
+        );
         setResHits(r.data?.data ?? []);
         setRoomHits(rm.data?.data ?? []);
         setTaskHits(t.data?.data ?? []);
@@ -178,75 +240,126 @@ export default function CommandPalette({ open, onOpen, onClose }) {
       }
     }, 250);
     return () => clearTimeout(debounceRef.current);
-  }, [query, open]);
+  }, [term, mode, open]);
 
   const can = usePermissionChecker();
-  const pageHits = useMemo(() => {
-    const qv = query.trim().toLowerCase();
-    if (!qv) return [];
-    return NAV_GROUPS.flatMap((g) => g.items.map((i) => ({ ...i, group: g.label })))
-      .filter((i) => i.label.toLowerCase().includes(qv))
-      .slice(0, 5);
-  }, [query]);
+
+  const hereBoost = (to) =>
+    to && (location.pathname === to || location.pathname.startsWith(to + '/')) ? 1.6 : 1;
 
   const items = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const visible = ACTIONS.filter((a) => !a.perm || can(a.perm));
-    const actions = q
-      ? visible.filter((a) => `${a.label} ${a.keywords}`.toLowerCase().includes(q))
-      : visible;
-    return [
-      ...actions.map((a) => ({ ...a, key: `action-${a.label}` })),
-      ...guestHits.map((g) => ({
-        key: `guest-${g.id}`,
-        label: `${g.firstName ?? ''} ${g.lastName ?? ''}`.trim() || 'Guest',
-        hint: g.email ?? 'guest',
-        icon: Users,
-        to: guestUrl(g.id),
-      })),
-      ...resHits.map((r) => ({
-        key: `res-${r.id}`,
-        label: r.guestName ?? r.confirmationNumber ?? 'Reservation',
-        hint: `${r.confirmationNumber ?? ''}${r.status ? ` · ${r.status.replace('_', ' ')}` : ''}`,
-        icon: CalendarCheck,
-        to: reservationUrl(r.id),
-      })),
-      ...roomHits.map((rm) => ({
-        key: `room-${rm.id}`,
-        label: `Room ${rm.number}`,
-        hint: [rm.floor ? `floor ${rm.floor}` : null, rm.status].filter(Boolean).join(' · '),
-        icon: BedDouble,
-        to: `/app/rooms?room=${encodeURIComponent(rm.number)}`,
-      })),
-      ...taskHits.map((t) => ({
-        key: `task-${t.id}`,
-        label: t.title,
-        hint: `task · ${String(t.status).replace('_', ' ')}`,
-        icon: ClipboardList,
-        to: '/app/tasks',
-      })),
-      ...pageHits.map((p) => ({
-        key: `page-${p.to}`,
-        label: p.label,
-        hint: `${p.group} \u00b7 page`,
+    const q = term.toLowerCase();
+    const visibleActions = ACTIONS.filter((a) => !a.perm || can(a.perm)).filter(
+      (a) => !q || `${a.label} ${a.keywords}`.toLowerCase().includes(q)
+    );
+    const actions = visibleActions.map((a) => ({
+      ...a,
+      key: `action-${a.label}`,
+      group: 'Actions',
+      score: frecencyScore(frecency[`action-${a.label}`]) * hereBoost(a.to),
+    }));
+
+    const pages = NAV_GROUPS.flatMap((g) => g.items.map((i) => ({ ...i, group: g.label })))
+      .filter((i) => !q || i.label.toLowerCase().includes(q))
+      .map((i) => ({
+        ...i,
+        key: `page-${i.to}`,
         icon: Map,
-        to: p.to,
-      })),
-    ];
-  }, [query, guestHits, resHits, roomHits, taskHits, pageHits, can]); // #101: was filtering with stale permissions
+        hint: `${i.group} · page`,
+        score: frecencyScore(frecency[`page-${i.to}`]) * hereBoost(i.to),
+      }));
+
+    const help = HELP_ITEMS.filter(
+      (h) => !q || `${h.label} ${h.keywords}`.toLowerCase().includes(q)
+    ).map((h) => ({
+      ...h,
+      key: `help-${h.to}`,
+      icon: MessagesSquare,
+      hint: 'help',
+      score: frecencyScore(frecency[`page-${h.to}`]) * hereBoost(h.to),
+    }));
+
+    const guests = guestHits.map((g) => ({
+      key: `guest-${g.id}`,
+      label: `${g.firstName ?? ''} ${g.lastName ?? ''}`.trim() || 'Guest',
+      hint: g.email ?? 'guest',
+      icon: Users,
+      to: guestUrl(g.id),
+      group: 'Guests',
+      score: frecencyScore(frecency[`guest-${g.id}`]) * 1.2,
+    }));
+    const res = resHits.map((r) => ({
+      key: `res-${r.id}`,
+      label: r.guestName ?? r.confirmationNumber ?? 'Reservation',
+      hint: `${r.confirmationNumber ?? ''}${r.status ? ` · ${r.status.replace('_', ' ')}` : ''}`,
+      icon: CalendarCheck,
+      to: reservationUrl(r.id),
+      group: 'Reservations',
+      score: frecencyScore(frecency[`res-${r.id}`]),
+    }));
+    const rooms = roomHits.map((rm) => ({
+      key: `room-${rm.id}`,
+      label: `Room ${rm.number}`,
+      hint: [rm.floor ? `floor ${rm.floor}` : null, rm.status].filter(Boolean).join(' · '),
+      icon: BedDouble,
+      to: `/app/rooms?room=${encodeURIComponent(rm.number)}`,
+      group: 'Rooms',
+      score: frecencyScore(frecency[`room-${rm.id}`]),
+    }));
+    const tasks = taskHits.map((t) => ({
+      key: `task-${t.id}`,
+      label: t.title,
+      hint: `task · ${String(t.status).replace('_', ' ')}`,
+      icon: ClipboardList,
+      to: '/app/tasks',
+      group: 'Tasks',
+      score: frecencyScore(frecency[`task-${t.id}`]),
+    }));
+
+    const pools = {
+      action: [...actions],
+      guest: [...guests],
+      room: [...rooms, ...res],
+      help: [...help],
+      all: [...actions, ...guests, ...res, ...rooms, ...tasks, ...pages, ...help],
+    };
+    let list = pools[mode] ?? pools.all;
+
+    // Empty query: recents only (top 8 by frecency), never a wall of commands.
+    if (!q && mode === 'all') {
+      list = [...actions, ...pages].sort((a, b) => b.score - a.score).slice(0, 8);
+    } else {
+      list = [...list].sort((a, b) => b.score - a.score);
+    }
+    return list;
+  }, [term, mode, guestHits, resHits, roomHits, taskHits, can, frecency, location.pathname]);
 
   useEffect(() => setIndex(0), [items.length, query]);
-
-  useEffect(() => {
-    listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
-  }, [index]);
+  useEffect(() => setCopied(false), [index, query]);
 
   if (!open) return null;
 
+  const record = (item) => {
+    const next = {
+      ...frecency,
+      [item.key]: { count: (frecency[item.key]?.count ?? 0) + 1, last: Date.now() },
+    };
+    setFrecency(next);
+    saveStore(userId, next);
+  };
+
   const go = (item) => {
     if (!item?.to) return;
+    record(item);
     onClose();
     navigate(item.to);
+  };
+
+  const copyActive = () => {
+    const item = items[index];
+    if (!item) return;
+    navigator.clipboard?.writeText(item.label).catch(() => {});
+    setCopied(true);
   };
 
   const onInputKey = (e) => {
@@ -259,11 +372,27 @@ export default function CommandPalette({ open, onOpen, onClose }) {
     } else if (e.key === 'Enter') {
       e.preventDefault();
       go(items[index]);
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      copyActive();
+    } else if (e.key === 'Backspace' && query === '' && mode !== 'all') {
+      e.preventDefault();
+      setQuery(''); // walk back: clear the mode prefix
+      setIndex(0);
     } else if (e.key === 'Escape') {
       e.preventDefault();
       onClose();
     }
   };
+
+  const groupOrder = ['Actions', 'Guests', 'Reservations', 'Rooms', 'Tasks', 'Pages', 'Help'];
+  const ordered = [...items].sort(
+    (a, b) =>
+      (groupOrder.indexOf(a.group) + 1 || 99) - (groupOrder.indexOf(b.group) + 1 || 99) ||
+      b.score - a.score
+  );
+
+  let lastGroup = null;
 
   return (
     <div
@@ -271,83 +400,109 @@ export default function CommandPalette({ open, onOpen, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg overflow-hidden rounded-xl border border-border bg-surface shadow-2xl"
+        className="w-full max-w-lg overflow-hidden rounded-xl border"
+        style={{ borderColor: 'var(--hq-hairline)', background: 'var(--hq-surface-1)' }}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Command palette"
       >
-        <div className="flex items-center gap-2 border-b border-border px-4">
-          <Search className="h-4 w-4 shrink-0 text-text-muted" />
+        <div
+          className="flex items-center gap-2 border-b px-4"
+          style={{ borderColor: 'var(--hq-hairline)' }}
+        >
+          <Search className="h-4 w-4 shrink-0" style={{ color: 'var(--text-muted)' }} />
+          {mode !== 'all' && (
+            <span
+              className="rounded px-1.5 py-0.5 text-[11px] font-semibold"
+              style={{ background: 'var(--hq-accent-soft)', color: 'var(--primary)' }}
+            >
+              {MODES.find((m) => m.mode === mode)?.prefix}{' '}
+              {MODES.find((m) => m.mode === mode)?.label}
+            </span>
+          )}
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onInputKey}
-            placeholder="Search guests, reservations, rooms, tasks, or type an action…"
-            className="w-full bg-transparent py-3 text-sm text-text-primary outline-none placeholder:text-text-muted"
+            placeholder={PLACEHOLDERS[mode]}
+            className="w-full bg-transparent py-3 text-sm outline-none"
+            style={{ color: 'var(--text-primary)' }}
           />
-          <kbd className="rounded border border-border bg-surface-elevated px-1.5 py-0.5 text-[10px] text-text-muted">
-            ESC
-          </kbd>
+          <kbd className="hq-keycap">ESC</kbd>
         </div>
 
         <div ref={listRef} className="max-h-80 overflow-auto p-2" role="listbox">
-          {items.length === 0 ? (
-            <p className="px-3 py-6 text-center text-sm text-text-muted">
+          {ordered.length === 0 ? (
+            <p className="px-3 py-6 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
               {searching ? 'Searching…' : 'No matches — try a name, conf #, or action'}
             </p>
           ) : (
-            items.map((item, i) => {
+            ordered.map((item, i) => {
               const Icon = item.icon;
-              const grp = item.key.split('-')[0];
-              const grpLabel =
-                {
-                  action: 'Actions',
-                  guest: 'Guests',
-                  res: 'Reservations',
-                  room: 'Rooms',
-                  task: 'Tasks',
-                  page: 'Pages',
-                }[grp] ?? grp;
-              const showHeader = i === 0 || items[i - 1].key.split('-')[0] !== grp;
+              const showHeader = item.group !== lastGroup;
+              lastGroup = item.group;
               return (
-                <button
-                  key={item.key}
-                  data-active={i === index}
-                  onMouseEnter={() => setIndex(i)}
-                  onClick={() => go(item)}
-                  role="option"
-                  aria-selected={i === index}
-                  className={cn(
-                    'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left',
-                    i === index ? 'bg-secondary/10' : 'hover:bg-surface-elevated'
-                  )}
-                >
+                <div key={item.key}>
                   {showHeader && (
-                    <div className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">
-                      {grpLabel}
+                    <div
+                      className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider"
+                      style={{ color: 'var(--text-muted)' }}
+                    >
+                      {item.group}
                     </div>
                   )}
-                  <span className="rounded-md bg-surface-elevated p-1.5">
-                    <Icon className="h-3.5 w-3.5 text-text-secondary" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm text-text-primary">{item.label}</span>
-                    {item.hint && (
-                      <span className="block truncate text-[11px] text-text-muted">
-                        {item.hint}
-                      </span>
+                  <button
+                    data-active={i === index}
+                    onMouseEnter={() => setIndex(i)}
+                    onClick={() => go(item)}
+                    role="option"
+                    aria-selected={i === index}
+                    className={cn(
+                      'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left',
+                      i === index ? 'bg-[var(--hq-accent-soft)]' : 'hover:bg-[var(--hq-surface-2)]'
                     )}
-                  </span>
-                  {i === index && (
-                    <kbd className="shrink-0 rounded border border-border bg-surface-elevated px-1.5 py-0.5 text-[10px] text-text-muted">
-                      ↵
-                    </kbd>
-                  )}
-                </button>
+                  >
+                    <span
+                      className="rounded-md p-1.5"
+                      style={{ background: 'var(--hq-surface-2)' }}
+                    >
+                      <Icon className="h-3.5 w-3.5" style={{ color: 'var(--text-secondary)' }} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className="block truncate text-sm"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        {item.label}
+                      </span>
+                      {item.hint && (
+                        <span
+                          className="block truncate text-[11px]"
+                          style={{ color: 'var(--text-muted)' }}
+                        >
+                          {item.hint}
+                        </span>
+                      )}
+                    </span>
+                    {i === index && (
+                      <kbd className="shrink-0">
+                        <span className="hq-keycap">↵</span>
+                      </kbd>
+                    )}
+                  </button>
+                </div>
               );
             })
           )}
+        </div>
+
+        <div
+          className="flex items-center justify-between border-t px-4 py-2 text-[11px]"
+          style={{ borderColor: 'var(--hq-hairline)', color: 'var(--text-muted)' }}
+        >
+          <span>&gt; actions · @ guests · # rooms · ? help</span>
+          <span>{copied ? 'Copied' : '↵ open · tab copy · esc close'}</span>
         </div>
       </div>
     </div>
