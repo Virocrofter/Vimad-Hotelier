@@ -335,9 +335,9 @@ export default function TapeChart({
     'flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left text-xs hover:bg-accent';
 
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
+    <div className="hq-surface-0 flex h-full flex-col gap-3 p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-lg font-semibold">Room Plan</h1>
+        <h1 className="text-lg font-semibold">Tape Chart</h1>
         <span className="text-xs text-muted-foreground">{property.name}</span>
         <div className="ml-auto flex items-center gap-1">
           <button
@@ -677,50 +677,49 @@ export default function TapeChart({
   );
 }
 
+/* StatsBar (blueprint S2/S6): micro-label stacked above a tabular numeral.
+ * ADR is the strip's revenue figure — magenta reserved; counts stay neutral. */
 function StatsBar({ tonight, unassigned, blocks, today, currency }) {
   const activeBlocks = blocks.filter((b) => b.startDate <= today && b.endDate > today);
-  const stat = 'flex items-center gap-2 rounded-lg border bg-card px-3 py-2 text-xs shadow-sm';
+  const stat = 'flex min-w-[112px] flex-col rounded-lg border bg-card px-3 py-2 shadow-sm';
+  const label = 'text-[10px] font-semibold uppercase tracking-wide text-muted-foreground';
+  const num = 'text-lg font-semibold tabular-nums';
   return (
     <div className="flex flex-wrap gap-2">
       <div className={stat}>
-        <span className="text-muted-foreground">Occupancy tonight</span>
-        <span className="font-semibold">
+        <span className={label}>Occupancy tonight</span>
+        <span className={num}>
           {tonight ? `${tonight.occupancyPct}%` : '—'}
-          {tonight ? (
-            <span className="ml-1 font-normal text-muted-foreground">
+          {tonight && (
+            <span className="ml-1 text-xs font-normal text-muted-foreground">
               ({tonight.occupied}/{tonight.sellable})
             </span>
-          ) : null}
+          )}
         </span>
       </div>
       <div className={stat}>
-        <span className="text-muted-foreground">ADR</span>
-        <span className="font-semibold">{tonight ? formatMoney(tonight.adr, currency) : '—'}</span>
+        <span className={label}>ADR</span>
+        <span className={cn(num, 'hq-revenue')}>
+          {tonight ? formatMoney(tonight.adr, currency) : '—'}
+        </span>
       </div>
       <div className={stat}>
-        <span className="text-muted-foreground">Arrivals</span>
-        <span className="font-semibold">{tonight?.arrivals ?? 0}</span>
+        <span className={label}>Arrivals</span>
+        <span className={num}>{tonight?.arrivals ?? 0}</span>
       </div>
       <div className={stat}>
-        <span className="text-muted-foreground">Departures</span>
-        <span className="font-semibold">{tonight?.departures ?? 0}</span>
+        <span className={label}>Departures</span>
+        <span className={num}>{tonight?.departures ?? 0}</span>
       </div>
       <div className={stat}>
-        <span className="text-muted-foreground">Unassigned</span>
-        <span
-          className={cn('font-semibold', unassigned > 0 ? 'text-amber-600' : 'text-emerald-600')}
-        >
+        <span className={label}>Unassigned</span>
+        <span className={cn(num, unassigned > 0 ? 'text-amber-600' : 'text-emerald-600')}>
           {unassigned}
         </span>
       </div>
       <div className={stat}>
-        <span className="text-muted-foreground">OOO now</span>
-        <span
-          className={cn(
-            'font-semibold',
-            activeBlocks.length > 0 ? 'text-rose-600' : 'text-emerald-600'
-          )}
-        >
+        <span className={label}>OOO now</span>
+        <span className={cn(num, activeBlocks.length > 0 ? 'text-rose-600' : 'text-emerald-600')}>
           {activeBlocks.length}
         </span>
       </div>
