@@ -8,6 +8,7 @@ export interface TaskListParams {
   department?: string;
   priority?: string;
   assigneeId?: string;
+  propertyId?: string;
   ruleId?: string;
   ruleKey?: string;
   slaBreached?: string;

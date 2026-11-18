@@ -14,6 +14,7 @@ import {
   useDeleteTaskRule,
   useRunTaskRuleNow,
 } from '../../../hooks/useTasks';
+import { usePropertyScope } from '../../../hooks/usePropertyScope';
 import { useProperties } from '../../../hooks/useProperties';
 import { useHousekeepingStaff } from '../../../hooks/useHousekeeping';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../../components/ui/tabs';
@@ -108,15 +109,18 @@ export default function TasksPage() {
   const [ruleDialogOpen, setRuleDialogOpen] = useState(false);
   const [ruleFilter, setRuleFilter] = useState('');
 
+  const { current } = usePropertyScope();
+
   const params = useMemo(
     () => ({
       status: filters.status || undefined,
       department: filters.department || undefined,
       priority: filters.priority || undefined,
       slaBreached: filters.slaBreached || undefined,
+      propertyId: current?.id || undefined,
       pageSize: 100,
     }),
-    [filters]
+    [filters, current]
   );
 
   const listQuery = useTaskList(params);
