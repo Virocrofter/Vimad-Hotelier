@@ -123,6 +123,18 @@
   /* Elevation: resting = hairline only; ONE raised shadow; overlay only for dialogs */
   --hq-raise: 0 8px 24px -8px rgb(19 43 58 / 0.18);
   --hq-overlay: 0 24px 48px -12px rgb(19 43 58 / 0.28);
+  /* Surface ladder (blueprint S2): elevation = layers, not shadows */
+  --hq-surface-0: #f4f7f8;
+  --hq-surface-1: #ffffff;
+  --hq-surface-2: #ecf1f2;
+  --hq-surface-3: #ffffff;
+  --hq-hairline: rgb(19 43 58 / 0.08);
+  --hq-hairline-strong: rgb(19 43 58 / 0.16);
+  /* Accent-soft pair (15% alpha) + reserved accents */
+  --hq-accent-soft: color-mix(in srgb, var(--primary) 15%, transparent);
+  --hq-magenta: #f453a4;
+  --hq-magenta-soft: color-mix(in srgb, #f453a4 15%, transparent);
+  --hq-lime: #65a30d;
 
   /* Z-index contract */
   --hq-z-content: 0;
@@ -283,6 +295,17 @@
   /* HQ-0 dark elevations (shadows weaker on dark; hairlines carry borders) */
   --hq-raise: 0 8px 24px -8px rgb(0 0 0 / 0.55);
   --hq-overlay: 0 24px 48px -12px rgb(0 0 0 / 0.65);
+  /* Surface ladder (blueprint S2) */
+  --hq-surface-0: #0f1a22;
+  --hq-surface-1: #16232c;
+  --hq-surface-2: #1c2b35;
+  --hq-surface-3: #233541;
+  --hq-hairline: rgb(255 255 255 / 0.08);
+  --hq-hairline-strong: rgb(255 255 255 / 0.16);
+  --hq-accent-soft: color-mix(in srgb, var(--primary) 15%, transparent);
+  --hq-magenta: #f453a4;
+  --hq-magenta-soft: color-mix(in srgb, #f453a4 15%, transparent);
+  --hq-lime: #a3e635;
 
   /* Two-layer focus: dark canvas halo under bright teal ring */
   --hq-focus-halo: #0f1a22;
@@ -295,4 +318,60 @@
   --hq-z-dialog: 120;
   --hq-z-toast: 60;
   --hq-z-cmdk: 70;
+}
+
+/* ─── Blueprint S2 utilities (Phase 2, 2026-11-18) ─── */
+.hq-surface-0 {
+  background: var(--hq-surface-0);
+}
+.hq-surface-1 {
+  background: var(--hq-surface-1);
+  border: 1px solid var(--hq-hairline);
+}
+.hq-surface-2 {
+  background: var(--hq-surface-2);
+  border: 1px solid var(--hq-hairline);
+}
+.hq-surface-3 {
+  background: var(--hq-surface-3);
+  border: 1px solid var(--hq-hairline-strong);
+}
+
+/* Keycap glyphs for shortcuts — never plain text quotes */
+.hq-keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 4px;
+  border: 1px solid var(--hq-hairline-strong);
+  border-bottom-width: 2px;
+  background: linear-gradient(var(--hq-surface-2), var(--hq-surface-1));
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* Magenta RESERVED: revenue figures, AI features, optimization toggles */
+.hq-revenue {
+  color: var(--hq-magenta);
+}
+.hq-revenue-soft {
+  background: var(--hq-magenta-soft);
+  color: var(--hq-magenta);
+}
+
+/* Lime money chip (positive money on dark; readable on light too) */
+.hq-money-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--hq-lime) 16%, transparent);
+  color: var(--hq-lime);
+  font-variant-numeric: tabular-nums;
 }
