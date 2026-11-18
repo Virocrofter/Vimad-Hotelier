@@ -16,7 +16,7 @@ export const deadLetterQueue = new Queue(DLQ_NAME, { connection: redisConnection
 // Prisma's napi string conversion on read and bloats failed_jobs to tens of
 // GB. Keep 8KB — enough for diagnosis, safe to store.
 const DLQ_PAYLOAD_CAP = 8192;
-function capPayload(data: unknown): unknown {
+function capPayload(data: unknown) {
   try {
     const json = JSON.stringify(data ?? {});
     return JSON.parse(json.length > DLQ_PAYLOAD_CAP ? json.slice(0, DLQ_PAYLOAD_CAP) : json);
