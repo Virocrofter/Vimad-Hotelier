@@ -1,9 +1,11 @@
+import { motion } from 'framer-motion';
 import { Star, Lock, Flag, Users } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 /* Tape Chart booking bar (Mews-language redo): the bar IS the stay — a
  * surface card with a 3px status stripe, guest name leading, icons trailing.
- * Conf# lives in the hover popover. */
+ * Conf# lives in the hover popover. layoutId (blueprint S10): when a drag
+ * moves the stay, the bar glides to its new room instead of teleporting. */
 const STATUS_META = {
   confirmed: { label: 'Confirmed', color: '#818cf8' },
   checked_in: { label: 'In house', color: '#34d399' },
@@ -24,7 +26,9 @@ export default function ReservationBlock({
 }) {
   const meta = STATUS_META[r.status] ?? STATUS_META.confirmed;
   return (
-    <div
+    <motion.div
+      layoutId={`stay-${r.id}`}
+      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       draggable={draggable}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
@@ -69,6 +73,6 @@ export default function ReservationBlock({
           HU
         </span>
       )}
-    </div>
+    </motion.div>
   );
 }
