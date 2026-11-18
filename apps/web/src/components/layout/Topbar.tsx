@@ -6,6 +6,8 @@ import { ChevronDown, LogOut, Search, Settings } from 'lucide-react';
 import GlobalCreateMenu from './GlobalCreateMenu';
 import { useAuth } from '../../hooks/useAuth';
 import { PropertySwitcher } from './PropertySwitcher';
+import { BusinessDatePill } from './BusinessDatePill';
+import { AlertCluster } from './AlertCluster';
 import { ThemeToggle } from '../theme/themeToggle';
 import { useMemo } from 'react';
 import { NAV_GROUPS } from '../../lib/navGroups';
@@ -74,6 +76,8 @@ export function Topbar() {
           Search…
           <kbd className="rounded border border-border px-1 text-[10px]">⌘K</kbd>
         </button>
+        <BusinessDatePill />
+        <AlertCluster />
         <GlobalCreateMenu />
         <ThemeToggle />
 
