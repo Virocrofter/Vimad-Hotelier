@@ -3221,30 +3221,30 @@ model PlatformAuditEvent {
 }
 
 model FeatureFlag {
-  id              String                @id
-  key             String
-  description     String
-  owner           String
-  defaultValue    Boolean               @default(false)
-  environment     String                @default("production")
-  rolloutStrategy Json                  @default("{}")
-  status          String                @default("active")
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-  overrides       FeatureFlagOverride[]
-
-  @@unique([key, environment], map: "feature_flags_key_env_key")
-  @@map("feature_flags")  valueType         String    @default("boolean")
+  id                String                @id
+  key               String
+  description       String
+  owner             String
+  defaultValue      Boolean               @default(false)
+  environment       String                @default("production")
+  rolloutStrategy   Json                  @default("{}")
+  status            String                @default("active")
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  overrides         FeatureFlagOverride[]
+  valueType         String                @default("boolean")
   defaultValueJsonb Json?
-  variants          Json      @default("[]")
-  failMode          String    @default("closed")
-  protected         Boolean   @default(false)
-  rolloutPct        Int       @default(0)
-  segmentRules      Json      @default("[]")
+  variants          Json                  @default("[]")
+  failMode          String                @default("closed")
+  protected         Boolean               @default(false)
+  rolloutPct        Int                   @default(0)
+  segmentRules      Json                  @default("[]")
   killReason        String?
   killedAt          DateTime?
   createdBy         String?
 
+  @@unique([key, environment], map: "feature_flags_key_env_key")
+  @@map("feature_flags")
 }
 
 model FeatureFlagOverride {
@@ -3374,20 +3374,19 @@ model RetentionPolicy {
 }
 
 model BackupRun {
-  id                String    @id
-  kind              String
-  status            String
-  destination       String
-  sizeBytes         BigInt?
-  checksum          String?
-  startedAt         DateTime  @default(now())
-  finishedAt        DateTime?
-  actor             String?
-  restoreTestedAt   DateTime?
-  restoreTestStatus String?
-  restoreTestLog    String?
-
-  @@map("backup_runs")  error               String?
+  id                  String    @id
+  kind                String
+  status              String
+  destination         String
+  sizeBytes           BigInt?
+  checksum            String?
+  startedAt           DateTime  @default(now())
+  finishedAt          DateTime?
+  actor               String?
+  restoreTestedAt     DateTime?
+  restoreTestStatus   String?
+  restoreTestLog      String?
+  error               String?
   name                String?
   restoreTestedLog    String?
   restoreTestedStatus String?
@@ -3397,6 +3396,7 @@ model BackupRun {
   type                String?
   verified            Boolean   @default(false)
 
+  @@map("backup_runs")
 }
 
 model DemoSession {
