@@ -409,94 +409,120 @@ export default function TapeChart({
         currency={property.currency}
       />
 
-      <FilterBar
-        floors={floors}
-        roomTypes={roomTypes}
-        filters={filters}
-        onChange={setFilters}
-        resultCount={filteredRooms.length}
-        totalCount={rooms.length}
-      />
-
-      {unassigned.length > 0 && (
-        <UnassignedStrip
-          unassigned={unassigned}
+      {/* FilterRail layout (blueprint S8): filters live in a right-side rail on
+          desktop, inline fallback below the header on narrow screens. */}
+      <div className="lg:hidden">
+        <FilterBar
+          floors={floors}
           roomTypes={roomTypes}
-          onContext={(e, r) => {
-            e.preventDefault();
-            setMenu({ x: e.clientX, y: e.clientY, kind: 'reservation', id: r.id });
-          }}
-          onAssign={(r) => setModal({ kind: 'assign', reservation: r })}
+          filters={filters}
+          onChange={setFilters}
+          resultCount={filteredRooms.length}
+          totalCount={rooms.length}
         />
-      )}
+      </div>
 
-      {selected.size > 0 && (
-        <BulkActionBar
-          count={selected.size}
-          onCheckIn={() => {
-            selected.forEach((id) => {
-              const r = resById.get(id);
-              if (r && canCheckIn(r)) mCheckIn.mutate(id);
-            });
-            setSelected(new Set());
-          }}
-          onCheckOut={() => {
-            selected.forEach((id) => {
-              const r = resById.get(id);
-              if (r && r.status === 'checked_in') mCheckOut.mutate(id);
-            });
-            setSelected(new Set());
-          }}
-          onClear={() => setSelected(new Set())}
-          busy={mCheckIn.isPending || mCheckOut.isPending}
-        />
-      )}
+      {/* FilterRail-layout */}
+      <div className="flex min-h-0 flex-1 gap-3">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+          {unassigned.length > 0 && (
+            <UnassignedStrip
+              unassigned={unassigned}
+              roomTypes={roomTypes}
+              onContext={(e, r) => {
+                e.preventDefault();
+                setMenu({ x: e.clientX, y: e.clientY, kind: 'reservation', id: r.id });
+              }}
+              onAssign={(r) => setModal({ kind: 'assign', reservation: r })}
+            />
+          )}
 
-      <TapeGrid
-        property={property}
-        rooms={filteredRooms}
-        roomTypes={roomTypes}
-        reservations={reservations}
-        stays={stays}
-        blocks={blocks}
-        restrictions={restrictions}
-        holds={holds}
-        dayStats={dayStats}
-        from={from}
-        to={to}
-        density={density}
-        selectedIds={selected}
-        collapsedTypes={collapsedTypes}
-        onToggleType={(id) =>
-          setCollapsedTypes((prev) => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id);
-            else next.add(id);
-            return next;
-          })
-        }
-        onToggleSelect={toggleSelect}
-        onCellContext={(e, roomId, date) => {
-          e.preventDefault();
-          setMenu({ x: e.clientX, y: e.clientY, kind: 'cell', roomId, date });
-        }}
-        onCellDoubleClick={(roomId, date) =>
-          setModal({ kind: 'create', roomId, arrivalDate: date })
-        }
-        onReservationContext={(e, reservationId) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setMenu({ x: e.clientX, y: e.clientY, kind: 'reservation', id: reservationId });
-        }}
-        onReservationClick={(reservationId) =>
-          setModal({ kind: 'edit', reservation: resById.get(reservationId) })
-        }
-        onBlockContext={(e, block) => {
-          e.preventDefault();
-          setMenu({ x: e.clientX, y: e.clientY, kind: 'block', block });
-        }}
-        onMoveReservation={tryMove}
-      />
+          {selected.size > 0 && (
+            <BulkActionBar
+              count={selected.size}
+              onCheckIn={() => {
+                selected.forEach((id) => {
+                  const r = resById.get(id);
+                  if (r && canCheckIn(r)) mCheckIn.mutate(id);
+                });
+                setSelected(new Set());
+              }}
+              onCheckOut={() => {
+                selected.forEach((id) => {
+                  const r = resById.get(id);
+                  if (r && r.status === 'checked_in') mCheckOut.mutate(id);
+                });
+                setSelected(new Set());
+              }}
+              onClear={() => setSelected(new Set())}
+              busy={mCheckIn.isPending || mCheckOut.isPending}
+            />
+          )}
+
+          <TapeGrid
+            property={property}
+            rooms={filteredRooms}
+            roomTypes={roomTypes}
+            reservations={reservations}
+            stays={stays}
+            blocks={blocks}
+            restrictions={restrictions}
+            holds={holds}
+            dayStats={dayStats}
+            from={from}
+            to={to}
+            density={density}
+            selectedIds={selected}
+            collapsedTypes={collapsedTypes}
+            onToggleType={(id) =>
+              setCollapsedTypes((prev) => {
+                const next = new Set(prev);
+                if (next.has(id)) next.delete(id);
+                else next.add(id);
+                return next;
+              })
+            }
+            onToggleSelect={toggleSelect}
+            onCellContext={(e, roomId, date) => {
+              e.preventDefault();
+              setMenu({ x: e.clientX, y: e.clientY, kind: 'cell', roomId, date });
+            }}
+            onCellDoubleClick={(roomId, date) =>
+              setModal({ kind: 'create', roomId, arrivalDate: date })
+            }
+            onReservationContext={(e, reservationId) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setMenu({ x: e.clientX, y: e.clientY, kind: 'reservation', id: reservationId });
+            }}
+            onReservationClick={(reservationId) =>
+              setModal({ kind: 'edit', reservation: resById.get(reservationId) })
+            }
+            onBlockContext={(e, block) => {
+              e.preventDefault();
+              setMenu({ x: e.clientX, y: e.clientY, kind: 'block', block });
+            }}
+            onMoveReservation={tryMove}
+          />
+        </div>
+
+        <aside
+          className="hidden w-60 shrink-0 flex-col gap-3 overflow-y-auto rounded-lg border bg-card p-3 lg:flex"
+          style={{ borderColor: 'var(--hq-hairline)' }}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
+            Filters
+          </p>
+          <FilterBar
+            floors={floors}
+            roomTypes={roomTypes}
+            filters={filters}
+            onChange={setFilters}
+            resultCount={filteredRooms.length}
+            totalCount={rooms.length}
+          />
+        </aside>
+      </div>
 
       {menu && (
         <div
