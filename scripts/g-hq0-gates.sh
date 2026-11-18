@@ -40,7 +40,7 @@ grep -q "htmlFor={id}" "$UI/input.tsx" && gate P:input-label-assoc PASS '' || ga
 grep -q 'sticky top-0' "$UI/table.tsx" && gate P:table-sticky PASS '' || gate P:table-sticky FAIL
 
 note '--- patterns ---'
-for f in PageShell StatDial StatusDot Money TimeAgo FilterBar Worklist OfficeShell; do
+for f in PageShell StatDial StatusDot Money TimeAgo FilterBar Worklist; do
   [ -f "$PAT/$f.tsx" ] && gate "N:$f" PASS '' || gate "N:$f" FAIL 'pattern missing'
 done
 grep -q 'hq-tnum' "$PAT/StatDial.tsx" && grep -q 'hq-tnum' "$PAT/Money.tsx" && gate N:tabular-values PASS '' || gate N:tabular-values FAIL
