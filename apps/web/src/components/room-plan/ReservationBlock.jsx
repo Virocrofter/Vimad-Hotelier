@@ -1,10 +1,13 @@
 import { Star, Lock, Flag, Users } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
+/* Tape Chart booking bar (Mews-language redo): the bar IS the stay — a
+ * surface card with a 3px status stripe, guest name leading, icons trailing.
+ * Conf# lives in the hover popover. */
 const STATUS_META = {
-  confirmed: { label: 'Confirmed', color: '#6366f1', soft: '#eef2ff', text: '#3730a3' },
-  checked_in: { label: 'In house', color: '#10b981', soft: '#ecfdf5', text: '#065f46' },
-  checked_out: { label: 'Departed', color: '#94a3b8', soft: '#f1f5f9', text: '#475569' },
+  confirmed: { label: 'Confirmed', color: '#818cf8' },
+  checked_in: { label: 'In house', color: '#34d399' },
+  checked_out: { label: 'Departed', color: '#94a3b8' },
 };
 
 export default function ReservationBlock({
@@ -30,43 +33,39 @@ export default function ReservationBlock({
       onMouseEnter={(e) => onHover && onHover(e, r.id)}
       onMouseLeave={onLeave}
       className={cn(
-        'flex h-full cursor-pointer items-center gap-1 overflow-hidden rounded-md border px-1.5 transition-shadow hover:shadow-md',
+        'flex h-full cursor-pointer items-center gap-1.5 overflow-hidden rounded-sm py-0.5 pl-2 pr-1.5 transition-shadow hover:shadow-md',
         selected && 'ring-2 ring-primary ring-offset-1'
       )}
       style={{
-        background: meta.soft,
-        borderColor: meta.color,
-        color: meta.text,
+        background: 'var(--hq-surface-1)',
+        border: '1px solid var(--hq-hairline)',
+        borderLeft: `3px solid ${meta.color}`,
+        color: 'var(--text-primary)',
       }}
-      title={`${r.guestName} · ${r.confirmationNumber}`}
+      title={`${r.guestName} · ${r.confirmationNumber} · ${meta.label}`}
     >
-      <span className="min-w-0 flex-1 truncate text-[11px] font-medium">{r.guestName}</span>
-      {!compact && (
-        <span className="hidden shrink-0 text-[10px] opacity-70 sm:inline">
-          {r.confirmationNumber}
-        </span>
-      )}
-      {r.vipStatus && <Star className="h-3 w-3 shrink-0 fill-amber-400 text-amber-400" />}
-      {r.fixedRoom && <Lock className="h-3 w-3 shrink-0 opacity-70" />}
+      <span className="min-w-0 flex-1 truncate text-[13px] font-semibold">{r.guestName}</span>
+      {r.vipStatus && <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />}
+      {r.fixedRoom && <Lock className="h-3.5 w-3.5 shrink-0 opacity-60" />}
       {r.openTraces > 0 && (
-        <span className="flex shrink-0 items-center gap-0.5 text-rose-600">
-          <Flag className="h-3 w-3" />
+        <span className="flex shrink-0 items-center gap-0.5 text-rose-500">
+          <Flag className="h-3.5 w-3.5" />
           {r.openTraces}
         </span>
       )}
       {r.companionsCount > 0 && (
-        <span className="flex shrink-0 items-center gap-0.5 opacity-70">
-          <Users className="h-3 w-3" />
+        <span className="flex shrink-0 items-center gap-0.5 opacity-60">
+          <Users className="h-3.5 w-3.5" />
           {r.companionsCount}
         </span>
       )}
       {Number(r.balance) > 0 && r.status === 'checked_in' && (
-        <span className="shrink-0 rounded bg-rose-100 px-1 text-[9px] font-semibold text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+        <span className="shrink-0 rounded bg-rose-500/15 px-1 text-[10px] font-semibold text-rose-500">
           {Number(r.balance).toFixed(0)}
         </span>
       )}
       {r.houseUse && (
-        <span className="shrink-0 rounded bg-slate-200 px-1 text-[9px] font-semibold text-slate-600">
+        <span className="shrink-0 rounded bg-slate-400/20 px-1 text-[10px] font-semibold text-slate-400">
           HU
         </span>
       )}

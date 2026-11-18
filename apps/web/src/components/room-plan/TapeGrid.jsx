@@ -76,12 +76,16 @@ export default function TapeGrid({
   const [hover, setHover] = useState(null);
 
   const compact = density === 'compact';
-  const dayW = compact ? 44 : 60;
-  const rowH = compact ? 32 : 44;
+  const dayW = compact ? 48 : 68;
+  const rowH = compact ? 36 : 52;
   const days = useMemo(() => dayKeysBetween(from, to), [from, to]);
   const colCount = days.length;
   const today = todayKey();
   const todayIdx = days.indexOf(today);
+  const isWeekendDay = (key) => {
+    const g = new Date(key + 'T00:00:00').getDay();
+    return g === 0 || g === 6;
+  };
 
   const template = `${LABEL_W}px repeat(${colCount}, ${dayW}px)`;
 
@@ -253,6 +257,7 @@ export default function TapeGrid({
                 className={cn(
                   'flex items-center justify-center border-l border-border text-[10px]',
                   day === today && 'bg-primary/10',
+                  day !== today && !stopSell && isWeekendDay(day) && 'bg-muted/25',
                   stopSell && 'bg-rose-500/10 text-rose-600'
                 )}
                 style={{ width: dayW, height: 30 }}
@@ -332,7 +337,8 @@ export default function TapeGrid({
                   onDoubleClick={() => onCellDoubleClick(room.id, d)}
                   className={cn(
                     'absolute top-0 border-l border-border/50',
-                    d === today && 'bg-primary/5'
+                    d === today && 'bg-primary/5',
+                    d !== today && isWeekendDay(d) && 'bg-muted/25'
                   )}
                   style={{ left: colOf(d) * dayW, width: dayW, height: rowH }}
                 />
@@ -348,8 +354,13 @@ export default function TapeGrid({
               return (
                 <div
                   key={`${seg.reservationId}-${seg.roomId}-${seg.start}`}
-                  className="absolute top-0"
-                  style={{ left: c0 * dayW + 2, width: (c1 - c0) * dayW - 4, height: rowH }}
+                  className="absolute"
+                  style={{
+                    left: c0 * dayW + 1,
+                    width: (c1 - c0) * dayW - 2,
+                    top: 4,
+                    height: rowH - 8,
+                  }}
                 >
                   <ReservationBlock
                     reservation={res}
@@ -390,10 +401,10 @@ export default function TapeGrid({
                     b.type === 'ooo' ? 'bg-rose-500/90' : 'bg-slate-500/90'
                   )}
                   style={{
-                    left: c0 * dayW + 2,
-                    width: (c1 - c0) * dayW - 4,
-                    height: rowH - 4,
-                    top: 2,
+                    left: c0 * dayW + 1,
+                    width: (c1 - c0) * dayW - 2,
+                    height: rowH - 8,
+                    top: 4,
                   }}
                   title={b.reason ?? (b.type === 'ooo' ? 'Out of order' : 'Out of service')}
                 >
