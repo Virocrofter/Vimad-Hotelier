@@ -11,6 +11,7 @@ datasource db {
 // ─── Tenant & Identity ───
 
 model Tenant {
+  reservationRooms   ReservationRoom[]
   onboardingProgress OnboardingProgress[]
   id                 String               @id @default(cuid())
   name               String
@@ -186,6 +187,7 @@ model PasswordReset {
 // ─── Property & Inventory ───
 
 model Property {
+  reservationRooms       ReservationRoom[]
   onboardingProgress     OnboardingProgress[]
   id                     String               @id @default(cuid())
   tenantId               String
@@ -243,19 +245,20 @@ model Property {
 }
 
 model RoomType {
-  id            String   @id @default(cuid())
-  tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  propertyId    String
-  property      Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  name          String
-  code          String
-  description   String?
-  baseOccupancy Int      @default(2)
-  maxOccupancy  Int      @default(4)
-  status        String   @default("active")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  reservationRooms ReservationRoom[]
+  id               String            @id @default(cuid())
+  tenantId         String
+  tenant           Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId       String
+  property         Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name             String
+  code             String
+  description      String?
+  baseOccupancy    Int               @default(2)
+  maxOccupancy     Int               @default(4)
+  status           String            @default("active")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   rooms                 Room[]
   ratePlans             RatePlan[]
@@ -273,6 +276,7 @@ model RoomType {
 }
 
 model Room {
+  reservationRooms   ReservationRoom[]
   id                 String            @id @default(cuid())
   tenantId           String
   tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -469,37 +473,38 @@ model GuestNote {
 // ─── Reservations ───
 
 model Reservation {
-  id                 String    @id @default(cuid())
+  reservationRooms   ReservationRoom[]
+  id                 String            @id @default(cuid())
   tenantId           String
-  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   propertyId         String
-  property           Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property           Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   guestId            String
-  guest              Guest     @relation(fields: [guestId], references: [id], onDelete: Restrict)
-  confirmationNumber String    @unique
+  guest              Guest             @relation(fields: [guestId], references: [id], onDelete: Restrict)
+  confirmationNumber String            @unique
   groupId            String?
-  group              Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  group              Group?            @relation(fields: [groupId], references: [id], onDelete: SetNull)
   roomTypeId         String?
-  roomType           RoomType? @relation(fields: [roomTypeId], references: [id], onDelete: SetNull)
+  roomType           RoomType?         @relation(fields: [roomTypeId], references: [id], onDelete: SetNull)
   ratePlanId         String?
-  ratePlan           RatePlan? @relation(fields: [ratePlanId], references: [id], onDelete: SetNull)
-  status             String    @default("confirmed")
-  source             String    @default("direct")
-  arrivalDate        DateTime  @db.Date
-  departureDate      DateTime  @db.Date
+  ratePlan           RatePlan?         @relation(fields: [ratePlanId], references: [id], onDelete: SetNull)
+  status             String            @default("confirmed")
+  source             String            @default("direct")
+  arrivalDate        DateTime          @db.Date
+  departureDate      DateTime          @db.Date
   nights             Int
-  adults             Int       @default(1)
-  children           Int       @default(0)
+  adults             Int               @default(1)
+  children           Int               @default(0)
   notes              String?
   eta                String?
   specialRequests    String?
   marketSegment      String?
-  houseUse           Boolean   @default(false)
-  guaranteed         Boolean   @default(false)
-  doNotMove          Boolean   @default(false)
-  fixedRoom          Boolean   @default(false)
-  depositDue         Decimal   @default(0) @db.Decimal(10, 2)
-  depositPaid        Decimal   @default(0) @db.Decimal(10, 2)
+  houseUse           Boolean           @default(false)
+  guaranteed         Boolean           @default(false)
+  doNotMove          Boolean           @default(false)
+  fixedRoom          Boolean           @default(false)
+  depositDue         Decimal           @default(0) @db.Decimal(10, 2)
+  depositPaid        Decimal           @default(0) @db.Decimal(10, 2)
   preArrivalSentAt   DateTime?
   confirmationSentAt DateTime?
   checkedInAt        DateTime?
@@ -510,10 +515,10 @@ model Reservation {
   cancelledBy        String?
   cancelReason       String?
   noShowAt           DateTime?
-  totalAmount        Decimal   @db.Decimal(10, 2)
-  balance            Decimal   @db.Decimal(10, 2)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  totalAmount        Decimal           @db.Decimal(10, 2)
+  balance            Decimal           @db.Decimal(10, 2)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 
   stays                ReservationStay[]
   folio                Folio?
@@ -561,6 +566,36 @@ model ReservationStay {
   @@index([date])
   @@index([reservationId])
   @@map("reservation_stays")
+}
+
+// ─── Multi-room bridge (addendum #3): the booking-level room list ───
+// Exists from CONFIRMATION so "rooms arriving today" is countable
+// pre-arrival — stays above are nightly truth and only exist post-check-in.
+// Room move = mutate the row (stays keep the historical record).
+model ReservationRoom {
+  id            String      @id @default(cuid())
+  tenantId      String
+  tenant        Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId    String
+  property      Property    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  reservationId String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  roomId        String?
+  room          Room?       @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  roomTypeId    String?
+  roomType      RoomType?   @relation(fields: [roomTypeId], references: [id], onDelete: SetNull)
+  role          String      @default("primary") // primary | companion
+  status        String      @default("upcoming") // upcoming | checked_in | checked_out | no_show | cancelled
+  checkedInAt   DateTime?
+  checkedOutAt  DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([reservationId, roomId])
+  @@index([tenantId, propertyId, status])
+  @@index([reservationId])
+  @@index([roomId])
+  @@map("reservation_rooms")
 }
 
 // ─── Billing ───
