@@ -17,7 +17,7 @@ export interface TaskListParams {
 }
 
 export const listTasks = (params?: TaskListParams) =>
-  apiClient.get('/tasks', { params }).then((r) => r.data);
+  apiClient.get('/tasks', { params }).then((r) => r.data.data ?? r.data);
 
 export const getTaskSummary = () => apiClient.get('/tasks/summary').then((r) => r.data.data);
 

@@ -137,7 +137,7 @@ tasksRouter.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const tenantId = (req as AuthenticatedRequest).auth.tenantId;
-      res.json(await listTasks(tenantId, req.validatedQuery as Record<string, string>));
+      res.json({ data: await listTasks(tenantId, req.validatedQuery as Record<string, string>) });
     } catch (err) {
       next(err);
     }
