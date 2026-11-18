@@ -30,6 +30,7 @@ import { usePropertyScope } from '../../../hooks/usePropertyScope';
 import { checkInReservation, checkOutReservation } from '../../../api/api-reservations';
 import { LINKS } from '../../../lib/dashLinks';
 import { cn } from '../../../lib/utils';
+import { formatMoney } from '../../../lib/money';
 
 const TYPE_LABELS = {
   channel_sync_failure: 'Channel sync failure',
@@ -39,12 +40,7 @@ const TYPE_LABELS = {
   room_readiness: 'Room readiness',
 };
 
-const money = (value, currency) =>
-  new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: currency ?? 'ZAR',
-    maximumFractionDigits: 0,
-  }).format(value ?? 0);
+const money = (value, currency) => formatMoney(value ?? 0, currency ?? 'ZAR', 0);
 
 const relTime = (iso) => {
   const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
@@ -132,13 +128,20 @@ function CriticalStrip({ critical }) {
   );
 }
 
-function GlanceTile({ icon: Icon, label, value, hint, to }) {
+function GlanceTile({ icon: Icon, label, value, hint, to, tone }) {
   const body = (
     <div className="rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between">
         <div className="min-w-0">
           <p className="text-[11px] font-medium uppercase tracking-wide text-text-muted">{label}</p>
-          <p className="mt-1 truncate text-2xl font-bold text-text-primary">{value}</p>
+          <p
+            className={cn(
+              'mt-1 truncate text-2xl font-bold',
+              tone === 'revenue' ? 'hq-revenue' : 'text-text-primary'
+            )}
+          >
+            {value}
+          </p>
           {hint && <p className="mt-0.5 truncate text-xs text-text-secondary">{hint}</p>}
         </div>
         <div className="rounded-lg bg-surface-elevated p-2">
@@ -301,7 +304,7 @@ export default function TodayCockpit({ propertyId, onMutated }) {
       <CriticalStrip critical={d.critical} />
 
       {/* Today at a glance — every tile drills to its worklist */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-8">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
         <GlanceTile
           icon={CalendarCheck}
           label="Arrivals"
@@ -320,16 +323,8 @@ export default function TodayCockpit({ propertyId, onMutated }) {
           icon={BedDouble}
           label="In house"
           value={d.today.inHouse}
-          hint={`${d.today.checkedOutToday} checked out`}
+          hint={`${d.today.checkedOutToday} checked out · ${d.today.dayUse} day use`}
           to={LINKS.roomPlan}
-        />
-        <GlanceTile icon={Users} label="Day use" value={d.today.dayUse} hint="reserved (UX-02)" />
-        <GlanceTile
-          icon={ClipboardList}
-          label="Rooms ready"
-          value={`${d.today.roomsReady}/${d.today.roomsTotal}`}
-          hint="sellable tonight"
-          to={LINKS.housekeeping}
         />
         <GlanceTile
           icon={LogIn}
@@ -342,11 +337,12 @@ export default function TodayCockpit({ propertyId, onMutated }) {
           icon={TrendingUp}
           label="Occupancy"
           value={`${d.revenue.occupancyPct}%`}
-          hint={`${d.revenue.occupiedTonight}/${d.revenue.roomsTotal} rooms`}
+          hint={`${d.today.roomsReady}/${d.today.roomsTotal} ready · ${d.revenue.occupiedTonight}/${d.revenue.roomsTotal} occupied`}
         />
         <GlanceTile
           icon={DollarSign}
           label="Room revenue"
+          tone="revenue"
           value={money(d.revenue.roomRevenueToday, currency)}
           hint={`ADR ${money(d.revenue.adr, currency)}`}
           to={LINKS.reports}
