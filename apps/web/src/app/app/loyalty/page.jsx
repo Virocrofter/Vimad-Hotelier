@@ -29,7 +29,7 @@ import {
   YAxis,
   CartesianGrid,
 } from 'recharts';
-import { useLoyaltyMembers } from '../../../hooks/useloyalty';
+import { useAdjustLoyaltyPoints, useLoyaltyMembers } from '../../../hooks/useloyalty';
 const timeAgo = (iso) => {
   if (!iso) return 'Never';
   const diff = Date.now() - new Date(iso).getTime();
@@ -45,7 +45,6 @@ const formatCurrency = (n) =>
   `R${Number(n || 0).toLocaleString('en-ZA', { maximumFractionDigits: 0 })}`;
 import { MemberDetailDrawer } from './MemberDetailDrawer';
 import { LTVPredictiveModal } from './LTVPredictiveModal';
-import { apiClient } from '../../../api/client';
 
 const tierConfig = {
   platinum: {
@@ -143,6 +142,7 @@ function AdjustPointsModal({ open, members, onClose, onDone }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [done, setDone] = useState(false);
+  const adjust = useAdjustLoyaltyPoints();
 
   if (!open) return null;
 
@@ -151,7 +151,7 @@ function AdjustPointsModal({ open, members, onClose, onDone }) {
     setSaving(true);
     setError(null);
     try {
-      await apiClient.post('/v1/loyalty/adjust', {
+      await adjust.mutateAsync({
         guestId: form.guestId,
         type: 'adjustment',
         amount: Number(form.amount),
