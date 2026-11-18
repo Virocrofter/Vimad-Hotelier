@@ -753,72 +753,101 @@ function StatsBar({ tonight, unassigned, blocks, today, currency }) {
   );
 }
 
+/* FilterBarChips (blueprint S6 FilterRail): chip groups under micro-labels.
+ * Live filters only — the old Status select was dead UI (filteredRooms never
+ * read filters.status), so it's dropped rather than prettified. */
 function FilterBar({ floors, roomTypes, filters, onChange, resultCount, totalCount }) {
-  const select =
-    'rounded-md border bg-background px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-ring';
+  const set = (patch) => onChange({ ...filters, ...patch });
+  const groupLabel = 'text-[10px] font-semibold uppercase tracking-wide text-muted-foreground';
+  const chip = (active) =>
+    cn(
+      'rounded-full border px-2.5 py-1 text-xs transition-colors',
+      active
+        ? 'border-transparent bg-[var(--hq-accent-soft)] font-medium text-[var(--primary)]'
+        : 'text-text-secondary hover:bg-[var(--hq-surface-2)]'
+    );
+  const chipStyle = (active) => (active ? undefined : { borderColor: 'var(--hq-hairline)' });
+
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Filter className="h-4 w-4 text-muted-foreground" />
-      <select
-        className={select}
-        value={filters.floor}
-        onChange={(e) => onChange({ ...filters, floor: e.target.value })}
-      >
-        <option value="all">All floors</option>
-        {floors.map((f) => (
-          <option key={f} value={f}>
-            Floor {f}
-          </option>
-        ))}
-      </select>
-      <select
-        className={select}
-        value={filters.roomTypeId}
-        onChange={(e) => onChange({ ...filters, roomTypeId: e.target.value })}
-      >
-        <option value="all">All types</option>
-        {roomTypes.map((t) => (
-          <option key={t.id} value={t.id}>
-            {t.name}
-          </option>
-        ))}
-      </select>
-      <select
-        className={select}
-        value={filters.status}
-        onChange={(e) => onChange({ ...filters, status: e.target.value })}
-      >
-        <option value="all">All statuses</option>
-        {Object.entries(STATUS_META).map(([k, v]) => (
-          <option key={k} value={k}>
-            {v.label}
-          </option>
-        ))}
-      </select>
-      <select
-        className={select}
-        value={filters.roomState}
-        onChange={(e) => onChange({ ...filters, roomState: e.target.value })}
-      >
-        <option value="all">All room states</option>
-        {Object.entries(HK_META).map(([k, v]) => (
-          <option key={k} value={k}>
-            {v.label}
-          </option>
-        ))}
-      </select>
+    <div className="flex flex-col gap-3">
       <div className="relative">
         <Search className="absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
         <input
-          className="w-52 rounded-md border bg-background py-1.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+          className="w-full rounded-md border bg-background py-1.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
           placeholder="Guest or confirmation #"
           value={filters.search}
-          onChange={(e) => onChange({ ...filters, search: e.target.value })}
+          onChange={(e) => set({ search: e.target.value })}
         />
       </div>
-      <span className="text-xs text-muted-foreground">
+      <div>
+        <p className={groupLabel}>Floor</p>
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          <button
+            className={chip(filters.floor === 'all')}
+            style={chipStyle(filters.floor === 'all')}
+            onClick={() => set({ floor: 'all' })}
+          >
+            All
+          </button>
+          {floors.map((f) => (
+            <button
+              key={f}
+              className={chip(filters.floor === f)}
+              style={chipStyle(filters.floor === f)}
+              onClick={() => set({ floor: f })}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <p className={groupLabel}>Room type</p>
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          <button
+            className={chip(filters.roomTypeId === 'all')}
+            style={chipStyle(filters.roomTypeId === 'all')}
+            onClick={() => set({ roomTypeId: 'all' })}
+          >
+            All
+          </button>
+          {roomTypes.map((t) => (
+            <button
+              key={t.id}
+              className={chip(filters.roomTypeId === t.id)}
+              style={chipStyle(filters.roomTypeId === t.id)}
+              onClick={() => set({ roomTypeId: t.id })}
+            >
+              {t.name}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <p className={groupLabel}>Room state</p>
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          <button
+            className={chip(filters.roomState === 'all')}
+            style={chipStyle(filters.roomState === 'all')}
+            onClick={() => set({ roomState: 'all' })}
+          >
+            All
+          </button>
+          {Object.entries(HK_META).map(([k, v]) => (
+            <button
+              key={k}
+              className={chip(filters.roomState === k)}
+              style={chipStyle(filters.roomState === k)}
+              onClick={() => set({ roomState: k })}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <p className="text-[11px] text-muted-foreground">
         {resultCount}/{totalCount} rooms
-      </span>
+      </p>
     </div>
   );
 }
