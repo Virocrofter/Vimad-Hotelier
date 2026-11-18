@@ -317,7 +317,7 @@ export default function ReservationsPage() {
   }, [page, totalPages]);
 
   return (
-    <div className="space-y-4">
+    <div className="hq-surface-0 min-h-full space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold text-text-primary">Reservations</h2>
@@ -633,7 +633,7 @@ export default function ReservationsPage() {
                       <td className="px-4 py-3 text-right font-medium text-text-primary">
                         {r.rate != null ? zar(r.rate) : '—'}
                       </td>
-                      <td className="px-4 py-3 text-right font-medium text-text-primary">
+                      <td className="px-4 py-3 text-right font-medium hq-revenue">
                         {zar(r.totalAmount)}
                       </td>
                       <td
@@ -659,8 +659,28 @@ export default function ReservationsPage() {
                 })}
                 {reservations.length === 0 && (
                   <tr>
-                    <td colSpan={11} className="px-4 py-12 text-center text-text-muted">
-                      No reservations match your filters.
+                    <td colSpan={11} className="px-4 py-12">
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <ListChecks className="h-8 w-8 text-text-muted" />
+                        <p className="text-sm font-medium text-text-primary">
+                          No reservations match
+                        </p>
+                        <p className="text-xs text-text-muted">
+                          Try widening the date range or clearing filters.
+                        </p>
+                        <button
+                          onClick={() => {
+                            setStatusFilter('all');
+                            setSourceFilter('all');
+                            setDateFrom('');
+                            setDateTo('');
+                            setQuery('');
+                          }}
+                          className="mt-1 text-xs font-medium text-secondary hover:underline"
+                        >
+                          Reset all filters
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )}
