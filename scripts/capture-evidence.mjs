@@ -24,6 +24,8 @@ for (const theme of themes) {
   const email = page.locator('input[type="email"]').first();
   const passw = page.locator('input[type="password"]').first();
   if ((await email.count()) && (await passw.count())) {
+    const slugInput = page.locator('input').first();
+    if (await slugInput.count()) await slugInput.fill('demo-hotel');
     await email.fill('admin@vimad.test');
     await passw.fill('admin123');
     await page.locator('button[type="submit"]').first().click();
