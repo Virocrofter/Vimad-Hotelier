@@ -1,136 +1,153 @@
 /* apps/web/src/components/layout/Sidebar.tsx
- * Job-based sidebar (roadmap audit §5.1, Phase 3 nav restructure).
- * LINKS ONLY — no routes moved, no files renamed, no pages displaced; every
- * destination already exists in the app (see src/lib/navGroups.js).
- * Rollback: restore Sidebar.tsx.pre-nav-restructure.bak (or git checkout).
- * Permissions note: navigation is discoverability, not a security boundary;
- * server-side authorization and tenant/property scoping are unchanged (§9).
+ * Rail-and-flyout chassis sidebar (blueprint S4, Phase 3).
+ * 64px icon rail + 264px flyout panel. Hover previews a group, click pins
+ * it, state persists in localStorage. Chain group stays context-gated.
+ * The filter input is gone — the command palette (Cmd-K) is search.
+ * Permissions: nav is discoverability, not a security boundary (server
+ * authorization unchanged); role-based projection lands with the useAuth
+ * census (P3.2b). Ribbon collapse <1200px + phone sheet land in P3.2b with
+ * the layout pass.
  */
 import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, Search } from 'lucide-react';
-import { NAV_GROUPS } from '../../lib/navGroups';
 import { useQuery } from '@tanstack/react-query';
 import { getScope } from '../../api/chains';
+import { NAV_GROUPS } from '../../lib/navGroups';
 import { cn } from '../../lib/utils';
 
-const COLLAPSED_KEY = 'nav.groups.collapsed';
+const UI_KEY = 'nav.chassis.v1';
 
-function loadCollapsed(): Record<string, boolean> {
+type UiState = { open: boolean; group: string };
+
+function loadUi(): UiState {
   try {
-    return JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? '{}');
+    const raw = JSON.parse(localStorage.getItem(UI_KEY) ?? '{}');
+    return { open: raw.open !== false, group: raw.group ?? 'command' };
   } catch {
-    return {};
+    return { open: true, group: 'command' };
   }
 }
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const { pathname } = useLocation();
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => ({
-    setup: true, // More/Setup starts collapsed; everything else open
-    ...loadCollapsed(),
-  }));
-  const [filter, setFilter] = useState('');
+  const [ui, setUi] = useState<UiState>(loadUi);
+  const [hoverGroup, setHoverGroup] = useState<string | null>(null);
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + '/');
 
   const scopeQ = useQuery({ queryKey: ['nav-scope'], queryFn: getScope, staleTime: 60000 });
   const hasChain = (scopeQ.data?.properties?.length ?? 0) > 1;
 
-  const groups = useMemo(() => {
-    const base = NAV_GROUPS.filter((g) => g.context !== 'chain' || hasChain);
-    const q = filter.trim().toLowerCase();
-    if (!q) return base;
-    return base
-      .map((g) => ({
-        ...g,
-        items: g.items.filter((i) => i.label.toLowerCase().includes(q)),
-      }))
-      .filter((g) => g.items.length > 0 || g.label.toLowerCase().includes(q));
-  }, [filter, hasChain]);
+  const groups = useMemo(
+    () => NAV_GROUPS.filter((g) => g.context !== 'chain' || hasChain),
+    [hasChain]
+  );
 
-  const toggle = (key: string) =>
-    setCollapsed((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
+  const activeKey = useMemo(() => {
+    for (const g of groups) if (g.items.some((i) => isActive(i.to))) return g.key;
+    return ui.group;
+  }, [pathname, groups, ui.group]);
+
+  const openKey = hoverGroup ?? activeKey;
+  const open = ui.open || hoverGroup !== null;
+  const openGroup = groups.find((g) => g.key === openKey) ?? groups[0];
+
+  const persist = (patch: Partial<UiState>) =>
+    setUi((prev) => {
+      const next = { ...prev, ...patch };
       try {
-        localStorage.setItem(COLLAPSED_KEY, JSON.stringify(next));
+        localStorage.setItem(UI_KEY, JSON.stringify(next));
       } catch {}
       return next;
     });
 
   return (
-    <nav
-      aria-label="Primary"
-      className="flex h-full w-64 flex-col border-r border-border bg-surface"
-    >
-      <div className="flex items-center gap-2 px-4 pb-3 pt-4">
-        <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-        <span className="text-base font-bold tracking-tight text-text-primary">Vimad</span>
-      </div>
-
-      <div className="px-3 pb-2">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
-          <input
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            placeholder="Filter pages…"
-            aria-label="Filter navigation"
-            className="w-full rounded-md border border-border bg-background py-1.5 pl-7 pr-2 text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary/40"
-          />
-        </div>
-      </div>
-
-      <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-4">
-        {groups.map((group) => {
-          const hasActive = group.items.some((i) => isActive(i.to));
-          const isOpen = filter ? true : !collapsed[group.key];
-          const Icon = group.icon;
+    <div className="flex h-full" onMouseLeave={() => setHoverGroup(null)}>
+      <nav
+        aria-label="Primary"
+        className="flex h-full w-16 flex-col items-center gap-1 border-r py-3"
+        style={{ borderColor: 'var(--hq-hairline)', background: 'var(--hq-surface-1)' }}
+      >
+        <Link
+          to="/app/dashboard"
+          aria-label="Command Center"
+          onClick={onNavigate}
+          className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg"
+          style={{ background: 'var(--hq-accent-soft)' }}
+        >
+          <span className="h-3 w-3 rounded-full" style={{ background: 'var(--primary)' }} />
+        </Link>
+        {groups.map((g) => {
+          const Icon = g.icon;
+          const active = g.key === activeKey;
           return (
-            <div key={group.key} className="mb-1">
-              <button
-                type="button"
-                onClick={() => toggle(group.key)}
-                aria-expanded={isOpen}
-                className={cn(
-                  'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[11px] font-semibold uppercase tracking-wide hover:text-text-primary',
-                  hasActive && !isOpen ? 'text-primary' : 'text-text-muted'
-                )}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                <span className="flex-1">{group.label}</span>
-                <ChevronDown
-                  className={cn('h-3.5 w-3.5 transition-transform', !isOpen && '-rotate-90')}
-                />
-              </button>
-              {isOpen && (
-                <ul className="mt-0.5 space-y-0.5">
-                  {group.items.map((item) => (
-                    <li key={item.to}>
-                      <Link
-                        to={item.to}
-                        onClick={onNavigate}
-                        className={cn(
-                          'block rounded-md px-2 py-1.5 pl-8 text-[13px]',
-                          isActive(item.to)
-                            ? 'bg-primary/10 font-medium text-primary'
-                            : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary'
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+            <button
+              key={g.key}
+              type="button"
+              title={g.label}
+              aria-label={g.label}
+              aria-current={active ? 'true' : undefined}
+              onClick={() => persist({ group: g.key, open: true })}
+              onMouseEnter={() => setHoverGroup(g.key)}
+              className={cn(
+                'flex h-10 w-10 items-center justify-center rounded-lg transition-colors',
+                active
+                  ? 'text-[var(--primary)]'
+                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
               )}
-            </div>
+              style={active ? { background: 'var(--hq-accent-soft)' } : undefined}
+            >
+              <Icon className="h-5 w-5" />
+            </button>
           );
         })}
-        {groups.length === 0 && (
-          <p className="px-2 py-4 text-xs text-text-muted">No pages match this filter.</p>
-        )}
-      </div>
-    </nav>
+      </nav>
+
+      {open && openGroup && (
+        <div
+          className="flex h-full w-[264px] flex-col border-r"
+          style={{ borderColor: 'var(--hq-hairline)', background: 'var(--hq-surface-1)' }}
+          onMouseEnter={() => setHoverGroup(openGroup.key)}
+        >
+          <header className="flex items-center justify-between px-4 pb-2 pt-4">
+            <h2
+              className="text-[11px] font-semibold uppercase tracking-wide"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              {openGroup.label}
+            </h2>
+            <button
+              type="button"
+              aria-label="Hide panel"
+              className="rounded px-1.5 text-xs"
+              style={{ color: 'var(--text-muted)' }}
+              onClick={() => persist({ open: false })}
+            >
+              &larr;
+            </button>
+          </header>
+          <ul className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2 pb-4">
+            {openGroup.items.map((item) => (
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  onClick={onNavigate}
+                  className={cn(
+                    'block rounded-md px-3 py-2 text-[13px]',
+                    isActive(item.to)
+                      ? 'bg-[var(--hq-accent-soft)] font-medium text-[var(--primary)]'
+                      : 'hover:bg-[var(--hq-surface-2)]'
+                  )}
+                  style={!isActive(item.to) ? { color: 'var(--text-secondary)' } : undefined}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
 
