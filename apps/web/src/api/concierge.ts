@@ -1,59 +1,32 @@
 /* apps/web/src/api/concierge.ts — T3 concierge board client */
-const API_BASE = (
-  import.meta.env.VITE_API_BASE_URL ??
-  import.meta.env.VITE_API_URL ??
-  'http://localhost:3001'
-).replace(/\/$/, '');
+import { apiGet, apiPost, apiPatch } from './client';
+import { formatMoney } from '../lib/money';
 
-function getToken(): string {
-  for (const key of ['vimad.token', 'vimad_access_token', 'access_token', 'token', 'auth']) {
-    const raw = localStorage.getItem(key);
-    if (!raw) continue;
-    try {
-      const parsed = JSON.parse(raw);
-      if (typeof parsed === 'string' && parsed) return parsed;
-      if (parsed?.accessToken) return parsed.accessToken;
-      if (parsed?.token) return parsed.token;
-      if (parsed?.state?.token) return parsed.state.token;
-    } catch {
-      if (raw.startsWith('eyJ')) return raw;
-    }
-  }
-  return '';
-}
+// House client (api/client.ts) already attaches the JWT, refreshes expired
+// tokens, sends x-property-id, and normalizes /v1. The local getToken() probe
+// of 5 localStorage keys is gone (#72/#78) — one auth path for the whole app.
 
-async function req<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API_BASE}/v1/concierge${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
-      ...(init.headers ?? {}),
-    },
-  });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(body?.error?.message ?? `Request failed (${res.status})`);
-  }
-  return body.data as T;
-}
+const unwrap = <T>(p: Promise<T>): Promise<T> => p.then((b: any) => b.data as T);
 
 export const conciergeApi = {
   board: (date: string, propertyId?: string) =>
-    req<{ date: string; overdue: any[]; counts: any; sections: Record<string, any[]> }>(
-      `/board?date=${date}${propertyId ? `&propertyId=${propertyId}` : ''}`
+    unwrap(
+      apiGet<{ date: string; overdue: any[]; counts: any; sections: Record<string, any[]> }>(
+        '/v1/concierge/board',
+        { params: { date, propertyId } }
+      )
     ),
 
   create: (input: Record<string, unknown>) =>
-    req<{ id: string }>('/', { method: 'POST', body: JSON.stringify(input) }),
+    unwrap(apiPost<{ id: string }>('/v1/concierge', input)),
 
   update: (id: string, patch: Record<string, unknown>) =>
-    req<{ updated: boolean }>(`/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+    unwrap(apiPatch<{ updated: boolean }>(`/v1/concierge/${id}`, patch)),
 
   postToFolio: (id: string) =>
-    req<{ folioItemId: string; alreadyPosted: boolean }>(`/${id}/post-to-folio`, {
-      method: 'POST',
-    }),
+    unwrap(
+      apiPost<{ folioItemId: string; alreadyPosted: boolean }>(`/v1/concierge/${id}/post-to-folio`)
+    ),
 };
 
 export const CONCIERGE_TYPES = [
@@ -68,5 +41,4 @@ export const CONCIERGE_TYPES = [
 
 export const TRIP_FLOW = ['requested', 'confirmed', 'assigned', 'en_route', 'completed'] as const;
 
-export const fmtRand = (minor: number) =>
-  `R ${(minor / 100).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+export const fmtRand = (minor: number) => formatMoney(minor / 100);
