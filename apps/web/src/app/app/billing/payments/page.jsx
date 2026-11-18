@@ -2,7 +2,7 @@
  * Payments command center: hosted checkout deposits, saved-card charges,
  * refunds, and the live transaction ledger (all Paystack-backed).
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   getPaymentConfig,
   listPayments,
@@ -44,6 +44,7 @@ function PaymentsInner() {
   const [notice, setNotice] = useState(null);
   const [modal, setModal] = useState(null); // 'pay' | 'charge' | 'refund'
   const { payWithPopup } = usePaystack();
+  const verifyOnce = useRef(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -72,11 +73,13 @@ function PaymentsInner() {
     const params = new URLSearchParams(window.location.search);
     const reference = params.get('reference') || params.get('trxref');
     if (!reference) return;
+    if (verifyOnce.current) return;
+    verifyOnce.current = true;
+    window.history.replaceState({}, '', '/app/billing/payments');
     const t = setTimeout(() => setNotice({ kind: 'info', text: `Verifying ${reference}…` }), 0);
     verifyPayment(reference)
       .then(() => {
         setNotice({ kind: 'ok', text: `Payment ${reference} confirmed and posted to folio.` });
-        window.history.replaceState({}, '', '/app/billing/payments');
         load();
       })
       .catch((err) => setNotice({ kind: 'err', text: err.message ?? 'Verification failed' }));
