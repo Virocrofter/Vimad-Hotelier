@@ -3144,7 +3144,7 @@ model ProfilerQuerySnapshot {
   rows        Float    @default(0)
   capturedAt  DateTime @default(now())
 
-  @@index([fingerprint, capturedAt])
+  @@index([fingerprint, capturedAt], map: "profiler_query_snapshots_fp_cap_idx")
   @@map("profiler_query_snapshots")
 }
 
@@ -3157,7 +3157,7 @@ model ProfilerSlowQuery {
   rows       Int?
   createdAt  DateTime @default(now())
 
-  @@index([tenantId, createdAt])
+  @@index([tenantId, createdAt], map: "profiler_slow_queries_tenant_created_idx")
   @@index([createdAt])
   @@map("profiler_slow_queries")
 }
@@ -3214,9 +3214,9 @@ model PlatformAuditEvent {
   ipAddress     String?
   createdAt     DateTime @default(now())
 
-  @@index([actorEmail, createdAt])
-  @@index([entity, entityId])
-  @@index([tenantId, createdAt])
+  @@index([actorEmail, createdAt], map: "pae_actor_createdAt_idx")
+  @@index([entity, entityId], map: "pae_entity_idx")
+  @@index([tenantId, createdAt], map: "pae_tenant_createdAt_idx")
   @@map("platform_audit_events")
 }
 
@@ -3250,7 +3250,7 @@ model FeatureFlag {
 model FeatureFlagOverride {
   id        String      @id
   flagId    String
-  flag      FeatureFlag @relation(fields: [flagId], references: [id], onDelete: Cascade)
+  flag      FeatureFlag @relation(fields: [flagId], references: [id], onDelete: Cascade, map: "ffo_flag_fkey")
   tenantId  String?
   value     Boolean
   cohort    String?
@@ -3258,14 +3258,14 @@ model FeatureFlagOverride {
   reason    String?
   createdAt DateTime    @default(now())
 
-  @@unique([flagId, tenantId])
+  @@unique([flagId, tenantId], map: "ffo_flag_tenant_key")
   @@map("feature_flag_overrides")
 }
 
 model Contract {
   id                 String          @id
   tenantId           String
-  tenant             Tenant          @relation(fields: [tenantId], references: [id])
+  tenant             Tenant          @relation(fields: [tenantId], references: [id], map: "contracts_tenantId_fkey")
   legalEntity        String
   status             String          @default("draft")
   modules            Json            @default("[]")
@@ -3297,13 +3297,13 @@ model Contract {
 model ContractEvent {
   id         String   @id
   contractId String
-  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade, map: "contract_events_contractId_fkey")
   type       String
   payload    Json?
   actor      String
   createdAt  DateTime @default(now())
 
-  @@index([contractId, createdAt])
+  @@index([contractId, createdAt], map: "contract_events_contractId_idx")
   @@map("contract_events")
 }
 
@@ -3338,6 +3338,7 @@ model SupportAccessRequest {
   approvedBy  String?
   createdAt   DateTime  @default(now())
 
+  @@index([caseId], map: "sar_caseId_idx")
   @@map("support_access_requests")
 }
 
@@ -3354,7 +3355,7 @@ model DataRequest {
   createdBy   String
   createdAt   DateTime  @default(now())
 
-  @@index([tenantId, status])
+  @@index([tenantId, status], map: "data_requests_tenant_status_idx")
   @@map("data_requests")
 }
 
@@ -3369,7 +3370,7 @@ model RetentionPolicy {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  @@unique([dataClass, tenantId])
+  @@unique([dataClass, tenantId], map: "retention_class_tenant_key")
   @@map("retention_policies")
 }
 
@@ -3431,7 +3432,7 @@ model DemoSession {
 model DemoInvite {
   id          String      @id @default(cuid())
   sessionId   String
-  session     DemoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session     DemoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade, map: "demo_invites_sessionId_fkey")
   tokenHash   String
   tokenPrefix String
   expiresAt   DateTime
@@ -3447,7 +3448,7 @@ model DemoInvite {
 model DemoActivity {
   id        String      @id @default(cuid())
   sessionId String
-  session   DemoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session   DemoSession @relation(fields: [sessionId], references: [id], onDelete: Cascade, map: "demo_activity_sessionId_fkey")
   tenantId  String?
   actor     String?
   action    String
@@ -3455,7 +3456,7 @@ model DemoActivity {
   meta      Json?
   createdAt DateTime    @default(now())
 
-  @@index([sessionId, createdAt])
+  @@index([sessionId, createdAt], map: "demo_activity_sessionId_idx")
   @@map("demo_activity")
 }
 
@@ -3500,7 +3501,7 @@ model WebhookDelivery {
   deliveredAt  DateTime?
   createdAt    DateTime  @default(now())
 
-  @@index([status, createdAt])
+  @@index([status, createdAt], map: "wd_status_idx")
   @@map("webhook_deliveries")
 }
 
@@ -3549,7 +3550,7 @@ model AccessReview {
   notes      String?
   createdAt  DateTime @default(now())
 
-  @@unique([period, operatorId])
+  @@unique([period, operatorId], map: "access_reviews_period_operator_key")
   @@map("access_reviews")
 }
 
@@ -3651,7 +3652,7 @@ model DrRestoreJob {
 
 model ExceptionCadenceLease {
   id       Int      @id
-  lockedAt DateTime @default("1970-01-01T00:00:00Z") @map("locked_at")
+  lockedAt DateTime @default(dbgenerated("'1970-01-01 00:00:00+00'::timestamp with time zone")) @map("locked_at") @db.Timestamptz(6)
 
   @@map("exception_cadence_lease")
 }
