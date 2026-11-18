@@ -542,7 +542,9 @@ function GuestsTableSkeleton({ rows = 5 }) {
   );
 }
 
-// ─── Stat Card ───
+// ─── Stat Card (KpiCard anatomy, blueprint S2/S6) ───
+/* Micro-label above the numeral, tabular figures, soft icon chip.
+ * These are counts — magenta stays reserved for revenue. */
 function StatCard({ icon: Icon, label, value, tone = 'secondary' }) {
   const tones = {
     secondary: 'bg-secondary/10 text-secondary',
@@ -557,8 +559,10 @@ function StatCard({ icon: Icon, label, value, tone = 'secondary' }) {
           <Icon className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-2xl font-bold text-text-primary">{value ?? '—'}</p>
-          <p className="text-xs text-text-muted">{label}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+            {label}
+          </p>
+          <p className="text-3xl font-semibold text-text-primary tabular-nums">{value ?? '—'}</p>
         </div>
       </CardContent>
     </Card>
@@ -777,7 +781,7 @@ export default function GuestsPage() {
   const hasActiveFilters = debouncedSearch || vipFilter || blacklistFilter;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="hq-surface-0 min-h-full p-6 space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
