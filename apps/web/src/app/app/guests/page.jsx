@@ -35,6 +35,7 @@ import { Card, CardContent } from '../../../components/ui/card';
 import { Dialog } from '../../../components/ui/dialog';
 import { Skeleton, SkeletonText } from '../../../components/ui/skeleton';
 import { EmptyState } from '../../../components/ui/EmptyState';
+import { GuestCardDrawer } from '../../../components/guests/GuestCardDrawer';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -585,6 +586,7 @@ export default function GuestsPage() {
   const [deleteError, setDeleteError] = useState(null);
   const [blacklistTarget, setBlacklistTarget] = useState(null);
   const [mergeSource, setMergeSource] = useState(null);
+  const [cardGuestId, setCardGuestId] = useState(null);
 
   // Fixed debounce: effect-based, cleanup actually runs
   useEffect(() => {
@@ -938,7 +940,7 @@ export default function GuestsPage() {
                       {/* Guest */}
                       <td className="px-4 py-3">
                         <button
-                          onClick={() => navigate(`/app/guests/${guest.id}`)}
+                          onClick={() => setCardGuestId(guest.id)}
                           className="flex items-center gap-3 text-left hover:opacity-80"
                         >
                           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary/10 text-secondary font-medium text-sm">
@@ -1038,8 +1040,11 @@ export default function GuestsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/app/guests/${guest.id}`)}>
+                            <DropdownMenuItem onClick={() => setCardGuestId(guest.id)}>
                               View Profile
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => navigate(`/app/guests/${guest.id}`)}>
+                              Open Full Page
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => navigate(`/app/reservations/new?guestId=${guest.id}`)}
@@ -1174,6 +1179,13 @@ export default function GuestsPage() {
         onClose={() => setMergeSource(null)}
         onConfirm={handleMerge}
         isSubmitting={mergeMutation.isPending}
+      />
+
+      {/* Guest Card drawer (blueprint S6) */}
+      <GuestCardDrawer
+        guestId={cardGuestId}
+        open={!!cardGuestId}
+        onClose={() => setCardGuestId(null)}
       />
     </div>
   );
