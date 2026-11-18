@@ -292,7 +292,13 @@ async function maybeAutoIncident(probeResults: any[]) {
     `SELECT "name" FROM "scheduler_heartbeats" WHERE "ranAt" < now() - interval '2 hours'`
   );
   if (stale.length) reasons.push(`stale cron loops: ${stale.map((s: any) => s.name).join(', ')}`);
-  if (!reasons.length) return;
+  if (!reasons.length) {
+    // self-healing: resolve zombie auto-detected incidents once health returns
+    await prisma.$executeRawUnsafe(
+      `UPDATE "incidents" SET "status"='resolved', "updatedAt"=now() WHERE "title" LIKE 'Auto-detected: %' AND "status" NOT IN ('resolved','closed')`
+    );
+    return;
+  }
   const title = `Auto-detected: ${reasons.join('; ')}`.slice(0, 200);
   const exists = await q<any[]>(
     `SELECT 1 FROM "incidents" WHERE "title" = $1 AND "status" NOT IN ('resolved','closed') LIMIT 1`,
