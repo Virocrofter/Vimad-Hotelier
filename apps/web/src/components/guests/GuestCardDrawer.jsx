@@ -16,7 +16,7 @@ export function GuestCardDrawer({ guestId, open, onClose }) {
       title={title}
       loading={isLoading}
       error={error?.message ?? null}
-      width={640}
+      width={720}
     >
       {guest && <GuestCard guest={guest} showBack={false} />}
     </Drawer>

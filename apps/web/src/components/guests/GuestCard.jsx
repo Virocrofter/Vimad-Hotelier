@@ -326,7 +326,7 @@ function PreferencesTab({ guest }) {
         <p className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
           Add Preference
         </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <select
             className="flex h-10 rounded-md border bg-surface px-3 py-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             value={form.category}
@@ -433,7 +433,7 @@ function DocumentsTab({ guest }) {
         <p className="mb-3 text-xs font-medium uppercase tracking-wider text-text-muted">
           Add Document
         </p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <select
             className="flex h-10 rounded-md border bg-surface px-3 py-2 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             value={form.type}
@@ -701,8 +701,12 @@ export function GuestCard({ guest, showBack = true }) {
               <BedDouble className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-text-primary">{guest.totalStays ?? 0}</p>
-              <p className="text-xs text-text-muted">Total Stays</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                Total Stays
+              </p>
+              <p className="text-3xl font-semibold text-text-primary tabular-nums">
+                {guest.totalStays ?? 0}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -712,8 +716,12 @@ export function GuestCard({ guest, showBack = true }) {
               <Clock className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-text-primary">{guest.totalNights ?? 0}</p>
-              <p className="text-xs text-text-muted">Total Nights</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                Total Nights
+              </p>
+              <p className="text-3xl font-semibold text-text-primary tabular-nums">
+                {guest.totalNights ?? 0}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -723,10 +731,12 @@ export function GuestCard({ guest, showBack = true }) {
               <Banknote className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-text-primary">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                Lifetime Revenue
+              </p>
+              <p className="text-3xl font-semibold tabular-nums hq-revenue">
                 {formatCurrency(guest.totalRevenue ?? 0)}
               </p>
-              <p className="text-xs text-text-muted">Lifetime Revenue</p>
             </div>
           </CardContent>
         </Card>
