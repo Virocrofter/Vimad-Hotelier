@@ -31,6 +31,10 @@ for (const theme of themes) {
   }
   await page.goto(BASE + '/app/dashboard', { waitUntil: 'networkidle' }).catch(() => {});
   await page.waitForTimeout(1500);
+  const rendered = await page.evaluate(() => document.querySelectorAll('a,button,input,select,[role]').length);
+  if (!rendered) { console.log('BLANK PAGE — aborting ' + theme); process.exit(1); }
+  const bodyBg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  console.log(theme + ' body bg: ' + bodyBg + (theme === 'dark' && bodyBg.includes('244, 247, 248') ? '  <-- NOT SWITCHING' : ''));
 
   for (const w of widths) {
     await page.setViewportSize({ width: w, height: 900 });
