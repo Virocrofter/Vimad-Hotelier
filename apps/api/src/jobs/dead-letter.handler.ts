@@ -11,6 +11,20 @@ const DEFAULT_ATTEMPTS = 3;
 
 export const deadLetterQueue = new Queue(DLQ_NAME, { connection: redisConnection });
 
+// Payload cap (2026-11-18): job.data can reach 100MB+ (email jobs carrying
+// base64-embedded templates, retried en masse). A 132MB jsonb row crashes
+// Prisma's napi string conversion on read and bloats failed_jobs to tens of
+// GB. Keep 8KB — enough for diagnosis, safe to store.
+const DLQ_PAYLOAD_CAP = 8192;
+function capPayload(data: unknown): unknown {
+  try {
+    const json = JSON.stringify(data ?? {});
+    return JSON.parse(json.length > DLQ_PAYLOAD_CAP ? json.slice(0, DLQ_PAYLOAD_CAP) : json);
+  } catch {
+    return { capped: true };
+  }
+}
+
 export const deadLetterWorker = new Worker(
   DLQ_NAME,
   async (job) => {
@@ -107,14 +121,14 @@ export function attachDeadLetterHandler(sourceQueueName: string) {
         update: {
           failReason: failedReason,
           attemptCount: totalAttempts,
-          payload: job.data ?? {},
+          payload: capPayload(job.data),
           status: 'pending',
         },
         create: {
           queue: sourceQueueName,
           jobId,
           jobName: job.name,
-          payload: job.data ?? {},
+          payload: capPayload(job.data),
           failReason: failedReason,
           attemptCount: totalAttempts,
           status: 'pending',
