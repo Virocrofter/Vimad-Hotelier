@@ -26,7 +26,7 @@ for (const theme of themes) {
   if ((await email.count()) && (await passw.count())) {
     const slugInput = page.locator('input').first();
     if (await slugInput.count()) await slugInput.fill('demo-hotel');
-    await email.fill('admin@vimad.test');
+    await email.fill('admin@demo.com');
     await passw.fill('admin123');
     await page.locator('button[type="submit"]').first().click();
     await page.waitForURL(/app/, { timeout: 15000 }).catch(() => {});
