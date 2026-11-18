@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton, SkeletonText } from '../../../components/ui/skeleton';
 import type { Reservation } from '../../../types';
 import { useReservations, useCheckIn, useCancelReservation } from '../../../hooks/useReservations';
+import { GuestCardDrawer } from '../../../components/guests/GuestCardDrawer';
 
 const zar = (v: unknown) => formatCurrency(Number(v ?? 0));
 
@@ -128,6 +129,7 @@ export default function ReservationsPage() {
   const [tab, setTab] = useState<ViewTab>('all');
   const [page, setPage] = useState(1);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [cardGuestId, setCardGuestId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -587,9 +589,16 @@ export default function ReservationsPage() {
                               .toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-medium text-text-primary">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCardGuestId(r.guestId);
+                              }}
+                              className="font-medium text-text-primary hover:underline"
+                              title="Open guest card"
+                            >
                               {guestName || 'Unnamed Guest'}
-                            </p>
+                            </button>
                             <p className="text-xs text-text-muted">{r.guestEmail ?? '—'}</p>
                           </div>
                         </div>
@@ -700,6 +709,12 @@ export default function ReservationsPage() {
           )}
         </div>
       )}
+
+      <GuestCardDrawer
+        guestId={cardGuestId}
+        open={!!cardGuestId}
+        onClose={() => setCardGuestId(null)}
+      />
     </div>
   );
 }
