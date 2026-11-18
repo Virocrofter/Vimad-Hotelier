@@ -40,6 +40,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/ca
 import { Dialog } from '../../components/ui/dialog';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { StayTimeline } from './StayTimeline';
+import { FolioSnapshot } from './FolioSnapshot';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { timeAgo, formatDate, formatCurrency } from '../../lib/guest-utils';
 
@@ -847,6 +848,7 @@ export function GuestCard({ guest, showBack = true }) {
                 </CardContent>
               </Card>
             )}
+            {activeReservation && <FolioSnapshot reservation={activeReservation} />}
             {guest.reservations?.length > 0 && (
               <Card className="lg:col-span-2">
                 <CardHeader>
