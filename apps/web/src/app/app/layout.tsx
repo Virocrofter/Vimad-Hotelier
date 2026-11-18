@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../../components/layout/Sidebar';
+import RibbonNav from '../../components/layout/RibbonNav';
 import { Topbar } from '../../components/layout/Topbar';
 import { OfflineBanner } from '../../components/OfflineBanner';
 import { StatusBanner } from '../../components/StatusBanner';
@@ -22,9 +23,14 @@ function ShellCommandPalette() {
 export default function AppLayout() {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar />
+      <div className="max-[1199px]:hidden">
+        <Sidebar />
+      </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
+        <div className="min-[1200px]:hidden">
+          <RibbonNav />
+        </div>
         <StatusBanner />
         <SetupChip />
         <main className="flex-1 overflow-y-auto p-6">

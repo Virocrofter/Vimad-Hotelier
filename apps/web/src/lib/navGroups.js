@@ -53,6 +53,7 @@ export const NAV_GROUPS = [
   {
     key: 'revenue',
     label: 'Revenue',
+    roles: ['owner', 'admin', 'chain_admin'],
     icon: LineChart,
     items: [
       { label: 'Rates & Availability', to: '/app/rates' },
@@ -64,6 +65,7 @@ export const NAV_GROUPS = [
   {
     key: 'finance',
     label: 'Finance',
+    roles: ['owner', 'admin', 'chain_admin'],
     icon: Wallet,
     items: [
       { label: 'Folios & Billing', to: '/app/billing' },
@@ -79,6 +81,7 @@ export const NAV_GROUPS = [
     label: 'Chain',
     icon: Building2,
     context: 'chain',
+    roles: ['chain_admin', 'admin'],
     items: [
       { label: 'Chain Overview', to: '/app/chain-dashboard' },
       { label: 'Central Reservations', to: '/app/central-reservations' },
@@ -89,12 +92,14 @@ export const NAV_GROUPS = [
   {
     key: 'insight',
     label: 'Insight',
+    roles: ['owner', 'admin', 'chain_admin'],
     icon: BarChart3,
     items: [{ label: 'Reports', to: '/app/reports' }],
   },
   {
     key: 'grow',
     label: 'Grow',
+    roles: ['owner', 'admin'],
     icon: Users,
     items: [
       { label: 'CRM', to: '/app/crm' },
@@ -105,6 +110,7 @@ export const NAV_GROUPS = [
   {
     key: 'property',
     label: 'Property',
+    roles: ['owner', 'admin', 'chain_admin'],
     icon: Store,
     items: [
       { label: 'Rooms', to: '/app/rooms' },
@@ -116,6 +122,7 @@ export const NAV_GROUPS = [
   {
     key: 'system',
     label: 'System',
+    roles: ['owner', 'admin'],
     icon: Settings,
     items: [
       { label: 'Settings', to: '/app/settings' },

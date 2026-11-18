@@ -12,6 +12,7 @@ import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getScope } from '../../api/chains';
+import { useAuth } from '../../hooks/useAuth';
 import { NAV_GROUPS } from '../../lib/navGroups';
 import { cn } from '../../lib/utils';
 
@@ -31,6 +32,8 @@ function loadUi(): UiState {
 export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const { pathname } = useLocation();
   const [ui, setUi] = useState<UiState>(loadUi);
+  const auth = useAuth();
+  const role = auth?.user?.role;
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
 
   const isActive = (to: string) => pathname === to || pathname.startsWith(to + '/');
@@ -39,8 +42,11 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const hasChain = (scopeQ.data?.properties?.length ?? 0) > 1;
 
   const groups = useMemo(
-    () => NAV_GROUPS.filter((g) => g.context !== 'chain' || hasChain),
-    [hasChain]
+    () =>
+      NAV_GROUPS.filter(
+        (g) => (g.context !== 'chain' || hasChain) && (!g.roles || !role || g.roles.includes(role))
+      ),
+    [hasChain, role]
   );
 
   const activeKey = useMemo(() => {
