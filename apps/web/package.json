@@ -25,6 +25,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
+    "framer-motion": "^14.14.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^1.31.0",
     "motion": "^14.13.0",
