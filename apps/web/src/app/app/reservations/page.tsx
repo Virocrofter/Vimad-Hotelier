@@ -132,6 +132,48 @@ export default function ReservationsPage() {
   const [cardGuestId, setCardGuestId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Saved views (blueprint S6 DataTable spec): named filter sets, persisted
+  // locally. Capture tab + status/source/dates/query; apply restores them.
+  type SavedView = {
+    name: string;
+    tab: ViewTab;
+    statusFilter: string;
+    sourceFilter: string;
+    dateFrom: string;
+    dateTo: string;
+    query: string;
+  };
+  const [views, setViews] = useState<SavedView[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('reservations.savedViews.v1') ?? '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [savingView, setSavingView] = useState(false);
+  const [viewName, setViewName] = useState('');
+  const persistViews = (v: SavedView[]) => {
+    setViews(v);
+    try {
+      localStorage.setItem('reservations.savedViews.v1', JSON.stringify(v));
+    } catch {}
+  };
+  const applyView = (v: SavedView) => {
+    setTab(v.tab);
+    setStatusFilter(v.statusFilter);
+    setSourceFilter(v.sourceFilter);
+    setDateFrom(v.dateFrom);
+    setDateTo(v.dateTo);
+    setQuery(v.query);
+  };
+  const saveView = () => {
+    const name = viewName.trim();
+    if (!name) return;
+    persistViews([...views, { name, tab, statusFilter, sourceFilter, dateFrom, dateTo, query }]);
+    setViewName('');
+    setSavingView(false);
+  };
+
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), 300);
     return () => clearTimeout(t);
@@ -381,6 +423,62 @@ export default function ReservationsPage() {
             </span>
           </button>
         ))}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+          Views
+        </span>
+        {views.map((v) => (
+          <span key={v.name} className="inline-flex items-center gap-0.5">
+            <button
+              onClick={() => applyView(v)}
+              className="rounded-full border px-2.5 py-1 text-xs text-text-secondary hover:bg-surface-elevated"
+              title={`${v.tab} · ${v.statusFilter}${v.dateFrom ? ` · ${v.dateFrom} → ${v.dateTo}` : ''}`}
+            >
+              {v.name}
+            </button>
+            <button
+              onClick={() => persistViews(views.filter((x) => x.name !== v.name))}
+              className="px-0.5 text-text-muted hover:text-danger"
+              title="Delete view"
+            >
+              ×
+            </button>
+          </span>
+        ))}
+        {savingView ? (
+          <span className="inline-flex items-center gap-1.5">
+            <input
+              autoFocus
+              value={viewName}
+              onChange={(e) => setViewName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') saveView();
+                if (e.key === 'Escape') {
+                  setSavingView(false);
+                  setViewName('');
+                }
+              }}
+              placeholder="View name…"
+              className="h-7 w-36 rounded-md border border-border bg-background px-2 text-xs text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <button
+              onClick={saveView}
+              className="text-xs font-medium text-secondary hover:underline"
+            >
+              Save
+            </button>
+          </span>
+        ) : (
+          <button
+            onClick={() => setSavingView(true)}
+            className="rounded-full border border-dashed px-2.5 py-1 text-xs text-text-muted hover:text-text-primary"
+            style={{ borderColor: 'var(--hq-hairline)' }}
+          >
+            + Save view
+          </button>
+        )}
       </div>
 
       {filtersOpen && (
