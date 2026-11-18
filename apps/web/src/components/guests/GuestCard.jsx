@@ -39,6 +39,7 @@ import { Badge } from '../../components/ui/badge';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { Dialog } from '../../components/ui/dialog';
 import { EmptyState } from '../../components/ui/EmptyState';
+import { StayTimeline } from './StayTimeline';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { timeAgo, formatDate, formatCurrency } from '../../lib/guest-utils';
 
@@ -833,6 +834,16 @@ export function GuestCard({ guest, showBack = true }) {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-text-primary whitespace-pre-wrap">{guest.notes}</p>
+                </CardContent>
+              </Card>
+            )}
+            {guest.reservations?.length > 0 && (
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-base">Stay History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StayTimeline reservations={guest.reservations} />
                 </CardContent>
               </Card>
             )}
