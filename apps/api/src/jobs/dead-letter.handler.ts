@@ -58,11 +58,17 @@ export const deadLetterWorker = new Worker(
 
     // Re-queue with exponential backoff
     const originalQ = new Queue(originalQueue, { connection: redisConnection });
-    await originalQ.add(job.name, originalData, {
-      delay: Math.pow(2, attemptCount) * 60 * 1000,
-      priority: 1,
-      jobId: `${originalJobId}-retry-${attemptCount}`,
-    });
+    await originalQ.add(
+      job.name,
+      { ...originalData, attemptCount },
+      {
+        delay: Math.pow(2, attemptCount) * 60 * 1000,
+        priority: 1,
+        jobId: `${String(originalJobId)
+          .replace(/-retry-\d+$/, '')
+          .replace(/-manual-retry-\d+$/, '')}-retry-${attemptCount}`,
+      }
+    );
 
     await originalQ.close();
 
@@ -86,6 +92,8 @@ export function attachDeadLetterHandler(sourceQueueName: string) {
 
       const attemptsMade = job.attemptsMade;
       const maxAttempts = job.opts.attempts ?? DEFAULT_ATTEMPTS;
+      const priorAttempts = (job.data as any)?.attemptCount ?? 0;
+      const totalAttempts = priorAttempts + attemptsMade;
 
       if (attemptsMade < maxAttempts) {
         return; // intermediate failure — BullMQ will retry
@@ -98,7 +106,7 @@ export function attachDeadLetterHandler(sourceQueueName: string) {
         },
         update: {
           failReason: failedReason,
-          attemptCount: attemptsMade,
+          attemptCount: totalAttempts,
           payload: job.data ?? {},
           status: 'pending',
         },
@@ -108,7 +116,7 @@ export function attachDeadLetterHandler(sourceQueueName: string) {
           jobName: job.name,
           payload: job.data ?? {},
           failReason: failedReason,
-          attemptCount: attemptsMade,
+          attemptCount: totalAttempts,
           status: 'pending',
         },
       });
@@ -118,7 +126,7 @@ export function attachDeadLetterHandler(sourceQueueName: string) {
         originalJobId: jobId,
         originalData: job.data,
         failReason: failedReason,
-        attemptCount: attemptsMade,
+        attemptCount: totalAttempts,
         dbRecordId: record.id,
       });
 
