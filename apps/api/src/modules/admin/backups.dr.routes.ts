@@ -425,8 +425,14 @@ async function detectStale() {
   const lastAt: Date | null = last[0]?.finishedAt ?? null;
   const ageMin = lastAt ? (Date.now() - new Date(lastAt).getTime()) / 60000 : Infinity;
   if (ageMin > targetMin * 1.5) {
+    const fallbackTenant =
+      (await q`SELECT "id" FROM "tenants" ORDER BY "createdAt" ASC LIMIT 1`) as Array<{
+        id: string;
+      }>;
+    const tenantId = fallbackTenant[0]?.id ?? null;
+    if (!tenantId) return { stale: true, ageMin: Math.round(ageMin), targetMin };
     await run`INSERT INTO "exceptions" ("id","tenantId","type","severity","title","detail","recommendedAction","dedupeKey","status","slaDueAt","createdAt","updatedAt")
-      VALUES (${randomUUID()}, null, 'backup_stale', 'critical', 'No successful backup within 1.5× RPO target',
+      VALUES (${randomUUID()}, ${tenantId}, 'backup_stale', 'critical', 'No successful backup within 1.5× RPO target',
       ${`Last completed backup: ${lastAt ? lastAt.toISOString() : 'never'}. Age ${Math.round(ageMin)} min vs target ${targetMin} min.`},
       'Run a manual backup and investigate the schedule engine', 'backup-stale', 'open', ${new Date(Date.now() + 2 * 3600 * 1000)}, ${now()}, ${now()})
       ON CONFLICT ("tenantId","dedupeKey") DO UPDATE SET "detail"=EXCLUDED."detail", "updatedAt"=${now()}`;
