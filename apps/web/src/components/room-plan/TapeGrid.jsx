@@ -157,7 +157,7 @@ export default function TapeGrid({
   };
   const hideHover = () => {
     clearTimeout(hoverTimer.t);
-    setHover(null);
+    hoverTimer.t = setTimeout(() => setHover(null), 200);
   };
 
   const dayHeaderCell = (day) => {
@@ -438,12 +438,18 @@ export default function TapeGrid({
         />
       )}
       {hover && resById.get(hover.reservationId) && (
-        <ReservationPopover
-          reservation={resById.get(hover.reservationId)}
-          currency={property.currency}
-          x={hover.x}
-          y={hover.y}
-        />
+        <div onMouseEnter={() => clearTimeout(hoverTimer.t)} onMouseLeave={hideHover}>
+          <ReservationPopover
+            reservation={resById.get(hover.reservationId)}
+            currency={property.currency}
+            x={hover.x}
+            y={hover.y}
+            onManage={() => {
+              hideHover();
+              onReservationClick(hover.reservationId);
+            }}
+          />
+        </div>
       )}
     </div>
   );

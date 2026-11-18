@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
-import { formatMoney } from './TapeChart';
+import { formatMoney, STATUS_META } from './TapeChart';
 
-export default function ReservationPopover({ reservation: r, currency, x, y }) {
+export default function ReservationPopover({ reservation: r, currency, x, y, onManage }) {
   const W = 280;
   const left = Math.min(x + 12, window.innerWidth - W - 12);
   const top = Math.min(y + 12, window.innerHeight - 260);
@@ -16,8 +16,14 @@ export default function ReservationPopover({ reservation: r, currency, x, y }) {
           <div className="text-sm font-semibold">{r.guestName}</div>
           <div className="text-[11px] text-muted-foreground">{r.confirmationNumber}</div>
         </div>
-        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium">
-          {r.status.replace('_', ' ')}
+        <span
+          className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+          style={{
+            background: STATUS_META[r.status]?.soft ?? 'var(--muted)',
+            color: STATUS_META[r.status]?.text ?? 'inherit',
+          }}
+        >
+          {STATUS_META[r.status]?.label ?? r.status.replace('_', ' ')}
         </span>
       </div>
       <div className="space-y-1">
@@ -98,6 +104,14 @@ export default function ReservationPopover({ reservation: r, currency, x, y }) {
           <div className="mt-1 border-t pt-1 text-[10px] italic text-muted-foreground">
             “{r.specialRequests}”
           </div>
+        )}
+        {onManage && (
+          <button
+            onClick={onManage}
+            className="mt-2 w-full rounded-md bg-primary px-2 py-1.5 text-[11px] font-medium text-primary-foreground hover:opacity-90"
+          >
+            Manage
+          </button>
         )}
       </div>
     </div>
