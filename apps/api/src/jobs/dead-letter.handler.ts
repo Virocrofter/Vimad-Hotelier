@@ -3,7 +3,7 @@ import { Queue, QueueEvents, Job, Worker } from 'bullmq';
 import { getQueue, redisConnection } from '../common/queue.js';
 import { prisma } from '../common/prisma.js';
 import { logger } from '../common/logger.js';
-import { sendEmail } from './email.queue.js';
+import { sendEmail, EMAIL_QUEUE } from './email.queue.js';
 
 const DLQ_NAME = 'dead-letter';
 const MAX_RETRIES = 5;
@@ -45,7 +45,7 @@ export const deadLetterWorker = new Worker(
             queue: originalQueue,
             jobId: originalJobId,
             jobName: job.name,
-            payload: originalData ?? {},
+            payload: capPayload(originalData),
             failReason,
             attemptCount,
             status: 'pending',
@@ -54,18 +54,25 @@ export const deadLetterWorker = new Worker(
         failedJobId = record.id;
       }
 
-      await sendEmail({
-        to: process.env.OPS_EMAIL ?? 'ops@vimad.io',
-        subject: `Job Permanently Failed: ${originalQueue}`,
-        template: 'generic',
-        payload: {
-          message: `Job ${originalJobId} in queue ${originalQueue} failed after ${MAX_RETRIES} attempts.\n\nError: ${failReason}\n\nFailedJob ID: ${failedJobId}\n\nData: ${JSON.stringify(originalData, null, 2)}`,
-        },
-      });
+      if (originalQueue !== EMAIL_QUEUE) {
+        await sendEmail({
+          to: process.env.OPS_EMAIL ?? 'ops@vimad.io',
+          subject: `Job Permanently Failed: ${originalQueue}`,
+          template: 'generic',
+          payload: {
+            message: `Job ${originalJobId} in queue ${originalQueue} failed after ${MAX_RETRIES} attempts.\n\nError: ${failReason}\n\nFailedJob ID: ${failedJobId}\n\nData (capped): ${JSON.stringify(originalData).slice(0, 2000)}`,
+          },
+        });
+      } else {
+        logger.error(
+          { originalQueue, originalJobId, failedJobId },
+          'email-queue dead letter persisted; ops email suppressed (cannot report an email outage by email)'
+        );
+      }
 
       logger.error(
         { originalQueue, originalJobId, failedJobId },
-        'job permanently failed, persisted and ops notified'
+        'job permanently failed and persisted'
       );
       return;
     }
@@ -138,7 +145,7 @@ export function attachDeadLetterHandler(sourceQueueName: string) {
       await deadLetterQueue.add('dead-letter', {
         originalQueue: sourceQueueName,
         originalJobId: jobId,
-        originalData: job.data,
+        originalData: capPayload(job.data),
         failReason: failedReason,
         attemptCount: totalAttempts,
         dbRecordId: record.id,

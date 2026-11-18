@@ -41,6 +41,28 @@ export interface EmailJobData {
 }
 
 export async function sendEmail(data: EmailJobData, opts?: { delay?: number }): Promise<void> {
+  // Payload cap (2026-11-18): the dead-letter ops email embedded uncapped
+  // job data and fed itself — payloads doubled per cycle to 264MB, crashing
+  // the queue, the DLQ reader (napi), and bloating email_logs to 756MB.
+  const EMAIL_JOB_CAP = 256 * 1024;
+  const jobBytes = Buffer.byteLength(
+    JSON.stringify({ payload: data.payload, attachments: data.attachments ?? [] })
+  );
+  if (jobBytes > EMAIL_JOB_CAP) {
+    await prisma.emailLog.create({
+      data: {
+        tenantId: data.tenantId ?? null,
+        to: data.to,
+        subject: data.subject,
+        template: data.template,
+        payload: { error: 'payload_exceeds_cap', bytes: jobBytes, cap: EMAIL_JOB_CAP },
+        relatedType: data.relatedType ?? null,
+        relatedId: data.relatedId ?? null,
+        status: 'failed',
+      },
+    });
+    throw new Error(`sendEmail: ${jobBytes} bytes exceeds cap ${EMAIL_JOB_CAP} (${data.template})`);
+  }
   // 1. Write the log row FIRST so queued emails are visible even if the
   //    worker is down. The worker flips it to sent/failed.
   const log = await prisma.emailLog.create({
