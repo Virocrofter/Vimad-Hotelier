@@ -222,16 +222,21 @@ export default function CommandPalette({ open, onOpen, onClose }) {
       setSearching(true);
       try {
         const [g, r, rm, t, pay] = await Promise.all([
-          apiClient.get('/guests', { params: { search: term, pageSize: 5 } }),
-          apiClient.get('/reservations', { params: { search: term, pageSize: 5 } }),
-          apiClient.get('/rooms', { params: { search: term, pageSize: 5 } }),
-          apiClient.get('/tasks', { params: { q: term, pageSize: 5 } }),
+          apiClient.get('/guests', { params: { search: term, pageSize: 5 } }).catch(() => null),
+          apiClient
+            .get('/reservations', { params: { search: term, pageSize: 5 } })
+            .catch(() => null),
+          apiClient.get('/rooms', { params: { search: term, pageSize: 5 } }).catch(() => null),
+          apiClient.get('/tasks', { params: { q: term, pageSize: 5 } }).catch(() => null),
           apiClient.get('/payments', { params: { pageSize: 50 } }).catch(() => null),
         ]);
-        const pd = pay?.data?.data ?? pay?.data ?? [];
-        const allPayments = Array.isArray(pd) ? pd : (pd?.items ?? []);
+        // Endpoints vary in envelope shape: flat | {data:[…]} | paginated {data:{items}}.
+        const asArr = (resp) => {
+          const d = resp?.data?.data ?? resp?.data ?? [];
+          return Array.isArray(d) ? d : (d?.items ?? []);
+        };
         setPaymentHits(
-          allPayments
+          asArr(pay)
             .filter((x) =>
               String(x.reference ?? '')
                 .toLowerCase()
@@ -239,14 +244,10 @@ export default function CommandPalette({ open, onOpen, onClose }) {
             )
             .slice(0, 5)
         );
-        setGuestHits(
-          mode === 'guest'
-            ? (g.data?.data ?? [])
-            : (g.data?.data?.slice(0, mode === 'all' ? 3 : 0) ?? [])
-        );
-        setResHits(r.data?.data ?? []);
-        setRoomHits(rm.data?.data ?? []);
-        setTaskHits(t.data?.data ?? []);
+        setGuestHits(mode === 'guest' ? asArr(g) : asArr(g).slice(0, mode === 'all' ? 3 : 0));
+        setResHits(asArr(r));
+        setRoomHits(asArr(rm));
+        setTaskHits(asArr(t));
       } catch {
         setGuestHits([]);
         setResHits([]);
@@ -391,7 +392,18 @@ export default function CommandPalette({ open, onOpen, onClose }) {
       list = [...list].sort((a, b) => b.score - a.score);
     }
     return list;
-  }, [term, mode, guestHits, resHits, roomHits, taskHits, can, frecency, location.pathname]);
+  }, [
+    term,
+    mode,
+    guestHits,
+    resHits,
+    roomHits,
+    taskHits,
+    paymentHits,
+    can,
+    frecency,
+    location.pathname,
+  ]);
 
   useEffect(() => setIndex(0), [items.length, query]);
   useEffect(() => setCopied(false), [index, query]);
