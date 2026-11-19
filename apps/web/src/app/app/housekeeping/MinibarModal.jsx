@@ -44,6 +44,8 @@ export default function MinibarModal({ open, onClose, onLogged }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [recent, setRecent] = useState([]);
+  const [waiveTarget, setWaiveTarget] = useState(null);
+  const [waiveReason, setWaiveReason] = useState('');
 
   const loadRecent = () =>
     fetchMinibarChecks({ pageSize: 10 })
@@ -114,12 +116,21 @@ export default function MinibarModal({ open, onClose, onLogged }) {
     }
   };
 
-  const handleWaive = async (c) => {
-    const reason = window.prompt('Waive reason — posts a folio reversal:');
-    if (!reason) return;
+  // S11: no native dialogs — inline reason, mandatory (posts a folio reversal).
+  const confirmWaive = async () => {
+    const reason = waiveReason.trim();
+    if (reason.length < 2) {
+      toast({
+        title: 'Reason required',
+        description: 'Waiving posts a folio reversal — a reason is mandatory.',
+        variant: 'destructive',
+      });
+      return;
+    }
     try {
-      await waiveMinibar(c.id, reason);
+      await waiveMinibar(waiveTarget.id, reason);
       toast({ title: 'Check waived & charge reversed' });
+      setWaiveTarget(null);
       loadRecent();
     } catch (err) {
       toast({ title: 'Waive failed', description: err.message, variant: 'destructive' });
@@ -288,35 +299,72 @@ export default function MinibarModal({ open, onClose, onLogged }) {
           <div className="border-t pt-4 space-y-1.5">
             <h3 className="text-sm font-semibold">Recent checks</h3>
             {recent.map((c) => (
-              <div key={c.id} className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">
-                  Room {c.room?.number} — {fmt(c.totalMinor)}
-                </span>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className={
-                      c.status === 'posted'
-                        ? 'text-emerald-600 border-emerald-500/30'
-                        : c.status === 'waived'
-                          ? 'text-zinc-400'
-                          : 'text-orange-500 border-orange-500/30'
-                    }
-                  >
-                    {c.status}
-                  </Badge>
-                  {c.status === 'posted' && (
+              <div key={c.id}>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    Room {c.room?.number} — {fmt(c.totalMinor)}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className={
+                        c.status === 'posted'
+                          ? 'text-emerald-600 border-emerald-500/30'
+                          : c.status === 'waived'
+                            ? 'text-zinc-400'
+                            : 'text-orange-500 border-orange-500/30'
+                      }
+                    >
+                      {c.status}
+                    </Badge>
+                    {c.status === 'posted' && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 text-xs text-red-600"
+                        onClick={() => {
+                          setWaiveTarget(c);
+                          setWaiveReason('');
+                        }}
+                      >
+                        Waive
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                {waiveTarget?.id === c.id && (
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <input
+                      autoFocus
+                      value={waiveReason}
+                      onChange={(e) => setWaiveReason(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') confirmWaive();
+                        if (e.key === 'Escape') setWaiveTarget(null);
+                      }}
+                      placeholder="Waive reason — required, posts folio reversal"
+                      className="h-6 flex-1 rounded-md border border-input bg-background px-2 text-xs"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-6 text-[11px]"
+                      onClick={confirmWaive}
+                    >
+                      Waive
+                    </Button>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-6 text-xs text-red-600"
-                      onClick={() => handleWaive(c)}
+                      className="h-6 text-[11px]"
+                      onClick={() => setWaiveTarget(null)}
                     >
-                      Waive
+                      Back
                     </Button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
