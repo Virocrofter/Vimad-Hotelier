@@ -397,26 +397,34 @@ function ReportsView({ stats }) {
           <CardTitle className="text-sm">Today's Progress</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {[
-              { label: 'Pending', value: today.pending, color: 'bg-warning/100' },
-              { label: 'In Progress', value: today.inProgress, color: 'bg-accent/100' },
-              { label: 'Completed', value: today.completed, color: 'bg-success/100' },
-              { label: 'Inspected', value: today.inspected, color: 'bg-purple-500' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3">
-                <div className={cn('h-3 w-3 rounded-full', item.color)} />
-                <span className="text-sm w-24">{item.label}</span>
-                <div className="flex-1 bg-muted rounded-full h-2">
-                  <div
-                    className={cn('h-2 rounded-full', item.color)}
-                    style={{ width: `${today.total > 0 ? (item.value / today.total) * 100 : 0}%` }}
-                  />
+          {today.total === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No tasks scheduled yet today — this fills in as the day&apos;s board is worked.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {[
+                { label: 'Pending', value: today.pending, color: 'bg-warning/100' },
+                { label: 'In Progress', value: today.inProgress, color: 'bg-accent/100' },
+                { label: 'Completed', value: today.completed, color: 'bg-success/100' },
+                { label: 'Inspected', value: today.inspected, color: 'bg-purple-500' },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-3">
+                  <div className={cn('h-3 w-3 rounded-full', item.color)} />
+                  <span className="text-sm w-24">{item.label}</span>
+                  <div className="flex-1 bg-muted rounded-full h-2">
+                    <div
+                      className={cn('h-2 rounded-full', item.color)}
+                      style={{
+                        width: `${today.total > 0 ? (item.value / today.total) * 100 : 0}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium w-8 text-right">{item.value}</span>
                 </div>
-                <span className="text-sm font-medium w-8 text-right">{item.value}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -425,14 +433,20 @@ function ReportsView({ stats }) {
           <CardTitle className="text-sm">By Type</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {byType.map((t) => (
-              <div key={t.type} className="flex justify-between text-sm">
-                <span>{TYPE_LABELS[t.type] ?? t.type}</span>
-                <Badge variant="secondary">{t.count}</Badge>
-              </div>
-            ))}
-          </div>
+          {byType.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No tasks yet — this chart fills in as today&apos;s work is logged.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {byType.map((t) => (
+                <div key={t.type} className="flex justify-between text-sm">
+                  <span>{TYPE_LABELS[t.type] ?? t.type}</span>
+                  <Badge variant="secondary">{t.count}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -441,14 +455,20 @@ function ReportsView({ stats }) {
           <CardTitle className="text-sm">By Priority</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {byPriority.map((p) => (
-              <div key={p.priority} className="flex justify-between text-sm">
-                <span className="capitalize">{p.priority}</span>
-                <Badge className={PRIORITY_COLORS[p.priority]}>{p.count}</Badge>
-              </div>
-            ))}
-          </div>
+          {byPriority.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No tasks yet — this chart fills in as today&apos;s work is logged.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {byPriority.map((p) => (
+                <div key={p.priority} className="flex justify-between text-sm">
+                  <span className="capitalize">{p.priority}</span>
+                  <Badge className={PRIORITY_COLORS[p.priority]}>{p.count}</Badge>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
