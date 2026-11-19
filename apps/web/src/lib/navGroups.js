@@ -61,6 +61,7 @@ export const NAV_GROUPS = [
       { label: 'Rates & Availability', to: '/app/rates' },
       { label: 'Inventory', to: '/app/inventory' },
       { label: 'Channels', to: '/app/channel-manager' },
+      { label: 'Upsells', to: '/app/upsell' },
       // Upsells (U1-prime) + Booking Engine config land here in Phase 8
     ],
   },
