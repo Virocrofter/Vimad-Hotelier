@@ -21,7 +21,7 @@ import {
   type RatePlanCreateInput,
   type RatePlanUpdateInput,
 } from './rates.service.js';
-import { setCellOverride, clearCellOverride } from './pricing-rules.service.js';
+import { setCellOverride, clearCellOverride, listCellOverrides } from './pricing-rules.service.js';
 import { attachPropertyScope } from '../auth/auth.middleware.js';
 
 extendZodWithOpenApi(z);
@@ -335,7 +335,7 @@ const cellOverrideSchema = z.object({
   propertyId: z.string().min(1),
 });
 
-ratesRouter.put(
+ratesRouter.patch(
   '/overrides/cell',
   requirePermission('rate_plan', 'update'),
   validateBody(cellOverrideSchema),
@@ -369,6 +369,22 @@ ratesRouter.delete(
       const q = req.query as Record<string, string>;
       res.json({
         data: await clearCellOverride(req.tenantId, q.propertyId, q.ratePlanId, q.date),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// Read-back for the calendar cell editor (two-segment path: no /:id conflict)
+ratesRouter.get(
+  '/overrides/cell',
+  requirePermission('rate_plan', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const q = req.query as Record<string, string>;
+      res.json({
+        data: await listCellOverrides(req.tenantId, q.propertyId, q.from, q.to),
       });
     } catch (err) {
       next(err);

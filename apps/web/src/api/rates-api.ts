@@ -141,3 +141,27 @@ export async function createSeasonalGrid(input: CreateSeasonalGridInput): Promis
   const response = await apiPost<{ data: { id: string } }>('/v1/rates/seasonal', input);
   return response.data;
 }
+
+export interface RateCellOverride {
+  ratePlanId: string;
+  date: string;
+  effectiveRate: number;
+}
+
+export async function listCellOverrides(params: {
+  from: string;
+  to: string;
+}): Promise<RateCellOverride[]> {
+  const response = await apiGet<{ data: RateCellOverride[] }>('/v1/rates/overrides/cell', params);
+  return response.data;
+}
+
+export async function setCellOverride(input: {
+  ratePlanId: string;
+  date: string;
+  rate: number;
+  propertyId: string;
+}): Promise<RateCellOverride> {
+  const response = await apiPatch<{ data: RateCellOverride }>('/v1/rates/overrides/cell', input);
+  return response.data;
+}

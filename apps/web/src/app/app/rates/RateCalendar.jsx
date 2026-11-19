@@ -1,6 +1,6 @@
 /* apps/web/src/app/app/rates/RateCalendar.jsx */
 import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
   ChevronLeft,
@@ -13,12 +13,22 @@ import {
   CheckSquare,
 } from 'lucide-react';
 import { listRoomTypes } from '../../../api/room-types';
-import { listRatePlans } from '../../../api/rates-api';
-import { formatDate, formatShortDay, heatClass, getCellRate } from './RateUtils';
+import { listRatePlans, listCellOverrides, setCellOverride } from '../../../api/rates-api';
+import {
+  formatDate,
+  formatShortDay,
+  heatClass,
+  getCellRate,
+  planForDate,
+  isWeekend,
+} from './RateUtils';
 
 export default function RateCalendar() {
   const [dateOffset, setDateOffset] = useState(0);
   const [selectedRoomType, setSelectedRoomType] = useState('all');
+  const [editing, setEditing] = useState(null); // { rtId, date } — the cell being edited
+  const [draft, setDraft] = useState('');
+  const queryClient = useQueryClient();
 
   const { data: roomTypes = [], isLoading: loadingTypes } = useQuery({
     queryKey: ['room-types'],
@@ -47,6 +57,26 @@ export default function RateCalendar() {
     }
     return result;
   }, [today, dateOffset]);
+
+  // Manual overrides for the visible window (blueprint: rate change <=3 clicks)
+  const { data: overrides = [] } = useQuery({
+    queryKey: ['rate-cell-overrides', dates[0], dates[dates.length - 1]],
+    queryFn: () => listCellOverrides({ from: dates[0], to: dates[dates.length - 1] }),
+  });
+
+  const overrideMap = useMemo(() => {
+    const m = new Map();
+    overrides.forEach((o) =>
+      m.set(`${o.ratePlanId}|${o.date.slice(0, 10)}`, Number(o.effectiveRate))
+    );
+    return m;
+  }, [overrides]);
+
+  const saveOverride = useMutation({
+    mutationFn: ({ ratePlanId, date, rate, propertyId }) =>
+      setCellOverride({ ratePlanId, date, rate, propertyId }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rate-cell-overrides'] }),
+  });
 
   const filteredRoomTypes =
     selectedRoomType === 'all' ? roomTypes : roomTypes.filter((rt) => rt.id === selectedRoomType);
@@ -266,22 +296,68 @@ export default function RateCalendar() {
                       </div>
                     </td>
                     {dates.map((date) => {
-                      const cell = getCellRate(ratePlans, rt.id, date);
-                      if (!cell) {
+                      const plan = planForDate(ratePlans, rt.id, date);
+                      const ov = plan ? overrideMap.get(`${plan.id}|${date}`) : undefined;
+                      const cell =
+                        ov !== undefined
+                          ? {
+                              rate: ov,
+                              minStay: plan.minStay ?? 1,
+                              weekend: isWeekend(date),
+                              currency: plan.currency ?? 'ZAR',
+                            }
+                          : getCellRate(ratePlans, rt.id, date);
+                      if (!cell || !plan) {
                         return (
                           <td key={date} className="px-1.5 py-2 text-center">
                             <span className="text-xs text-text-muted">—</span>
                           </td>
                         );
                       }
+                      const isEditing = editing && editing.rtId === rt.id && editing.date === date;
                       return (
                         <td key={date} className="px-1.5 py-2 text-center">
-                          <div className={`rounded-lg px-2 py-1.5 ${heatClass(cell.rate, base)}`}>
-                            <p className="font-semibold">${cell.rate}</p>
-                            {cell.minStay > 1 && (
-                              <p className="text-[10px] opacity-80">min {cell.minStay}</p>
-                            )}
-                          </div>
+                          {isEditing ? (
+                            <input
+                              autoFocus
+                              value={draft}
+                              onChange={(e) => setDraft(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  const rate = Number(draft);
+                                  if (rate > 0) {
+                                    saveOverride.mutate({
+                                      ratePlanId: plan.id,
+                                      date,
+                                      rate,
+                                      propertyId: plan.propertyId,
+                                    });
+                                  }
+                                  setEditing(null);
+                                } else if (e.key === 'Escape') {
+                                  setEditing(null);
+                                }
+                              }}
+                              onBlur={() => setEditing(null)}
+                              className="w-16 rounded-md border border-[#F453A4] bg-surface px-1 py-1 text-center text-sm tabular-nums outline-none"
+                            />
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setEditing({ rtId: rt.id, date });
+                                setDraft(String(cell.rate));
+                              }}
+                              title="Click to set rate (click, type, Enter)"
+                              className={`w-full rounded-lg px-2 py-1.5 ${heatClass(cell.rate, base)} ${
+                                ov !== undefined ? 'ring-1 ring-[#F453A4]' : ''
+                              }`}
+                            >
+                              <p className="font-semibold tabular-nums">${cell.rate}</p>
+                              {cell.minStay > 1 && (
+                                <p className="text-[10px] opacity-80">min {cell.minStay}</p>
+                              )}
+                            </button>
+                          )}
                         </td>
                       );
                     })}

@@ -597,3 +597,28 @@ export async function clearCellOverride(
   });
   return { cleared: del.count };
 }
+
+/* Read-back for the calendar cell editor: manual overrides in a date
+ * window. Tenant-scoped; propertyId narrows when provided. */
+export async function listCellOverrides(
+  tenantId: string,
+  propertyId: string | undefined,
+  from: string,
+  to: string
+) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(from ?? '') || !/^\d{4}-\d{2}-\d{2}$/.test(to ?? '')) {
+    throw new AppError(400, 'from/to (YYYY-MM-DD) required', 'VALIDATION_ERROR');
+  }
+  return prisma.rateOverride.findMany({
+    where: {
+      tenantId,
+      ...(propertyId ? { propertyId } : {}),
+      ruleId: { startsWith: 'manual:' },
+      date: {
+        gte: new Date(`${from}T00:00:00.000Z`),
+        lte: new Date(`${to}T00:00:00.000Z`),
+      },
+    },
+    select: { ratePlanId: true, date: true, effectiveRate: true },
+  });
+}
