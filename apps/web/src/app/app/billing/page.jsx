@@ -34,6 +34,7 @@ import {
   deleteFolio,
 } from '../../../api/folio';
 import FolioOverview from './components/FolioOverview';
+import TransactionSheet from './components/TransactionSheet';
 import { flags } from '../../../lib/flags';
 import PaymentExceptions from './PaymentExceptions';
 
@@ -105,6 +106,7 @@ export default function BillingPage() {
   const [showShiftClose, setShowShiftClose] = useState(false);
   const [showNewFolio, setShowNewFolio] = useState(false);
   const [reverseTarget, setReverseTarget] = useState(null);
+  const [sheetTx, setSheetTx] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null); // { kind: 'transfer' | 'delete' }
 
   const flash = (kind, text) => {
@@ -550,7 +552,12 @@ export default function BillingPage() {
                   </tr>
                 ) : (
                   runningBalance.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-surface/50">
+                    <tr
+                      key={tx.id}
+                      onClick={() => setSheetTx(tx)}
+                      className="hover:bg-surface/50 cursor-pointer"
+                      title="View transaction"
+                    >
                       <td className="px-4 py-3 text-text-secondary whitespace-nowrap">{tx.date}</td>
                       <td className="px-4 py-3 font-mono text-text-secondary">{tx.code}</td>
                       <td className="px-4 py-3 text-text-primary">{tx.description}</td>
@@ -566,7 +573,10 @@ export default function BillingPage() {
                       <td className="px-4 py-3 text-right">
                         {!isPaymentItem(tx.raw.type) && folio?.status === 'open' && (
                           <button
-                            onClick={() => setReverseTarget(tx)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setReverseTarget(tx);
+                            }}
                             className="text-xs text-text-muted hover:text-danger"
                             title="Reverse charge"
                           >
@@ -647,6 +657,23 @@ export default function BillingPage() {
             } catch (e) {
               flash('error', errMsg(e));
             }
+          }}
+        />
+      )}
+
+      {sheetTx && (
+        <TransactionSheet
+          tx={sheetTx}
+          folio={folio}
+          guestName={guestName}
+          onClose={() => setSheetTx(null)}
+          onViewReceipt={() => {
+            setSheetTx(null);
+            setShowReceipt(true);
+          }}
+          onReverse={(target) => {
+            setSheetTx(null);
+            setReverseTarget(target);
           }}
         />
       )}
