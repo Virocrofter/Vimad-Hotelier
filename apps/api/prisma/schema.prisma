@@ -11,6 +11,7 @@ datasource db {
 // ─── Tenant & Identity ───
 
 model Tenant {
+  logbookEntries     LogbookEntry[]
   reservationRooms   ReservationRoom[]
   onboardingProgress OnboardingProgress[]
   id                 String               @id @default(cuid())
@@ -187,6 +188,7 @@ model PasswordReset {
 // ─── Property & Inventory ───
 
 model Property {
+  logbookEntries         LogbookEntry[]
   reservationRooms       ReservationRoom[]
   onboardingProgress     OnboardingProgress[]
   id                     String               @id @default(cuid())
@@ -572,6 +574,23 @@ model ReservationStay {
 // Exists from CONFIRMATION so "rooms arriving today" is countable
 // pre-arrival — stays above are nightly truth and only exist post-check-in.
 // Room move = mutate the row (stays keep the historical record).
+model LogbookEntry {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  authorId   String
+  authorName String
+  category   String   @default("general") // general | shift | maintenance | guest | incident
+  message    String
+  shift      String? // morning | afternoon | night
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId, propertyId, createdAt])
+  @@map("logbook_entries")
+}
+
 model ReservationRoom {
   id            String      @id @default(cuid())
   tenantId      String

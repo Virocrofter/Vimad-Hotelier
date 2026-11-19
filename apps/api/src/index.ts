@@ -162,6 +162,8 @@ import { startOverbookingAlertScheduler } from './modules/inventory/inventory.ca
 import { mealsRouter } from './modules/meals/meals.routes.js';
 // [SUPPORT] guest support tickets — staff desk + guest portal + SLA engine
 import { ticketsRouter } from './modules/tickets/tickets.routes.js';
+// [LOGBOOK] shift handover notes
+import { logbookRouter } from './modules/logbook/logbook.routes.js';
 import { onboardingRouter } from './modules/onboarding/onboarding.routes.js';
 import { chainLoyaltyRouter } from './modules/chain-loyalty/chain-loyalty.routes.js';
 import { ticketsGuestRouter } from './modules/tickets/tickets.guest.routes.js';
@@ -500,6 +502,7 @@ async function bootstrap() {
   app.use('/v1/meal-plans', mealsRouter);
   // [SUPPORT] Staff Support Desk (auth'd)
   app.use('/v1/tickets', ticketsRouter);
+  app.use('/v1/logbook', logbookRouter);
   app.use('/v1/onboarding', onboardingRouter);
   app.use('/v1/chain-loyalty', chainLoyaltyRouter);
   app.use('/v1/tenant', tenantSettingsRouter);
