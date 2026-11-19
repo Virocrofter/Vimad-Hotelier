@@ -2,9 +2,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FileText, Mail, Plus, Receipt } from 'lucide-react';
 import { invoicesApi } from '../../../../api/invoices';
+import { formatMoney } from '../../../../lib/money';
 
-const fmtMoney = (n) =>
-  `R ${Number(n).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmtMoney = (n) => formatMoney(Number(n) || 0);
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState([]);

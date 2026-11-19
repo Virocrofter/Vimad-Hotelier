@@ -34,13 +34,12 @@ import {
   Shield,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { formatMoneyMinor } from '../../../lib/money';
 import { Button } from '@/components/ui/button';
 import { listPayments, recordVccCharge, refundPayment } from '../../../api/payments';
 
 /* ─── Helpers ─── */
-function formatCurrency(minor, currency = 'ZAR') {
-  return new Intl.NumberFormat('en-ZA', { style: 'currency', currency }).format((minor ?? 0) / 100);
-}
+const formatCurrency = (minor, currency = 'ZAR') => formatMoneyMinor(minor, currency);
 
 function daysUntil(dateStr) {
   if (!dateStr) return 999;

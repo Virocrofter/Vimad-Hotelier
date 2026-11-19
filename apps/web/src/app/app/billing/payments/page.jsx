@@ -13,6 +13,7 @@ import {
   listGuestPaymentMethods,
 } from '../../../../api/payments';
 import { usePaystack } from '../../../../hooks/usePaystack';
+import { formatMoneyMinor } from '../../../../lib/money';
 import { Banknote, Send } from 'lucide-react';
 import PaymentRequestsPage from '../payment-requests/page';
 
@@ -30,8 +31,7 @@ const STATUSES = {
   refunded: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
   partially_refunded: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
 };
-const fmt = (minor, currency = 'ZAR') =>
-  `${(minor / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })} ${currency}`;
+const fmt = (minor, currency = 'ZAR') => formatMoneyMinor(minor, currency);
 const newKey = () => `web-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 function PaymentsInner() {

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 import { cn } from '../../../lib/utils';
+import { formatMoney } from '../../../lib/money';
 import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 import {
@@ -74,9 +75,7 @@ const codeForType = (type) =>
   (transactionCodes.find((c) => c.mapsTo === type) || {}).code ||
   (isPaymentItem(type) ? '5000' : '1000');
 
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(amount || 0);
-}
+const formatCurrency = (amount) => formatMoney(amount);
 
 function errMsg(e) {
   return e?.response?.data?.error?.message || e?.message || 'Request failed';

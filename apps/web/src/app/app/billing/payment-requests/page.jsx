@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
+import { formatMoneyMinor } from '../../../../lib/money';
 import { Button } from '../../../../components/ui/button';
 import { Input } from '../../../../components/ui/input';
 import {
@@ -27,10 +28,7 @@ import {
 import { paymentRequestsApi } from '../../../../api/payment-requests';
 import { apiGet } from '../../../../api/client';
 
-const fmtMoney = (minor, currency) => {
-  const sym = currency === 'ZAR' ? 'R' : '$';
-  return `${sym} ${((minor ?? 0) / 100).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-};
+const fmtMoney = (minor, currency = 'ZAR') => formatMoneyMinor(minor, currency);
 
 const STATUS_STYLE = {
   pending: 'bg-warning/10 text-warning border-warning/20',

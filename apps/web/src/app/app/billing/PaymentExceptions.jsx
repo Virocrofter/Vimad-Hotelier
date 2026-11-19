@@ -17,13 +17,9 @@ import { usePaymentExceptions } from '../../../hooks/usePaymentExceptions';
 import { dismissPaymentException, initializePayment, verifyPayment } from '../../../api/payments';
 import { paymentRequestsApi } from '../../../api/payment-requests';
 import { cn } from '../../../lib/utils';
+import { formatMoneyMinor } from '../../../lib/money';
 
-const money = (minor, c = 'ZAR') =>
-  new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: c,
-    maximumFractionDigits: 2,
-  }).format((minor ?? 0) / 100);
+const money = (minor, c = 'ZAR') => formatMoneyMinor(minor, c);
 
 function DismissPrompt({ item, onConfirm, onCancel, busy }) {
   const [reason, setReason] = useState('');

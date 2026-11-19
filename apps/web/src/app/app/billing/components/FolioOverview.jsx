@@ -13,12 +13,12 @@ import {
   Percent,
 } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
+import { formatMoney } from '../../../../lib/money';
 import { Button } from '@/components/ui/button';
 import { listFolios } from '../../../../api/folio';
 import { apiGet } from '../../../../api/client';
 
-const fmt = (n, currency = 'ZAR') =>
-  new Intl.NumberFormat('en-ZA', { style: 'currency', currency }).format(Number(n) || 0);
+const fmt = (n, currency = 'ZAR') => formatMoney(Number(n) || 0, currency);
 
 export default function FolioOverview() {
   const [folios, setFolios] = useState([]);

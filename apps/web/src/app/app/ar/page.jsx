@@ -19,6 +19,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { useToast } from '../../../hooks/use-toast';
+import { formatMoney } from '../../../lib/money';
 import { Button } from '../../../components/ui/button';
 import { Badge } from '../../../components/ui/badge';
 import { getArStatementCsvUrl, getArStatement } from '../../../api/ar';
@@ -40,8 +41,7 @@ import {
 
 // ─── Helpers ───
 
-const fmtMoney = (n) =>
-  new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(Number(n ?? 0));
+const fmtMoney = (n) => formatMoney(Number(n ?? 0));
 
 const fmtDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : '—');
 

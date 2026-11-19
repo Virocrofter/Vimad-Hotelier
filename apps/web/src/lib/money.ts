@@ -13,3 +13,12 @@ export function formatMoney(amount: number, currency = 'ZAR', fractionDigits = 2
     return `R ${amount.toFixed(2)}`;
   }
 }
+
+/* Minor-unit (cents) sibling — payment/VCC APIs carry minor units. */
+export function formatMoneyMinor(
+  amountMinor: number,
+  currency = 'ZAR',
+  fractionDigits = 2
+): string {
+  return formatMoney((Number(amountMinor) || 0) / 100, currency, fractionDigits);
+}
