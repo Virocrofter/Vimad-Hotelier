@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatMoney } from '../../../lib/money';
 import {
   useChainBoard,
   useChainGuestView,
@@ -9,7 +10,7 @@ import {
 } from '../../../hooks/useChainLoyalty';
 import './chain-loyalty.css';
 
-const zar = new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' });
+const zar = (amount, currency = 'ZAR') => formatMoney(amount, currency);
 
 const errMsg = (e) =>
   e?.response?.data?.error?.message ||
