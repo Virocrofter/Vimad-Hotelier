@@ -177,6 +177,14 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
+      // A 401 with no session is expected on public pages (flags probe, etc.)
+      // — refreshing "nothing" and calling it session_expired caused the
+      // login-page redirect storm that broke post-login navigation. Reject
+      // silently; callers handle fallback (FlagsProvider falls back to false).
+      if (!getAccessToken()) {
+        return Promise.reject(error);
+      }
+
       if (originalRequest.url?.includes('/auth/refresh')) {
         await handleLogout('session_expired');
         return Promise.reject(error);
