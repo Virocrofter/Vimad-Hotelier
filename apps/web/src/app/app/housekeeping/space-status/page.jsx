@@ -147,6 +147,35 @@ export default function SpaceStatusPage() {
     setNote('');
   };
 
+  // P3 gate (<=3 taps): a status-only pick on a reason-free target
+  // (Clean/Inspected/In progress/Ready) auto-commits and closes the dialog.
+  // Save remains for reasoned transitions (Dirty/OOO/OOS) or multi-field edits.
+  const onHkChange = async (next) => {
+    setHkStatus(next);
+    if (!dialogRoom) return;
+    const statusOnly =
+      next !== dialogRoom.housekeepingStatus &&
+      serviceStatus === dialogRoom.serviceStatus &&
+      !note.trim();
+    const needsReason = next === 'dirty';
+    if (statusOnly && !needsReason) {
+      try {
+        await transition.mutateAsync({
+          id: dialogRoom.id,
+          input: { housekeepingStatus: next },
+        });
+        toast({ title: `Room ${dialogRoom.number} marked ${HK_STYLE[next].label}` });
+        setDialogRoom(null);
+      } catch (e) {
+        toast({
+          title: 'Update failed',
+          description: e?.response?.data?.error?.message ?? e.message,
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
   const saveTransition = async () => {
     const needsReason = serviceStatus === 'ooo' || serviceStatus === 'oos' || hkStatus === 'dirty';
     if (needsReason && reason.trim().length < 2) {
@@ -431,7 +460,7 @@ export default function SpaceStatusPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Housekeeping status</Label>
-              <Select value={hkStatus} onValueChange={setHkStatus}>
+              <Select value={hkStatus} onValueChange={onHkChange}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
