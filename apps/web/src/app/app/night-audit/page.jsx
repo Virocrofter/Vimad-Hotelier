@@ -577,7 +577,8 @@ export default function NightAuditPage() {
     setLoadingPreChecks(true);
     try {
       const res = await nightAuditApi.getPreChecks(propertyId);
-      setPreChecks(res.data);
+      // body is enveloped {data: payload} — verified 2026-11-19 via live probe
+      setPreChecks(res.data.data);
     } catch (err) {
       toast.error('Failed to load pre-audit checks');
       console.error(err);
@@ -590,7 +591,8 @@ export default function NightAuditPage() {
     if (!propertyId) return;
     try {
       const res = await nightAuditApi.getStatus(propertyId);
-      setAuditStatus(res.data);
+      // body is enveloped {data: payload} — verified 2026-11-19 via live probe
+      setAuditStatus(res.data.data);
     } catch (err) {
       console.error('Failed to load audit status:', err);
     }
