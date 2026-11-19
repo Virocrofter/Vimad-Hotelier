@@ -47,6 +47,7 @@ export const NAV_GROUPS = [
       { label: 'Housekeeping', to: '/app/housekeeping' },
       { label: 'Tickets', to: '/app/tasks' },
       { label: 'Night Audit', to: '/app/night-audit' },
+      { label: 'Logbook', to: '/app/logbook' },
       // Logbook lands here with its engine (master plan Phase 6)
     ],
   },

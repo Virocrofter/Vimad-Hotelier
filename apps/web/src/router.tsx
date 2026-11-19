@@ -250,6 +250,7 @@ export const router = createBrowserRouter([
       },
       { path: 'housekeeping/mobile', ...page(() => import('./app/app/housekeeping/mobile/page')) },
       { path: 'tasks', ...page(() => import('./app/app/tasks/page')) },
+      { path: 'logbook', ...page(() => import('./app/app/logbook/page')) },
       // [T3] Concierge board — transfers, wake-up calls, bookings, upsells
       { path: 'concierge', ...page(() => import('./app/app/concierge/page')) },
       { path: 'night-audit', ...page(() => import('./app/app/night-audit/page')) },
