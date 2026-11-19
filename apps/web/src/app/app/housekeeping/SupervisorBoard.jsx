@@ -94,7 +94,9 @@ function SupervisorTaskCard({ task, staff, onChanged }) {
   };
 
   return (
-    <Card className={cn('p-3', task.slaBreached && 'border-red-300 bg-red-50 dark:bg-red-950/20')}>
+    <Card
+      className={cn('p-3', task.slaBreached && 'border-danger/40 bg-danger/10 dark:bg-red-950/20')}
+    >
       <div className="flex items-center justify-between mb-2">
         <Badge className={cn('text-xs', PRIORITY_BADGE[task.priority] ?? PRIORITY_BADGE.normal)}>
           {task.priority}

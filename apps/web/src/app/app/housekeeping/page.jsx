@@ -193,7 +193,7 @@ function TaskCard({ task, onStart, onComplete, onInspect, onSkip, onAssign, staf
     <Card
       className={cn(
         'p-3 cursor-pointer hover:shadow-md transition-shadow',
-        overdue && 'border-red-300 bg-danger/10'
+        overdue && 'border-danger/40 bg-danger/10'
       )}
     >
       <div className="flex items-start justify-between mb-2">

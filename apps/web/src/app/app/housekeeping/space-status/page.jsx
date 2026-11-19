@@ -56,31 +56,31 @@ const HK_STYLE = {
   clean: {
     label: 'Clean',
     dot: 'bg-blue-500',
-    tile: 'border-blue-300 bg-blue-50',
+    tile: 'border-blue-300 bg-accent/10',
     text: 'text-blue-700',
   },
   dirty: {
     label: 'Dirty',
     dot: 'bg-orange-500',
-    tile: 'border-orange-300 bg-orange-50',
+    tile: 'border-orange-300 bg-warning/10',
     text: 'text-orange-700',
   },
   inspected: {
     label: 'Inspected',
     dot: 'bg-green-500',
-    tile: 'border-green-300 bg-green-50',
+    tile: 'border-green-300 bg-success/10',
     text: 'text-green-700',
   },
   in_progress: {
     label: 'In progress',
     dot: 'bg-yellow-500',
-    tile: 'border-yellow-300 bg-yellow-50',
+    tile: 'border-yellow-300 bg-warning/10',
     text: 'text-yellow-700',
   },
   ready: {
     label: 'Ready',
     dot: 'bg-emerald-500',
-    tile: 'border-emerald-300 bg-emerald-50',
+    tile: 'border-emerald-300 bg-success/10',
     text: 'text-emerald-700',
   },
 };
@@ -424,7 +424,7 @@ export default function SpaceStatusPage() {
             </DialogTitle>
           </DialogHeader>
           {dialogRoom?.serviceReason && (
-            <p className="rounded bg-slate-50 px-3 py-2 text-xs text-text-secondary">
+            <p className="rounded bg-[var(--hq-surface-2)] px-3 py-2 text-xs text-text-secondary">
               Current reason: {dialogRoom.serviceReason}
             </p>
           )}

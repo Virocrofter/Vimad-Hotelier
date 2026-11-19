@@ -40,7 +40,7 @@ export default function HkActivityPage() {
   }
 
   const intensity = (count) => {
-    if (!count) return 'bg-slate-100';
+    if (!count) return 'bg-[var(--hq-surface-2)]';
     const ratio = count / max;
     if (ratio > 0.75) return cn(active.color, 'opacity-100');
     if (ratio > 0.5) return cn(active.color, 'opacity-70');
