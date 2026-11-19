@@ -46,12 +46,12 @@ const fmtMoney = (n) => formatMoney(Number(n ?? 0));
 const fmtDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : '—');
 
 const STATUS_STYLE = {
-  draft: 'bg-slate-100 text-slate-700',
+  draft: 'bg-[var(--hq-surface-2)] text-text-secondary',
   sent: 'bg-blue-100 text-blue-700',
   partially_paid: 'bg-amber-100 text-amber-700',
   overdue: 'bg-red-100 text-red-700',
   paid: 'bg-emerald-100 text-emerald-700',
-  cancelled: 'bg-slate-100 text-slate-400 line-through',
+  cancelled: 'bg-[var(--hq-surface-2)] text-text-muted line-through',
 };
 
 const STATUS_LABEL = {
@@ -64,9 +64,9 @@ const STATUS_LABEL = {
 };
 
 const inputCls =
-  'w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300';
-const thCls = 'px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500';
-const tdCls = 'px-4 py-2.5 text-sm text-slate-700';
+  'w-full rounded-md border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300';
+const thCls = 'px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-text-muted';
+const tdCls = 'px-4 py-2.5 text-sm text-text-secondary';
 
 // ─── Small building blocks ───
 
@@ -74,11 +74,14 @@ function Modal({ title, onClose, children, wide }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div
-        className={`w-full ${wide ? 'max-w-3xl' : 'max-w-lg'} max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-2xl`}
+        className={`w-full ${wide ? 'max-w-3xl' : 'max-w-lg'} max-h-[90vh] overflow-y-auto rounded-xl bg-card shadow-2xl`}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-          <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-          <button onClick={onClose} className="rounded p-1 text-slate-400 hover:bg-slate-100">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h3 className="text-base font-semibold text-text-primary">{title}</h3>
+          <button
+            onClick={onClose}
+            className="rounded p-1 text-text-muted hover:bg-[var(--hq-surface-2)]"
+          >
             <X size={18} />
           </button>
         </div>
@@ -88,18 +91,40 @@ function Modal({ title, onClose, children, wide }) {
   );
 }
 
+/* StatCard (blueprint S2/S6): micro-label above the numeral, tabular figures,
+ * soft icon chip; red chip for alert (overdue). */
 function StatCard({ label, value, sub, alert }) {
   return (
     <div
-      className={`rounded-xl border bg-white p-4 shadow-sm ${
-        alert ? 'border-red-200' : 'border-slate-200'
+      className={`rounded-xl border bg-card p-4 shadow-sm ${
+        alert ? 'border-danger/40' : 'border-border'
       }`}
     >
-      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{label}</div>
-      <div className={`mt-1 text-2xl font-bold ${alert ? 'text-red-600' : 'text-slate-900'}`}>
-        {value}
+      <div className="flex items-center gap-3">
+        <div
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+          style={
+            alert
+              ? { background: 'color-mix(in srgb, #ef4444 15%, transparent)', color: '#ef4444' }
+              : { background: 'color-mix(in srgb, #3b82f6 15%, transparent)', color: '#3b82f6' }
+          }
+        >
+          <Wallet className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+            {label}
+          </p>
+          <p
+            className={`text-2xl font-semibold tabular-nums ${
+              alert ? 'text-danger' : 'text-text-primary'
+            }`}
+          >
+            {value}
+          </p>
+          {sub && <p className="text-xs text-text-muted">{sub}</p>}
+        </div>
       </div>
-      {sub && <div className="mt-0.5 text-xs text-slate-500">{sub}</div>}
     </div>
   );
 }
@@ -114,8 +139,8 @@ function AgingBar({ buckets }) {
   ];
   const total = entries.reduce((s, [, v]) => s + v, 0) || 1;
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
         Aging — outstanding by bucket
       </div>
       <div className="flex h-4 w-full overflow-hidden rounded-md">
@@ -130,7 +155,7 @@ function AgingBar({ buckets }) {
       </div>
       <div className="mt-2 flex flex-wrap gap-4">
         {entries.map(([label, v, cls]) => (
-          <span key={label} className="flex items-center gap-1.5 text-xs text-slate-600">
+          <span key={label} className="flex items-center gap-1.5 text-xs text-text-secondary">
             <span className={`inline-block h-2.5 w-2.5 rounded-sm ${cls}`} />
             {label}: <span className="font-medium">{fmtMoney(v)}</span>
           </span>
@@ -142,7 +167,9 @@ function AgingBar({ buckets }) {
 
 function StatusBadge({ status }) {
   return (
-    <Badge className={`${STATUS_STYLE[status] ?? 'bg-slate-100 text-slate-700'} hover:bg-none`}>
+    <Badge
+      className={`${STATUS_STYLE[status] ?? 'bg-[var(--hq-surface-2)] text-text-secondary'} hover:bg-none`}
+    >
       {STATUS_LABEL[status] ?? status}
     </Badge>
   );
@@ -196,23 +223,23 @@ function NewAccountModal({ onClose }) {
   return (
     <Modal title="New corporate account" onClose={onClose}>
       <form onSubmit={submit} className="grid grid-cols-2 gap-3">
-        <label className="col-span-2 text-xs font-medium text-slate-600">
+        <label className="col-span-2 text-xs font-medium text-text-secondary">
           Company name *
           <input className={inputCls} value={form.name} onChange={set('name')} required />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           Contact
           <input className={inputCls} value={form.contactName} onChange={set('contactName')} />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           Phone
           <input className={inputCls} value={form.phone} onChange={set('phone')} />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           AP email
           <input className={inputCls} type="email" value={form.email} onChange={set('email')} />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           Billing email
           <input
             className={inputCls}
@@ -221,11 +248,11 @@ function NewAccountModal({ onClose }) {
             onChange={set('billingEmail')}
           />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           VAT / tax number
           <input className={inputCls} value={form.taxNumber} onChange={set('taxNumber')} />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           Credit limit (R)
           <input
             className={inputCls}
@@ -235,7 +262,7 @@ function NewAccountModal({ onClose }) {
             onChange={set('creditLimit')}
           />
         </label>
-        <label className="col-span-2 text-xs font-medium text-slate-600">
+        <label className="col-span-2 text-xs font-medium text-text-secondary">
           Payment terms (days)
           <input
             className={inputCls}
@@ -309,7 +336,7 @@ function NewInvoiceModal({ accounts, onClose }) {
     <Modal title="New AR invoice" onClose={onClose} wide>
       <form onSubmit={submit} className="space-y-4">
         <div className="grid grid-cols-3 gap-3">
-          <label className="col-span-2 text-xs font-medium text-slate-600">
+          <label className="col-span-2 text-xs font-medium text-text-secondary">
             Corporate account *
             <select
               className={inputCls}
@@ -325,7 +352,7 @@ function NewInvoiceModal({ accounts, onClose }) {
               ))}
             </select>
           </label>
-          <label className="text-xs font-medium text-slate-600">
+          <label className="text-xs font-medium text-text-secondary">
             VAT %
             <input
               className={inputCls}
@@ -336,7 +363,7 @@ function NewInvoiceModal({ accounts, onClose }) {
               onChange={(e) => setForm((f) => ({ ...f, vatRate: e.target.value }))}
             />
           </label>
-          <label className="text-xs font-medium text-slate-600">
+          <label className="text-xs font-medium text-text-secondary">
             Due date (blank = account terms)
             <input
               className={inputCls}
@@ -345,7 +372,7 @@ function NewInvoiceModal({ accounts, onClose }) {
               onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
             />
           </label>
-          <label className="col-span-2 text-xs font-medium text-slate-600">
+          <label className="col-span-2 text-xs font-medium text-text-secondary">
             Notes
             <input
               className={inputCls}
@@ -356,7 +383,7 @@ function NewInvoiceModal({ accounts, onClose }) {
         </div>
 
         <div>
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-text-muted">
             Line items
           </div>
           {items.map((it, idx) => (
@@ -397,13 +424,13 @@ function NewInvoiceModal({ accounts, onClose }) {
           </Button>
         </div>
 
-        <div className="flex items-end justify-between border-t border-slate-100 pt-3">
-          <div className="text-sm text-slate-600">
+        <div className="flex items-end justify-between border-t border-border pt-3">
+          <div className="text-sm text-text-secondary">
             Subtotal: <span className="font-medium">{fmtMoney(total)}</span>
             <span className="mx-2">·</span>
             VAT: <span className="font-medium">{fmtMoney(vat)}</span>
             <span className="mx-2">·</span>
-            Total: <span className="font-bold text-slate-900">{fmtMoney(total + vat)}</span>
+            Total: <span className="font-bold text-text-primary">{fmtMoney(total + vat)}</span>
           </div>
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
@@ -466,7 +493,7 @@ function PaymentModal({ accounts, preselected, onClose }) {
   return (
     <Modal title="Record payment" onClose={onClose}>
       <form onSubmit={submit} className="grid grid-cols-2 gap-3">
-        <label className="col-span-2 text-xs font-medium text-slate-600">
+        <label className="col-span-2 text-xs font-medium text-text-secondary">
           Corporate account *
           <select
             className={inputCls}
@@ -482,7 +509,7 @@ function PaymentModal({ accounts, preselected, onClose }) {
             ))}
           </select>
         </label>
-        <label className="col-span-2 text-xs font-medium text-slate-600">
+        <label className="col-span-2 text-xs font-medium text-text-secondary">
           Apply to invoice (blank = on-account)
           <select
             className={inputCls}
@@ -498,7 +525,7 @@ function PaymentModal({ accounts, preselected, onClose }) {
             ))}
           </select>
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           Amount (R) *
           <input
             className={inputCls}
@@ -510,7 +537,7 @@ function PaymentModal({ accounts, preselected, onClose }) {
             required
           />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           Method
           <select
             className={inputCls}
@@ -523,7 +550,7 @@ function PaymentModal({ accounts, preselected, onClose }) {
             <option value="other">Other</option>
           </select>
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           Reference (idempotency guard)
           <input
             className={inputCls}
@@ -532,7 +559,7 @@ function PaymentModal({ accounts, preselected, onClose }) {
             placeholder="Bank ref / EFT no."
           />
         </label>
-        <label className="text-xs font-medium text-slate-600">
+        <label className="text-xs font-medium text-text-secondary">
           Note
           <input
             className={inputCls}
@@ -562,6 +589,7 @@ function InvoiceModal({ invoiceId, onClose }) {
   const cancelInvoice = useCancelArInvoice();
   const recordPayment = useRecordArPayment();
   const [payAmount, setPayAmount] = useState('');
+  const [cancelReason, setCancelReason] = useState(null); // '' = awaiting inline reason (S11)
 
   if (isLoading || !inv)
     return (
@@ -621,15 +649,29 @@ function InvoiceModal({ invoiceId, onClose }) {
               </Button>
             )}
             {inv.status !== 'cancelled' && inv.status !== 'paid' && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  const reason = window.prompt('Cancellation reason (optional)') ?? undefined;
+              <Button size="sm" variant="outline" onClick={() => setCancelReason('')}>
+                <Ban size={14} className="mr-1" /> Cancel
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {cancelReason !== null && (
+          <div className="flex items-center gap-2 rounded-lg border border-danger/30 bg-danger/5 p-2">
+            <input
+              autoFocus
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setCancelReason(null);
+                if (e.key === 'Enter') {
                   cancelInvoice.mutate(
-                    { id: inv.id, reason },
+                    { id: inv.id, reason: cancelReason.trim() || undefined },
                     {
-                      onSuccess: () => toast({ title: 'Invoice cancelled' }),
+                      onSuccess: () => {
+                        toast({ title: 'Invoice cancelled' });
+                        onClose();
+                      },
                       onError: (err) =>
                         toast({
                           title: 'Cancel failed',
@@ -638,36 +680,63 @@ function InvoiceModal({ invoiceId, onClose }) {
                         }),
                     }
                   );
-                }}
-              >
-                <Ban size={14} className="mr-1" /> Cancel
-              </Button>
-            )}
+                }
+              }}
+              placeholder="Cancellation reason (optional) — Enter confirms, Esc backs"
+              className="h-7 flex-1 rounded-md border border-border bg-background px-2 text-xs text-text-primary"
+            />
+            <Button
+              size="sm"
+              className="h-7"
+              disabled={cancelInvoice.isPending}
+              onClick={() =>
+                cancelInvoice.mutate(
+                  { id: inv.id, reason: cancelReason.trim() || undefined },
+                  {
+                    onSuccess: () => {
+                      toast({ title: 'Invoice cancelled' });
+                      onClose();
+                    },
+                    onError: (err) =>
+                      toast({
+                        title: 'Cancel failed',
+                        description: err.message,
+                        variant: 'destructive',
+                      }),
+                  }
+                )
+              }
+            >
+              Confirm cancel
+            </Button>
+            <Button size="sm" variant="ghost" className="h-7" onClick={() => setCancelReason(null)}>
+              Back
+            </Button>
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-4 gap-3 text-sm">
           <div>
-            <div className="text-xs text-slate-500">Issued</div>
+            <div className="text-xs text-text-muted">Issued</div>
             {fmtDate(inv.issueDate)}
           </div>
           <div>
-            <div className="text-xs text-slate-500">Due</div>
+            <div className="text-xs text-text-muted">Due</div>
             {fmtDate(inv.dueDate)}
           </div>
           <div>
-            <div className="text-xs text-slate-500">Total</div>
+            <div className="text-xs text-text-muted">Total</div>
             {fmtMoney(inv.total)}
           </div>
           <div>
-            <div className="text-xs text-slate-500">Balance</div>
+            <div className="text-xs text-text-muted">Balance</div>
             <span className="font-semibold">{fmtMoney(inv.balance)}</span>
           </div>
         </div>
 
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-slate-100">
+            <tr className="border-b border-border">
               <th className={thCls}>Date</th>
               <th className={thCls}>Description</th>
               <th className={`${thCls} text-right`}>Amount</th>
@@ -680,17 +749,17 @@ function InvoiceModal({ invoiceId, onClose }) {
                 <td className={tdCls}>
                   {it.description}
                   {it.folioId && (
-                    <span className="ml-2 text-xs text-slate-400">folio {it.folioId}</span>
+                    <span className="ml-2 text-xs text-text-muted">folio {it.folioId}</span>
                   )}
                 </td>
                 <td className={`${tdCls} text-right`}>{fmtMoney(it.amount)}</td>
               </tr>
             ))}
             <tr>
-              <td colSpan={2} className={`${tdCls} text-right text-slate-500`}>
+              <td colSpan={2} className={`${tdCls} text-right text-text-muted`}>
                 Subtotal / VAT ({inv.vatRate}%)
               </td>
-              <td className={`${tdCls} text-right text-slate-500`}>
+              <td className={`${tdCls} text-right text-text-muted`}>
                 {fmtMoney(inv.subtotal)} / {fmtMoney(inv.vatAmount)}
               </td>
             </tr>
@@ -699,7 +768,7 @@ function InvoiceModal({ invoiceId, onClose }) {
 
         {inv.payments.length > 0 && (
           <div>
-            <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-text-muted">
               Payments
             </div>
             <table className="w-full border-collapse">
@@ -720,7 +789,7 @@ function InvoiceModal({ invoiceId, onClose }) {
         )}
 
         {canPay && (
-          <div className="flex items-center gap-2 rounded-lg bg-slate-50 p-3">
+          <div className="flex items-center gap-2 rounded-lg bg-[var(--hq-surface-2)] p-3">
             <input
               className={`${inputCls} w-44`}
               type="number"
@@ -769,11 +838,11 @@ function AccountDrawer({ accountId, onClose }) {
       : Number(account.creditLimit);
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto bg-white shadow-2xl">
-      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto bg-card shadow-2xl">
+      <div className="flex items-center justify-between border-b border-border px-5 py-4">
         <div>
-          <h3 className="text-base font-semibold text-slate-900">{account.name}</h3>
-          <div className="text-xs text-slate-500">
+          <h3 className="text-base font-semibold text-text-primary">{account.name}</h3>
+          <div className="text-xs text-text-muted">
             Terms {account.paymentTermsDays ?? 30} days
             {account.taxNumber ? ` · VAT ${account.taxNumber}` : ''}
           </div>
@@ -788,7 +857,10 @@ function AccountDrawer({ accountId, onClose }) {
           >
             {account.isActive ? 'Place on hold' : 'Reactivate'}
           </Button>
-          <button onClick={onClose} className="rounded p-1 text-slate-400 hover:bg-slate-100">
+          <button
+            onClick={onClose}
+            className="rounded p-1 text-text-muted hover:bg-[var(--hq-surface-2)]"
+          >
             <X size={18} />
           </button>
         </div>
@@ -825,13 +897,13 @@ function AccountDrawer({ accountId, onClose }) {
           <a
             href={getArStatementCsvUrl(accountId, stmtRange)}
             download
-            className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-2 text-xs font-medium text-text-secondary hover:bg-[var(--hq-surface-2)]"
           >
             <Download size={13} /> CSV
           </a>
         </div>
         {statement && (
-          <div className="mb-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+          <div className="mb-4 rounded-lg bg-[var(--hq-surface-2)] p-3 text-sm text-text-secondary">
             Opening balance:{' '}
             <span className="font-medium">{fmtMoney(statement.openingBalance)}</span>
             <span className="mx-2">·</span>
@@ -840,7 +912,7 @@ function AccountDrawer({ accountId, onClose }) {
           </div>
         )}
 
-        <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-text-muted">
           Invoices
         </div>
         <table className="w-full border-collapse">
@@ -858,7 +930,7 @@ function AccountDrawer({ accountId, onClose }) {
           </tbody>
         </table>
 
-        <div className="mb-1 mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div className="mb-1 mt-4 text-xs font-semibold uppercase tracking-wide text-text-muted">
           Payments
         </div>
         <table className="w-full border-collapse">
@@ -939,15 +1011,17 @@ export default function ArPage() {
   };
 
   return (
-    <div className="space-y-5 p-6">
+    <div className="hq-surface-0 min-h-full space-y-5 p-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="flex items-center gap-2 text-xl font-bold text-slate-900">
-            <Wallet size={20} className="text-slate-500" />
+          <h1 className="flex items-center gap-2 text-xl font-bold text-text-primary">
+            <Wallet size={20} className="text-text-muted" />
             Accounts Receivable
           </h1>
-          <p className="text-sm text-slate-500">Corporate ledger — invoices, remittances, aging.</p>
+          <p className="text-sm text-text-muted">
+            Corporate ledger — invoices, remittances, aging.
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setModal('account')}>
@@ -996,7 +1070,7 @@ export default function ArPage() {
 
       {/* Tabs + filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex rounded-lg border border-slate-200 bg-white p-0.5">
+        <div className="flex rounded-lg border border-border bg-card p-0.5">
           {[
             ['invoices', 'Invoices'],
             ['accounts', 'Accounts'],
@@ -1006,7 +1080,9 @@ export default function ArPage() {
               key={key}
               onClick={() => setTab(key)}
               className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                tab === key ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+                tab === key
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-text-secondary hover:bg-[var(--hq-surface-2)]'
               }`}
             >
               {label}
@@ -1014,7 +1090,10 @@ export default function ArPage() {
           ))}
         </div>
         <div className="relative">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+          />
           <input
             className={`${inputCls} w-56 pl-8`}
             placeholder="Search…"
@@ -1059,10 +1138,10 @@ export default function ArPage() {
 
       {/* Invoices tab */}
       {tab === 'invoices' && (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
+              <tr className="border-b border-border bg-[var(--hq-surface-2)]">
                 <th className={thCls}>Invoice</th>
                 <th className={thCls}>Account</th>
                 <th className={thCls}>Issued</th>
@@ -1075,7 +1154,10 @@ export default function ArPage() {
             </thead>
             <tbody>
               {(invoices?.data ?? []).map((i) => (
-                <tr key={i.id} className="border-b border-slate-50 hover:bg-slate-50/60">
+                <tr
+                  key={i.id}
+                  className="border-b border-slate-50 hover:bg-[var(--hq-surface-2)]/60"
+                >
                   <td className={`${tdCls} font-medium`}>{i.number}</td>
                   <td className={tdCls}>{i.corporateAccount?.name}</td>
                   <td className={tdCls}>{fmtDate(i.issueDate)}</td>
@@ -1091,7 +1173,7 @@ export default function ArPage() {
                   <td className={`${tdCls} text-right font-medium`}>{fmtMoney(i.balance)}</td>
                   <td className={`${tdCls} text-right`}>
                     <button
-                      className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                      className="rounded p-1 text-text-muted hover:bg-[var(--hq-surface-2)] hover:text-text-secondary"
                       onClick={() => setSelectedInvoice(i.id)}
                     >
                       <ChevronRight size={16} />
@@ -1101,7 +1183,7 @@ export default function ArPage() {
               ))}
               {!invoicesLoading && (invoices?.data ?? []).length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={8} className="px-4 py-8 text-center text-sm text-text-muted">
                     No invoices match these filters.
                   </td>
                 </tr>
@@ -1113,10 +1195,10 @@ export default function ArPage() {
 
       {/* Accounts tab */}
       {tab === 'accounts' && (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
+              <tr className="border-b border-border bg-[var(--hq-surface-2)]">
                 <th className={thCls}>Account</th>
                 <th className={thCls}>Contact</th>
                 <th className={thCls}>Terms</th>
@@ -1139,11 +1221,14 @@ export default function ArPage() {
                     : Number(a.availableCredit);
                 const over = available !== null && available < 0;
                 return (
-                  <tr key={a.id} className="border-b border-slate-50 hover:bg-slate-50/60">
+                  <tr
+                    key={a.id}
+                    className="border-b border-slate-50 hover:bg-[var(--hq-surface-2)]/60"
+                  >
                     <td className={`${tdCls} font-medium`}>{a.name}</td>
                     <td className={tdCls}>
                       {a.contactName}
-                      {a.email && <div className="text-xs text-slate-400">{a.email}</div>}
+                      {a.email && <div className="text-xs text-text-muted">{a.email}</div>}
                     </td>
                     <td className={tdCls}>{a.paymentTermsDays ?? 30}d</td>
                     <td className={`${tdCls} text-right`}>
@@ -1162,7 +1247,7 @@ export default function ArPage() {
                         className={
                           a.isActive
                             ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-slate-100 text-slate-500'
+                            : 'bg-[var(--hq-surface-2)] text-text-muted'
                         }
                       >
                         {a.isActive ? 'Active' : 'On hold'}
@@ -1170,7 +1255,7 @@ export default function ArPage() {
                     </td>
                     <td className={`${tdCls} text-right`}>
                       <button
-                        className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                        className="rounded p-1 text-text-muted hover:bg-[var(--hq-surface-2)] hover:text-text-secondary"
                         onClick={() => setSelectedAccount(a.id)}
                       >
                         <ChevronRight size={16} />
@@ -1186,10 +1271,10 @@ export default function ArPage() {
 
       {/* Payments tab */}
       {tab === 'payments' && (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50">
+              <tr className="border-b border-border bg-[var(--hq-surface-2)]">
                 <th className={thCls}>Date</th>
                 <th className={thCls}>Account</th>
                 <th className={thCls}>Invoice</th>
@@ -1202,7 +1287,10 @@ export default function ArPage() {
             </thead>
             <tbody>
               {(payments?.data ?? []).map((p) => (
-                <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50/60">
+                <tr
+                  key={p.id}
+                  className="border-b border-slate-50 hover:bg-[var(--hq-surface-2)]/60"
+                >
                   <td className={tdCls}>{fmtDate(p.receivedAt)}</td>
                   <td className={tdCls}>{p.corporateAccount?.name}</td>
                   <td className={tdCls}>{p.invoice?.number ?? 'On account'}</td>
@@ -1214,7 +1302,7 @@ export default function ArPage() {
                       className={
                         p.status === 'applied'
                           ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-slate-100 text-slate-500'
+                          : 'bg-[var(--hq-surface-2)] text-text-muted'
                       }
                     >
                       {p.status === 'applied' ? 'Applied' : 'Reversed'}
@@ -1223,7 +1311,7 @@ export default function ArPage() {
                   <td className={`${tdCls} text-right`}>
                     {p.status === 'applied' && (
                       <button
-                        className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-red-600"
+                        className="rounded p-1 text-text-muted hover:bg-[var(--hq-surface-2)] hover:text-red-600"
                         title="Reverse payment"
                         onClick={() => {
                           const reason = window.prompt('Reversal reason (optional)') ?? undefined;
