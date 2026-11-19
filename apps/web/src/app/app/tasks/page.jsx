@@ -137,7 +137,7 @@ export default function TasksPage() {
   );
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="hq-surface-0 min-h-full space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -329,13 +329,21 @@ export default function TasksPage() {
 }
 
 function KpiCard({ label, value, icon: Icon, danger }) {
+  const hex = danger ? '#ef4444' : '#3b82f6';
   return (
     <Card className={cn(danger && 'border-danger/40')}>
       <CardContent className="flex items-center gap-3 pt-6">
-        <Icon className={cn('h-5 w-5', danger ? 'text-danger' : 'text-muted-foreground')} />
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+          style={{ background: `color-mix(in srgb, ${hex} 15%, transparent)`, color: hex }}
+        >
+          <Icon className="h-4 w-4" />
+        </span>
         <div>
-          <div className="text-2xl font-bold">{value}</div>
-          <div className="text-xs text-muted-foreground">{label}</div>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {label}
+          </p>
+          <p className="text-2xl font-semibold tabular-nums">{value}</p>
         </div>
       </CardContent>
     </Card>
