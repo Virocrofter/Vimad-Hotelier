@@ -11,6 +11,7 @@ datasource db {
 // ─── Tenant & Identity ───
 
 model Tenant {
+  keyIssuances       KeyIssuance[]
   logbookEntries     LogbookEntry[]
   reservationRooms   ReservationRoom[]
   onboardingProgress OnboardingProgress[]
@@ -188,6 +189,7 @@ model PasswordReset {
 // ─── Property & Inventory ───
 
 model Property {
+  keyIssuances           KeyIssuance[]
   logbookEntries         LogbookEntry[]
   reservationRooms       ReservationRoom[]
   onboardingProgress     OnboardingProgress[]
@@ -278,6 +280,7 @@ model RoomType {
 }
 
 model Room {
+  keyIssuances       KeyIssuance[]
   reservationRooms   ReservationRoom[]
   id                 String            @id @default(cuid())
   tenantId           String
@@ -475,6 +478,7 @@ model GuestNote {
 // ─── Reservations ───
 
 model Reservation {
+  keyIssuances       KeyIssuance[]
   reservationRooms   ReservationRoom[]
   id                 String            @id @default(cuid())
   tenantId           String
@@ -574,6 +578,31 @@ model ReservationStay {
 // Exists from CONFIRMATION so "rooms arriving today" is countable
 // pre-arrival — stays above are nightly truth and only exist post-check-in.
 // Room move = mutate the row (stays keep the historical record).
+model KeyIssuance {
+  id            String       @id @default(cuid())
+  tenantId      String
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  propertyId    String
+  property      Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomId        String
+  room          Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  reservationId String?
+  reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  guestName     String?
+  issuedBy      String
+  issuerName    String
+  status        String       @default("active") // active | returned | lost
+  issuedAt      DateTime     @default(now())
+  returnedAt    DateTime?
+  notes         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([tenantId, propertyId, status])
+  @@index([roomId, status])
+  @@map("key_issuances")
+}
+
 model LogbookEntry {
   id         String   @id @default(cuid())
   tenantId   String
