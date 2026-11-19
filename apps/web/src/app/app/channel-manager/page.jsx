@@ -19,6 +19,7 @@ import { Input } from '../../../components/ui/input';
 import { channelApi, CHANNEL_PROVIDERS } from '../../../api/channel';
 import { apiGet } from '../../../api/client';
 import { usePropertyScope } from '../../../hooks/usePropertyScope';
+import { Drawer } from '@/components/ui/drawer';
 
 const STATUS_STYLES = {
   active: 'bg-accent/10 text-accent border-accent/20',
@@ -348,11 +349,13 @@ export default function ChannelManagerPage() {
         />
       )}
       {disconnectTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-xl border border-border bg-background p-6 shadow-xl">
-            <h3 className="text-lg font-bold text-text-primary">
-              Disconnect {disconnectTarget.provider}?
-            </h3>
+        <Drawer
+          open
+          onClose={() => setDisconnectTarget(null)}
+          title={<>Disconnect {disconnectTarget.provider}?</>}
+          width={480}
+        >
+          <div className="space-y-4">
             <p className="mt-1 text-sm text-text-secondary">
               Availability and rates will stop syncing. Reservations already imported are kept.
             </p>
@@ -378,7 +381,7 @@ export default function ChannelManagerPage() {
               </Button>
             </div>
           </div>
-        </div>
+        </Drawer>
       )}
     </div>
   );
@@ -396,14 +399,8 @@ function ConnectModal({ properties, onClose, onConnect, busy }) {
   const [error, setError] = useState('');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-text-primary">Connect Channel</h3>
-          <button onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <Drawer open onClose={onClose} title="Connect Channel" width={480}>
+      <div className="space-y-4">
         <form
           className="space-y-4"
           onSubmit={async (e) => {
@@ -514,7 +511,7 @@ function ConnectModal({ properties, onClose, onConnect, busy }) {
           </div>
         </form>
       </div>
-    </div>
+    </Drawer>
   );
 }
 
@@ -531,16 +528,13 @@ function PushModal({ kind, properties, onClose, onPush, busy }) {
   const isAvailability = kind === 'availability';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-text-primary">
-            {isAvailability ? 'Push Availability' : 'Push Rates'}
-          </h3>
-          <button onClick={onClose} className="rounded-md p-1 hover:bg-surface text-text-muted">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <Drawer
+      open
+      onClose={onClose}
+      title={isAvailability ? 'Push Availability' : 'Push Rates'}
+      width={480}
+    >
+      <div className="space-y-4">
         <form
           className="space-y-4"
           onSubmit={async (e) => {
@@ -636,6 +630,6 @@ function PushModal({ kind, properties, onClose, onPush, busy }) {
           </div>
         </form>
       </div>
-    </div>
+    </Drawer>
   );
 }
