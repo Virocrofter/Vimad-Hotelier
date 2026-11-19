@@ -533,3 +533,67 @@ export async function dismissSuggestion(tenantId: string, suggestionId: string) 
   });
   return { dismissed: true };
 }
+
+/* ─── Cell overrides: single-date manual rate edits (blueprint
+ * "rate change <=3 clicks"). Same ledger as bulkUpdate, ruleId
+ * manual:cell:<actor> — manual rows are authoritative: rule
+ * evaluation never clobbers them (see evaluate()). ─── */
+export async function setCellOverride(
+  tenantId: string,
+  propertyId: string,
+  actorId: string,
+  input: Record<string, unknown>
+) {
+  const { ratePlanId, date, rate } = input as { ratePlanId: string; date: string; rate: number };
+  if (!ratePlanId || !/^\d{4}-\d{2}-\d{2}$/.test(date ?? '') || !(Number(rate) > 0)) {
+    throw new AppError(
+      400,
+      'ratePlanId, date (YYYY-MM-DD) and rate > 0 required',
+      'VALIDATION_ERROR'
+    );
+  }
+  const plan = await prisma.ratePlan.findFirst({ where: { id: ratePlanId, propertyId } });
+  if (!plan) throw new AppError(404, 'Rate plan not found', 'NOT_FOUND');
+  const dateD = new Date(`${date}T00:00:00.000Z`);
+  const base = Number(plan.baseRate);
+  return prisma.rateOverride.upsert({
+    where: { ratePlanId_date: { ratePlanId: plan.id, date: dateD } },
+    update: {
+      baseRate: base,
+      effectiveRate: round2(Number(rate)),
+      ruleId: `manual:cell:${actorId}`,
+    },
+    create: {
+      tenantId,
+      propertyId,
+      ratePlanId: plan.id,
+      date: dateD,
+      baseRate: base,
+      effectiveRate: round2(Number(rate)),
+      ruleId: `manual:cell:${actorId}`,
+    },
+  });
+}
+
+export async function clearCellOverride(
+  tenantId: string,
+  propertyId: string,
+  ratePlanId: string,
+  date: string
+) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? '')) {
+    throw new AppError(400, 'date (YYYY-MM-DD) required', 'VALIDATION_ERROR');
+  }
+  const plan = await prisma.ratePlan.findFirst({ where: { id: ratePlanId, propertyId } });
+  if (!plan) throw new AppError(404, 'Rate plan not found', 'NOT_FOUND');
+  const del = await prisma.rateOverride.deleteMany({
+    where: {
+      tenantId,
+      propertyId,
+      ratePlanId,
+      date: new Date(`${date}T00:00:00.000Z`),
+      ruleId: { startsWith: 'manual:' },
+    },
+  });
+  return { cleared: del.count };
+}

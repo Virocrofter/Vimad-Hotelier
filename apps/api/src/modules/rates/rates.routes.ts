@@ -21,6 +21,7 @@ import {
   type RatePlanCreateInput,
   type RatePlanUpdateInput,
 } from './rates.service.js';
+import { setCellOverride, clearCellOverride } from './pricing-rules.service.js';
 import { attachPropertyScope } from '../auth/auth.middleware.js';
 
 extendZodWithOpenApi(z);
@@ -320,6 +321,55 @@ ratesRouter.delete(
     try {
       await deleteRatePlan(req.tenantId, req.params.id);
       res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ─── Cell overrides (manual single-date rate edits) ───
+const cellOverrideSchema = z.object({
+  ratePlanId: z.string().min(1),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  rate: z.number().positive(),
+  propertyId: z.string().min(1),
+});
+
+ratesRouter.put(
+  '/overrides/cell',
+  requirePermission('rate_plan', 'update'),
+  validateBody(cellOverrideSchema),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = req.validatedBody as {
+        ratePlanId: string;
+        date: string;
+        rate: number;
+        propertyId: string;
+      };
+      res.json({
+        data: await setCellOverride(
+          req.tenantId,
+          body.propertyId,
+          (req.user as { id?: string } | undefined)?.id ?? 'unknown',
+          body
+        ),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+ratesRouter.delete(
+  '/overrides/cell',
+  requirePermission('rate_plan', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const q = req.query as Record<string, string>;
+      res.json({
+        data: await clearCellOverride(req.tenantId, q.propertyId, q.ratePlanId, q.date),
+      });
     } catch (err) {
       next(err);
     }
