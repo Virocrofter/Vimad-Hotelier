@@ -53,6 +53,7 @@ function slaInfo(task) {
 function SupervisorTaskCard({ task, staff, onChanged }) {
   const [busy, setBusy] = useState(false);
   const [audit, setAudit] = useState(null);
+  const [override, setOverride] = useState(null); // { action, note } — inline reason instead of window.prompt (S11)
   const sla = slaInfo(task);
 
   const handleReassign = async (assigneeId) => {
@@ -68,13 +69,24 @@ function SupervisorTaskCard({ task, staff, onChanged }) {
     }
   };
 
-  const handleOverride = async (action) => {
-    const note = window.prompt(`Reason for "${action}" — written to the audit trail:`);
-    if (!note) return;
+  // S11: no native dialogs — inline reason, mandatory (overrides are audited).
+  const confirmOverride = async () => {
+    const note = (override.note ?? '').trim();
+    if (note.length < 2) {
+      toast({
+        title: 'Reason required',
+        description: 'Overrides are written to the audit trail — a reason is mandatory.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setBusy(true);
     try {
-      await overrideTask(task.id, action, note);
-      toast({ title: `Task ${action === 'force-complete' ? 'force-completed' : action + 'led'}` });
+      await overrideTask(task.id, override.action, note);
+      toast({
+        title: `Task ${override.action === 'force-complete' ? 'force-completed' : override.action + 'led'}`,
+      });
+      setOverride(null);
       onChanged();
     } catch (err) {
       toast({ title: 'Override failed', description: err.message, variant: 'destructive' });
@@ -138,7 +150,7 @@ function SupervisorTaskCard({ task, staff, onChanged }) {
           variant="outline"
           className="h-7 flex-1 text-xs"
           disabled={busy}
-          onClick={() => handleOverride('force-complete')}
+          onClick={() => setOverride({ action: 'force-complete', note: '' })}
         >
           <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Force done
         </Button>
@@ -147,7 +159,7 @@ function SupervisorTaskCard({ task, staff, onChanged }) {
           variant="ghost"
           className="h-7 flex-1 text-xs"
           disabled={busy}
-          onClick={() => handleOverride('cancel')}
+          onClick={() => setOverride({ action: 'cancel', note: '' })}
         >
           <XCircle className="h-3.5 w-3.5 mr-1" /> Cancel
         </Button>
@@ -161,6 +173,41 @@ function SupervisorTaskCard({ task, staff, onChanged }) {
           <History className="h-3.5 w-3.5" />
         </Button>
       </div>
+
+      {override && (
+        <div className="mt-2 space-y-1.5 border-t pt-2">
+          <input
+            autoFocus
+            value={override.note}
+            onChange={(e) => setOverride((o) => ({ ...o, note: e.target.value }))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') confirmOverride();
+              if (e.key === 'Escape') setOverride(null);
+            }}
+            placeholder={`Reason for "${override.action}" — required, audited`}
+            className="h-7 w-full rounded-md border border-border bg-background px-2 text-xs"
+          />
+          <div className="flex gap-1.5">
+            <Button
+              size="sm"
+              className="h-6 flex-1 text-[11px]"
+              disabled={busy}
+              onClick={confirmOverride}
+            >
+              Confirm
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 flex-1 text-[11px]"
+              disabled={busy}
+              onClick={() => setOverride(null)}
+            >
+              Back
+            </Button>
+          </div>
+        </div>
+      )}
 
       {audit && (
         <div className="mt-2 max-h-28 overflow-y-auto space-y-1 border-t pt-2">
