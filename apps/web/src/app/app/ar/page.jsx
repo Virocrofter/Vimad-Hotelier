@@ -47,10 +47,10 @@ const fmtDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : '—');
 
 const STATUS_STYLE = {
   draft: 'bg-[var(--hq-surface-2)] text-text-secondary',
-  sent: 'bg-blue-100 text-blue-700',
-  partially_paid: 'bg-amber-100 text-amber-700',
-  overdue: 'bg-red-100 text-red-700',
-  paid: 'bg-emerald-100 text-emerald-700',
+  sent: 'bg-accent/15 text-accent',
+  partially_paid: 'bg-warning/15 text-warning',
+  overdue: 'bg-danger/15 text-danger',
+  paid: 'bg-success/15 text-success',
   cancelled: 'bg-[var(--hq-surface-2)] text-text-muted line-through',
 };
 
@@ -131,7 +131,7 @@ function StatCard({ label, value, sub, alert }) {
 
 function AgingBar({ buckets }) {
   const entries = [
-    ['Not due', buckets?.not_due ?? 0, 'bg-slate-300'],
+    ['Not due', buckets?.not_due ?? 0, 'bg-muted'],
     ['1–30', buckets?.['1-30'] ?? 0, 'bg-amber-400'],
     ['31–60', buckets?.['31-60'] ?? 0, 'bg-orange-500'],
     ['61–90', buckets?.['61-90'] ?? 0, 'bg-red-500'],
@@ -967,6 +967,8 @@ export default function ArPage() {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [paymentPreset, setPaymentPreset] = useState(null);
   const reversePayment = useReverseArPayment();
+  const [reverseId, setReverseId] = useState(null); // pending inline reversal (S11)
+  const [reverseReason, setReverseReason] = useState('');
 
   const { data: summary } = useArSummary();
   const accountParams = useMemo(
@@ -1246,7 +1248,7 @@ export default function ArPage() {
                       <Badge
                         className={
                           a.isActive
-                            ? 'bg-emerald-100 text-emerald-700'
+                            ? 'bg-success/15 text-success'
                             : 'bg-[var(--hq-surface-2)] text-text-muted'
                         }
                       >
@@ -1272,6 +1274,64 @@ export default function ArPage() {
       {/* Payments tab */}
       {tab === 'payments' && (
         <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+          {reverseId && (
+            <div className="flex items-center gap-2 border-b border-danger/20 bg-danger/5 p-2">
+              <input
+                autoFocus
+                value={reverseReason}
+                onChange={(e) => setReverseReason(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') setReverseId(null);
+                  if (e.key === 'Enter') {
+                    reversePayment.mutate(
+                      { id: reverseId, reason: reverseReason.trim() || undefined },
+                      {
+                        onSuccess: () => {
+                          toast({ title: 'Payment reversed' });
+                          setReverseId(null);
+                        },
+                        onError: (err) =>
+                          toast({
+                            title: 'Reversal failed',
+                            description: err.message,
+                            variant: 'destructive',
+                          }),
+                      }
+                    );
+                  }
+                }}
+                placeholder="Reversal reason (optional) — Enter confirms, Esc backs"
+                className="h-7 flex-1 rounded-md border border-border bg-background px-2 text-xs text-text-primary"
+              />
+              <Button
+                size="sm"
+                className="h-7"
+                disabled={reversePayment.isPending}
+                onClick={() =>
+                  reversePayment.mutate(
+                    { id: reverseId, reason: reverseReason.trim() || undefined },
+                    {
+                      onSuccess: () => {
+                        toast({ title: 'Payment reversed' });
+                        setReverseId(null);
+                      },
+                      onError: (err) =>
+                        toast({
+                          title: 'Reversal failed',
+                          description: err.message,
+                          variant: 'destructive',
+                        }),
+                    }
+                  )
+                }
+              >
+                Confirm reversal
+              </Button>
+              <Button size="sm" variant="ghost" className="h-7" onClick={() => setReverseId(null)}>
+                Back
+              </Button>
+            </div>
+          )}
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-border bg-[var(--hq-surface-2)]">
@@ -1301,7 +1361,7 @@ export default function ArPage() {
                     <Badge
                       className={
                         p.status === 'applied'
-                          ? 'bg-emerald-100 text-emerald-700'
+                          ? 'bg-success/15 text-success'
                           : 'bg-[var(--hq-surface-2)] text-text-muted'
                       }
                     >
@@ -1314,19 +1374,8 @@ export default function ArPage() {
                         className="rounded p-1 text-text-muted hover:bg-[var(--hq-surface-2)] hover:text-red-600"
                         title="Reverse payment"
                         onClick={() => {
-                          const reason = window.prompt('Reversal reason (optional)') ?? undefined;
-                          reversePayment.mutate(
-                            { id: p.id, reason },
-                            {
-                              onSuccess: () => toast({ title: 'Payment reversed' }),
-                              onError: (err) =>
-                                toast({
-                                  title: 'Reversal failed',
-                                  description: err.message,
-                                  variant: 'destructive',
-                                }),
-                            }
-                          );
+                          setReverseId(p.id);
+                          setReverseReason('');
                         }}
                       >
                         <RotateCcw size={15} />
