@@ -37,6 +37,7 @@ export const NAV_GROUPS = [
       { label: 'Groups & Events', to: '/app/groups' },
       { label: 'Concierge', to: '/app/concierge' },
       { label: 'Inbox', to: '/app/comms' },
+      { label: 'Keys', to: '/app/keys' },
     ],
   },
   {
