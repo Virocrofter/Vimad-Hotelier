@@ -17,6 +17,8 @@ import { formatMoney } from '../../../../lib/money';
 import { Button } from '@/components/ui/button';
 import { listFolios } from '../../../../api/folio';
 import { apiGet } from '../../../../api/client';
+import { Drawer } from '../../../../components/ui/drawer';
+import { ReceiptCard } from '../../../../components/billing/ReceiptCard';
 
 const fmt = (n, currency = 'ZAR') => formatMoney(Number(n) || 0, currency);
 
@@ -25,6 +27,7 @@ export default function FolioOverview() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [receiptFolio, setReceiptFolio] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -146,7 +149,11 @@ export default function FolioOverview() {
                 </tr>
               ) : (
                 folios.map((f) => (
-                  <tr key={f.id} className="hover:bg-surface/50">
+                  <tr
+                    key={f.id}
+                    className="cursor-pointer hover:bg-surface/50"
+                    onClick={() => setReceiptFolio(f)}
+                  >
                     <td className="px-4 py-2 font-mono text-xs text-text-secondary">
                       {f.reservation?.confirmationNumber || f.reservationId}
                     </td>
@@ -176,6 +183,15 @@ export default function FolioOverview() {
           </table>
         </div>
       </div>
+
+      <Drawer
+        open={!!receiptFolio}
+        onClose={() => setReceiptFolio(null)}
+        title={receiptFolio?.reservation?.confirmationNumber || 'Folio receipt'}
+        width={480}
+      >
+        {receiptFolio && <ReceiptCard folio={receiptFolio} currency={currency} />}
+      </Drawer>
     </div>
   );
 }
