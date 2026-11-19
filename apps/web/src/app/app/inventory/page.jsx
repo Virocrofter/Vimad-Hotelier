@@ -307,7 +307,7 @@ export default function InventoryPage() {
   ];
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="hq-surface-0 min-h-full p-6 space-y-5">
       {notice && (
         <div
           className={`rounded-lg px-4 py-2 text-sm ${notice.isErr ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}
@@ -346,8 +346,10 @@ export default function InventoryPage() {
         {kpis.map(([label, value, Icon, color]) => (
           <div key={label} className="rounded-xl border p-4 flex items-center justify-between">
             <div>
-              <div className={`text-2xl font-bold ${color}`}>{value}</div>
-              <div className="text-xs uppercase tracking-wide opacity-60">{label}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                {label}
+              </div>
+              <div className={`text-3xl font-semibold tabular-nums ${color}`}>{value}</div>
             </div>
             <Icon className="h-6 w-6 opacity-40" />
           </div>
