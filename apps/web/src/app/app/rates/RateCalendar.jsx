@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { listRoomTypes } from '../../../api/room-types';
 import { listRatePlans, listCellOverrides, setCellOverride } from '../../../api/rates-api';
+import { apiDelete } from '../../../api/client';
 import {
   formatDate,
   formatShortDay,
@@ -78,6 +79,30 @@ export default function RateCalendar() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rate-cell-overrides'] }),
   });
 
+  const clearOverride = useMutation({
+    mutationFn: ({ ratePlanId, date }) =>
+      apiDelete(`/v1/rates/overrides/cell?ratePlanId=${ratePlanId}&date=${date}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rate-cell-overrides'] }),
+  });
+
+  // Single source of truth: effective cell for a room type + date.
+  // Manual override wins; stats, CSV export, and the grid all resolve here.
+  const resolveCell = (rt, date) => {
+    const plan = planForDate(ratePlans, rt.id, date);
+    if (!plan) return null;
+    const ov = overrideMap.get(`${plan.id}|${date}`);
+    if (ov !== undefined) {
+      return {
+        rate: ov,
+        minStay: plan.minStay ?? 1,
+        weekend: isWeekend(date),
+        currency: plan.currency ?? 'ZAR',
+        overridden: true,
+      };
+    }
+    return getCellRate(ratePlans, rt.id, date);
+  };
+
   const filteredRoomTypes =
     selectedRoomType === 'all' ? roomTypes : roomTypes.filter((rt) => rt.id === selectedRoomType);
 
@@ -96,7 +121,7 @@ export default function RateCalendar() {
     const rates = [];
     filteredRoomTypes.forEach((rt) => {
       dates.forEach((d) => {
-        const cell = getCellRate(ratePlans, rt.id, d);
+        const cell = resolveCell(rt, d);
         if (cell) rates.push(cell.rate);
       });
     });
@@ -106,16 +131,34 @@ export default function RateCalendar() {
       max: Math.max(...rates),
       avg: Math.round(rates.reduce((a, b) => a + b, 0) / rates.length),
     };
-  }, [filteredRoomTypes, dates, ratePlans]);
+  }, [filteredRoomTypes, dates, ratePlans, overrideMap]);
 
   const exportCsv = () => {
-    const header = ['Room Type', 'Code', 'Date', 'Rate', 'Currency', 'Min Stay', 'Weekend'];
+    const header = [
+      'Room Type',
+      'Code',
+      'Date',
+      'Rate',
+      'Currency',
+      'Min Stay',
+      'Weekend',
+      'Override',
+    ];
     const rows = [];
     filteredRoomTypes.forEach((rt) => {
       dates.forEach((d) => {
-        const cell = getCellRate(ratePlans, rt.id, d);
+        const cell = resolveCell(rt, d);
         if (cell) {
-          rows.push([rt.name, rt.code, d, cell.rate, cell.currency, cell.minStay, cell.weekend]);
+          rows.push([
+            rt.name,
+            rt.code,
+            d,
+            cell.rate,
+            cell.currency,
+            cell.minStay,
+            cell.weekend,
+            cell.overridden ? 'yes' : '',
+          ]);
         }
       });
     });
@@ -297,16 +340,8 @@ export default function RateCalendar() {
                     </td>
                     {dates.map((date) => {
                       const plan = planForDate(ratePlans, rt.id, date);
+                      const cell = resolveCell(rt, date);
                       const ov = plan ? overrideMap.get(`${plan.id}|${date}`) : undefined;
-                      const cell =
-                        ov !== undefined
-                          ? {
-                              rate: ov,
-                              minStay: plan.minStay ?? 1,
-                              weekend: isWeekend(date),
-                              currency: plan.currency ?? 'ZAR',
-                            }
-                          : getCellRate(ratePlans, rt.id, date);
                       if (!cell || !plan) {
                         return (
                           <td key={date} className="px-1.5 py-2 text-center">
@@ -316,7 +351,7 @@ export default function RateCalendar() {
                       }
                       const isEditing = editing && editing.rtId === rt.id && editing.date === date;
                       return (
-                        <td key={date} className="px-1.5 py-2 text-center">
+                        <td key={date} className="relative px-1.5 py-2 text-center">
                           {isEditing ? (
                             <input
                               autoFocus
@@ -357,6 +392,20 @@ export default function RateCalendar() {
                                 <p className="text-[10px] opacity-80">min {cell.minStay}</p>
                               )}
                             </button>
+                          )}
+                          {ov !== undefined && !isEditing && (
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              title="Clear override (back to base rate)"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                clearOverride.mutate({ ratePlanId: plan.id, date });
+                              }}
+                              className="absolute right-0 top-0 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-[#F453A4] text-[9px] font-bold text-white"
+                            >
+                              ×
+                            </span>
                           )}
                         </td>
                       );
