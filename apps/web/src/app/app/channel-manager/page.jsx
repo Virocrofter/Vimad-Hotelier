@@ -88,7 +88,7 @@ export default function ChannelManagerPage() {
   const stats = status?.stats || { totalConnections: 0, active: 0, syncing: 0, failed: 0 };
 
   return (
-    <div className="space-y-6">
+    <div className="hq-surface-0 min-h-full space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -157,24 +157,32 @@ export default function ChannelManagerPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-xs text-text-muted uppercase tracking-wider">Connections</p>
-          <p className="mt-1 text-xl font-bold font-mono text-text-primary">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+            Connections
+          </p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums text-text-primary">
             {stats.totalConnections}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-xs text-text-muted uppercase tracking-wider">Active</p>
-          <p className="mt-1 flex items-center gap-1.5 text-xl font-bold font-mono text-accent">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+            Active
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 text-3xl font-semibold tabular-nums text-accent">
             <Wifi className="h-4 w-4" /> {stats.active}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-xs text-text-muted uppercase tracking-wider">Syncing</p>
-          <p className="mt-1 text-xl font-bold font-mono text-warning">{stats.syncing}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+            Syncing
+          </p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums text-warning">{stats.syncing}</p>
         </div>
         <div className="rounded-xl border border-border bg-surface p-4">
-          <p className="text-xs text-text-muted uppercase tracking-wider">Failed / Error</p>
-          <p className="mt-1 flex items-center gap-1.5 text-xl font-bold font-mono text-danger">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+            Failed / Error
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 text-3xl font-semibold tabular-nums text-danger">
             <WifiOff className="h-4 w-4" /> {stats.failed}
           </p>
         </div>
