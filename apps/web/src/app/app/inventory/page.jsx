@@ -21,6 +21,7 @@ import {
   Wrench,
   Zap,
 } from 'lucide-react';
+import { Drawer } from '@/components/ui/drawer';
 import { inventoryApi } from '../../../api/inventory';
 
 const DAY_MS = 86400_000;
@@ -904,26 +905,12 @@ function CellModal({ roomType, cell, onClose, onSave }) {
     </div>
   );
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-md rounded-2xl border bg-white dark:bg-slate-900 p-6 space-y-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="text-lg font-bold">{roomType.name}</h3>
-            <p className="text-sm opacity-60">
-              {roomType.code} · {cell.date} ·{' '}
-              <span className={`inline-block h-2 w-2 rounded-full ${st.dot}`} /> {st.label}
-            </p>
-          </div>
-          <button className="rounded-lg border px-2 py-1 text-sm" onClick={onClose}>
-            Close
-          </button>
-        </div>
+    <Drawer open onClose={onClose} title={roomType.name} width={480}>
+      <div className="space-y-4">
+        <p className="text-sm opacity-60">
+          {roomType.code} · {cell.date} ·{' '}
+          <span className={`inline-block h-2 w-2 rounded-full ${st.dot}`} /> {st.label}
+        </p>
 
         <div className="rounded-xl border p-4 text-sm">
           {row('Physical rooms', cell.total)}
@@ -993,7 +980,7 @@ function CellModal({ roomType, cell, onClose, onSave }) {
           </div>
         </div>
       </div>
-    </div>
+    </Drawer>
   );
 }
 
@@ -1021,22 +1008,33 @@ function HoldModal({ roomTypes, defaultDate, onClose, onSave }) {
   });
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
+    <Drawer
+      open
+      onClose={onClose}
+      title={
+        <span className="flex items-center gap-2">
+          <Lock className="h-5 w-5" /> New Allocation
+        </span>
+      }
+      width={480}
+      footer={
+        <button
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          disabled={!form.roomTypeId || !form.name.trim()}
+          onClick={() =>
+            onSave({
+              ...form,
+              quantity: Number(form.quantity),
+              endDate: form.endDate || undefined,
+              notes: form.notes || undefined,
+            })
+          }
+        >
+          Create allocation
+        </button>
+      }
     >
-      <div
-        className="w-full max-w-md rounded-2xl border bg-white dark:bg-slate-900 p-6 space-y-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <Lock className="h-5 w-5" /> New Allocation
-          </h3>
-          <button className="rounded-lg border px-2 py-1 text-sm" onClick={onClose}>
-            Close
-          </button>
-        </div>
+      <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3 text-sm">
           <label className="col-span-2 space-y-1">
             <span className="text-xs font-medium opacity-70">Room type</span>
@@ -1113,21 +1111,7 @@ function HoldModal({ roomTypes, defaultDate, onClose, onSave }) {
             />
           </label>
         </div>
-        <button
-          className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
-          disabled={!form.roomTypeId || !form.name.trim()}
-          onClick={() =>
-            onSave({
-              ...form,
-              quantity: Number(form.quantity),
-              endDate: form.endDate || undefined,
-              notes: form.notes || undefined,
-            })
-          }
-        >
-          Create allocation
-        </button>
       </div>
-    </div>
+    </Drawer>
   );
 }
