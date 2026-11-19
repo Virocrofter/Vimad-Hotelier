@@ -7,6 +7,49 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Building2, Link2, Plus, RefreshCw } from 'lucide-react';
 import { listChains, createChain, attachProperty, detachProperty } from '../../../api/chains';
 import { listProperties } from '../../../api/properties';
+import { apiClient } from '../../../api/client';
+
+/* A1-prime: days before arrival to auto-capture outstanding deposits from the
+ * guest's saved card (0 = off). Saves on blur/Enter. */
+function AutoDepositCell({ property }) {
+  const [days, setDays] = useState(property.autoDepositDays ?? 0);
+  const [state, setState] = useState('idle'); // idle | saving | saved | error
+  const save = async (value) => {
+    const n = Math.max(0, Math.min(30, Math.round(Number(value) || 0)));
+    setDays(n);
+    if (n === (property.autoDepositDays ?? 0)) return;
+    setState('saving');
+    try {
+      await apiClient.patch(`/properties/${property.id}`, { autoDepositDays: n });
+      property.autoDepositDays = n;
+      setState('saved');
+      setTimeout(() => setState('idle'), 1500);
+    } catch {
+      setState('error');
+    }
+  };
+  return (
+    <div className="flex items-center gap-1.5">
+      <input
+        type="number"
+        min={0}
+        max={30}
+        value={days}
+        onChange={(e) => setDays(e.target.value)}
+        onBlur={() => save(days)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') save(days);
+        }}
+        className="w-16 rounded-md border border-border bg-background px-2 py-1 text-sm text-text-primary"
+        title="Days before arrival to auto-capture deposits from saved cards (0 = off)"
+      />
+      <span className="text-xs text-text-muted">days</span>
+      {state === 'saving' && <span className="text-xs text-text-muted">…</span>}
+      {state === 'saved' && <span className="text-xs text-success">✓</span>}
+      {state === 'error' && <span className="text-xs text-danger">failed</span>}
+    </div>
+  );
+}
 
 export default function PropertiesDashboardPage() {
   const queryClient = useQueryClient();
@@ -174,6 +217,7 @@ export default function PropertiesDashboardPage() {
                 <th className="px-4 py-3">City</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Chain</th>
+                <th className="px-4 py-3">Auto-deposit</th>
               </tr>
             </thead>
             <tbody>
@@ -214,11 +258,14 @@ export default function PropertiesDashboardPage() {
                       ))}
                     </select>
                   </td>
+                  <td className="px-4 py-3">
+                    <AutoDepositCell property={p} />
+                  </td>
                 </tr>
               ))}
               {properties.length === 0 && !propertiesQuery.isLoading && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-text-muted">
+                  <td colSpan={6} className="px-4 py-8 text-center text-text-muted">
                     No properties yet.
                   </td>
                 </tr>

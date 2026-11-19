@@ -13,7 +13,9 @@ export const propertyCreateSchema = z.object({
   currency: z.string().default('ZAR'),
 });
 
-export const propertyUpdateSchema = propertyCreateSchema.partial();
+export const propertyUpdateSchema = propertyCreateSchema.partial().extend({
+  autoDepositDays: z.number().int().min(0).max(30).optional(),
+});
 
 export type PropertyCreateInput = z.infer<typeof propertyCreateSchema>;
 export type PropertyUpdateInput = z.infer<typeof propertyUpdateSchema>;
