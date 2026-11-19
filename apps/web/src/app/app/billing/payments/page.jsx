@@ -16,6 +16,8 @@ import { usePaystack } from '../../../../hooks/usePaystack';
 import { formatMoneyMinor } from '../../../../lib/money';
 import { Banknote, Send } from 'lucide-react';
 import PaymentRequestsPage from '../payment-requests/page';
+import { Drawer } from '../../../../components/ui/drawer';
+import { TransactionSheet } from '../../../../components/billing/TransactionSheet';
 
 const TYPES = {
   deposit: 'Deposit',
@@ -43,6 +45,7 @@ function PaymentsInner() {
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState(null);
   const [modal, setModal] = useState(null); // 'pay' | 'charge' | 'refund'
+  const [sheet, setSheet] = useState(null);
   const { payWithPopup } = usePaystack();
   const verifyOnce = useRef(false);
 
@@ -268,7 +271,11 @@ function PaymentsInner() {
               </tr>
             ) : (
               rows.map((p) => (
-                <tr key={p.id} className="border-b border-white/5 hover:bg-white/5">
+                <tr
+                  key={p.id}
+                  className="cursor-pointer border-b border-white/5 hover:bg-white/5"
+                  onClick={() => setSheet(p)}
+                >
                   <td className="px-3 py-2 font-mono text-xs">{p.reference}</td>
                   <td className="px-3 py-2">
                     {p.guest ? `${p.guest.firstName} ${p.guest.lastName}` : '—'}
@@ -301,7 +308,10 @@ function PaymentsInner() {
                   <td className="px-3 py-2">
                     {(p.status === 'success' || p.status === 'partially_refunded') && (
                       <button
-                        onClick={() => setModal({ refund: p })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setModal({ refund: p });
+                        }}
                         className="text-xs text-red-300 hover:underline"
                       >
                         Refund
@@ -344,6 +354,15 @@ function PaymentsInner() {
       {modal?.refund && (
         <RefundModal row={modal.refund} onSubmit={doRefund} onClose={() => setModal(null)} />
       )}
+
+      <Drawer
+        open={!!sheet}
+        onClose={() => setSheet(null)}
+        title={sheet?.reference || 'Transaction'}
+        width={440}
+      >
+        {sheet && <TransactionSheet payment={sheet} />}
+      </Drawer>
     </div>
   );
 }
