@@ -34,6 +34,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { nightAuditApi } from '../../../api/night-audit';
+import { usePropertyScope } from '../../../hooks/usePropertyScope';
 import { useProperties } from '../../../hooks/useProperties';
 import { toast } from '../../../hooks/use-toast';
 
@@ -565,7 +566,9 @@ export default function NightAuditPage() {
   const [newEmail, setNewEmail] = useState('');
   const [savingSchedule, setSavingSchedule] = useState(false);
 
-  const propertyId = selectedProperty?.id;
+  const { current: scopedProperty } = usePropertyScope();
+  // useProperties().selectedProperty can be unset; scope hook is the source of truth
+  const propertyId = scopedProperty?.id ?? selectedProperty?.id;
 
   // ─── Data Fetching ───
 
