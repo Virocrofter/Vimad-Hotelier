@@ -102,7 +102,13 @@ export default function RateCalendar() {
   const statCards = [
     { label: 'Min Rate', value: stats.min, icon: TrendingDown, accent: 'text-accent' },
     { label: 'Max Rate', value: stats.max, icon: TrendingUp, accent: 'text-danger' },
-    { label: 'Avg Rate', value: stats.avg, icon: DollarSign, accent: 'text-primary' },
+    {
+      label: 'Avg Rate',
+      value: stats.avg,
+      icon: DollarSign,
+      accent: 'text-primary',
+      revenue: true,
+    },
   ];
 
   return (
@@ -168,13 +174,19 @@ export default function RateCalendar() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {statCards.map(({ label, value, icon: Icon, accent }) => (
+        {statCards.map(({ label, value, icon: Icon, accent, revenue }) => (
           <div key={label} className="bg-surface border border-border rounded-xl p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-text-secondary">{label}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+                {label}
+              </span>
               <Icon className={`h-4 w-4 ${accent}`} />
             </div>
-            <p className="text-2xl font-bold text-text-primary mt-1">
+            <p
+              className={`text-3xl font-semibold mt-1 tabular-nums ${
+                revenue ? 'hq-revenue' : 'text-text-primary'
+              }`}
+            >
               {isLoading ? '—' : `$${value}`}
             </p>
           </div>

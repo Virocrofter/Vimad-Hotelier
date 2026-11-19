@@ -18,7 +18,7 @@ export default function RatesPage() {
   const [tab, setTab] = useState('calendar');
 
   return (
-    <div className="space-y-6">
+    <div className="hq-surface-0 min-h-full space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -37,7 +37,9 @@ export default function RatesPage() {
             onClick={() => setTab(key)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors ${
               tab === key
-                ? 'border-primary text-primary'
+                ? key === 'grids'
+                  ? 'border-[#F453A4] hq-revenue'
+                  : 'border-primary text-primary'
                 : 'border-transparent text-text-secondary hover:text-text-primary'
             }`}
           >
