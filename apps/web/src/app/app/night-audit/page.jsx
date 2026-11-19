@@ -928,13 +928,13 @@ export default function NightAuditPage() {
                 {loadingPreChecks && <Loader2 className="h-4 w-4 animate-spin text-text-muted" />}
               </div>
 
-              {preChecks?.currentAudit && (
+              {auditStatus?.currentAudit && (
                 <div className="flex items-center gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
                   <span className="h-2.5 w-2.5 rounded-full bg-amber-500" aria-hidden="true" />
                   <div>
                     <p className="text-sm font-medium text-text-primary">
                       Night audit in progress — started{' '}
-                      {new Date(preChecks.currentAudit.createdAt).toLocaleString('en-ZA', {
+                      {new Date(auditStatus.currentAudit.createdAt).toLocaleString('en-ZA', {
                         day: 'numeric',
                         month: 'short',
                         hour: '2-digit',
