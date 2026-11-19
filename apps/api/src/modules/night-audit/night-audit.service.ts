@@ -326,6 +326,7 @@ export async function getAuditStatus(tenantId: string, propertyId?: string) {
   return {
     lastAuditDate: lastAudit?.auditDate ?? null,
     lastAuditStatus: lastAudit?.status ?? null,
+    currentAudit: lastAudit?.status === 'in_progress' ? lastAudit : null,
     lastAuditId: lastAudit?.id ?? null,
     isDayClosed: lastAudit?.status === 'completed' && lastAudit?.auditDate >= today,
     pendingCheckouts,

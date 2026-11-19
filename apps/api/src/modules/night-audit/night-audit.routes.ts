@@ -68,6 +68,7 @@ const AuditStatusSchema = z
     data: z.object({
       lastAuditDate: z.unknown().nullable(),
       lastAuditStatus: z.string().nullable(),
+      currentAudit: z.any().nullable(),
       lastAuditId: z.string().nullable(),
       isDayClosed: z.boolean(),
       pendingCheckouts: z.number().int(),
