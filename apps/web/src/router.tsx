@@ -260,6 +260,7 @@ export const router = createBrowserRouter([
       { path: 'chain-loyalty', element: <ChainLoyaltyPage /> },
       { path: 'channel-manager', ...page(() => import('./app/app/channel-manager/page')) },
       { path: 'upsell', ...page(() => import('./app/app/upsell/page')) },
+      { path: 'booking-engine', ...page(() => import('./app/app/booking-engine/page')) },
       { path: 'loyalty', ...page(() => import('./app/app/loyalty/page')) },
       { path: 'settings', ...page(() => import('./app/app/settings/page')) },
       { path: 'settings/email', ...page(() => import('./app/app/settings/email/page')) },
