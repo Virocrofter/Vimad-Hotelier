@@ -123,45 +123,61 @@ function getInitials(first, last) {
 
 // ─── Sub-components ───
 
+/* StatsCards (blueprint S1.4 Miller: max 6; S2/S6 KpiCard anatomy — label
+ * first, tabular numeral, soft icon chip). In Progress folds into Pending's
+ * sub-hint; Completion % is derivable (completed/total) and drops. */
 function StatsCards({ stats }) {
   if (!stats) return <LoadingSkeleton className="h-32" count={4} />;
   const { today, overdue, staffOnDuty, avgCleaningDuration } = stats;
 
+  const chip = (hex) => ({
+    background: `color-mix(in srgb, ${hex} 15%, transparent)`,
+    color: hex,
+  });
+
   const cards = [
-    { label: 'Total Today', value: today.total, icon: ClipboardList, color: 'text-blue-600' },
-    { label: 'Pending', value: today.pending, icon: Clock, color: 'text-yellow-600' },
-    { label: 'In Progress', value: today.inProgress, icon: Play, color: 'text-blue-600' },
+    { label: 'Total Today', value: today.total, icon: ClipboardList, hex: '#3b82f6' },
+    {
+      label: 'Pending',
+      value: today.pending,
+      icon: Clock,
+      hex: '#eab308',
+      sub: `${today.inProgress} in progress`,
+    },
     {
       label: 'Completed',
       value: today.completed + today.inspected,
       icon: CheckCircle2,
-      color: 'text-green-600',
+      hex: '#22c55e',
     },
-    { label: 'Overdue', value: overdue, icon: AlertTriangle, color: 'text-red-600' },
-    { label: 'Staff On Duty', value: staffOnDuty, icon: Users, color: 'text-purple-600' },
-    {
-      label: 'Avg Duration',
-      value: `${avgCleaningDuration}m`,
-      icon: Timer,
-      color: 'text-gray-600',
-    },
-    {
-      label: 'Completion',
-      value: `${today.completionRate}%`,
-      icon: BarChart3,
-      color: 'text-emerald-600',
-    },
+    { label: 'Overdue', value: overdue, icon: AlertTriangle, hex: '#ef4444' },
+    { label: 'Staff On Duty', value: staffOnDuty, icon: Users, hex: '#a855f7' },
+    { label: 'Avg Duration', value: `${avgCleaningDuration}m`, icon: Timer, hex: '#64748b' },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
       {cards.map((c) => (
         <Card key={c.label} className="p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <c.icon className={cn('h-4 w-4', c.color)} />
-            <span className="text-xs text-muted-foreground">{c.label}</span>
+          <div className="flex items-center gap-2.5">
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+              style={chip(c.hex)}
+            >
+              <c.icon className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                {c.label}
+              </p>
+              <p className="text-2xl font-semibold tabular-nums leading-tight">
+                {c.value}
+                {c.sub && (
+                  <span className="ml-1 text-xs font-normal text-muted-foreground">{c.sub}</span>
+                )}
+              </p>
+            </div>
           </div>
-          <div className="text-2xl font-bold">{c.value}</div>
         </Card>
       ))}
     </div>
@@ -552,7 +568,7 @@ function HousekeepingPage() {
     : 'All Staff';
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="hq-surface-0 min-h-full space-y-6 p-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
