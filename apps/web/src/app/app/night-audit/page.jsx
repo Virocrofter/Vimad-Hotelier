@@ -150,7 +150,7 @@ function ChecklistItem({ item }) {
 function StepToggle({ label, checked, onChange, disabled }) {
   return (
     <label
-      className={`flex items-center justify-between rounded-lg border border-border p-3 cursor-pointer transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800'}`}
+      className={`flex items-center justify-between rounded-lg border border-border p-3 cursor-pointer transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--hq-surface-2)] dark:hover:bg-[var(--hq-surface-3)]'}`}
     >
       <span className="text-sm font-medium text-text-secondary">{label}</span>
       <button
@@ -250,7 +250,7 @@ function HistoryTable({ audits, onViewReport, onRollback, rollingBack }) {
             return (
               <tr
                 key={audit.id}
-                className="border-b border-slate-100 hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800/30"
+                className="border-b border-border hover:bg-[var(--hq-surface-2)] dark:hover:bg-[var(--hq-surface-3)]/30"
               >
                 <td className="py-3 font-medium text-text-primary">
                   {new Date(audit.auditDate).toLocaleDateString('en-US', {
@@ -278,7 +278,7 @@ function HistoryTable({ audits, onViewReport, onRollback, rollingBack }) {
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => onViewReport(audit)}
-                      className="rounded-lg p-1.5 text-text-muted hover:text-text-secondary dark:hover:text-slate-300 hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-700 transition-colors"
+                      className="rounded-lg p-1.5 text-text-muted hover:text-text-secondary dark:hover:text-text-muted hover:bg-[var(--hq-surface-2)] dark:hover:bg-[var(--hq-surface-3)] transition-colors"
                       title="View Report"
                     >
                       <Eye className="h-4 w-4" />
@@ -337,7 +337,7 @@ function ReportModal({ audit, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-text-muted hover:text-text-secondary dark:hover:text-slate-300 hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-700"
+            className="rounded-lg p-2 text-text-muted hover:text-text-secondary dark:hover:text-text-muted hover:bg-[var(--hq-surface-2)] dark:hover:bg-[var(--hq-surface-3)]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -496,7 +496,7 @@ function ReportModal({ audit, onClose }) {
         <div className="sticky bottom-0 bg-card border-t border-border px-6 py-4 flex items-center justify-end gap-3">
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-[var(--hq-surface-3)] transition-colors"
           >
             <Printer className="h-4 w-4" /> Print
           </button>
@@ -511,7 +511,7 @@ function ReportModal({ audit, onClose }) {
               a.click();
               URL.revokeObjectURL(url);
             }}
-            className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-[var(--hq-surface-2)] transition-colors"
+            className="flex items-center gap-2 rounded-lg bg-[var(--hq-surface-0)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--hq-surface-3)] dark:hover:bg-[var(--hq-surface-2)] transition-colors"
           >
             <Download className="h-4 w-4" /> Export JSON
           </button>
@@ -791,7 +791,7 @@ export default function NightAuditPage() {
               fetchPreChecks();
               fetchStatus();
             }}
-            className="rounded-lg border border-border p-2 text-text-muted hover:text-text-secondary dark:hover:text-slate-300 hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 transition-colors"
+            className="rounded-lg border border-border p-2 text-text-muted hover:text-text-secondary dark:hover:text-text-muted hover:bg-[var(--hq-surface-2)] dark:hover:bg-[var(--hq-surface-3)] transition-colors"
             title="Refresh"
           >
             <RefreshCw className="h-4 w-4" />
@@ -902,7 +902,7 @@ export default function NightAuditPage() {
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                    : 'border-transparent text-text-muted hover:text-text-secondary dark:hover:text-slate-300 hover:border-border dark:hover:border-slate-600'
+                    : 'border-transparent text-text-muted hover:text-text-secondary dark:hover:text-text-muted hover:border-border dark:hover:border-border'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -1139,13 +1139,13 @@ export default function NightAuditPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExportHistory}
-                className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 transition-colors"
+                className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-[var(--hq-surface-3)] transition-colors"
               >
                 <Download className="h-4 w-4" /> Export
               </button>
               <button
                 onClick={() => fetchHistory(historyPage)}
-                className="rounded-lg border border-border p-1.5 text-text-muted hover:text-text-secondary dark:hover:text-slate-300 transition-colors"
+                className="rounded-lg border border-border p-1.5 text-text-muted hover:text-text-secondary dark:hover:text-text-muted transition-colors"
               >
                 <RefreshCw className="h-4 w-4" />
               </button>
@@ -1154,7 +1154,7 @@ export default function NightAuditPage() {
 
           {loadingHistory ? (
             <div className="text-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-slate-300 mx-auto" />
+              <Loader2 className="h-8 w-8 animate-spin text-text-muted mx-auto" />
             </div>
           ) : (
             <>
@@ -1179,7 +1179,7 @@ export default function NightAuditPage() {
                         fetchHistory(newPage);
                       }}
                       disabled={historyPage <= 1}
-                      className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-[var(--hq-surface-3)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Previous
                     </button>
@@ -1190,7 +1190,7 @@ export default function NightAuditPage() {
                         fetchHistory(newPage);
                       }}
                       disabled={historyPage >= history.meta.totalPages}
-                      className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-[var(--hq-surface-3)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Next
                     </button>
