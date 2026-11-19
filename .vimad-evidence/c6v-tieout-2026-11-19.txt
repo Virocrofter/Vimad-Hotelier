@@ -1,0 +1,68 @@
+
+ RUN  v2.1.9 /Users/mosesokpeku/Desktop/Vimad/apps/api
+
+{"level":30,"time":"2026-11-19T20:23:38.444Z","pid":52065,"env":"test","msg":"Redis connected"}
+{"level":30,"time":"2026-11-19T20:23:38.444Z","pid":52064,"env":"test","msg":"Redis connected"}
+{"level":30,"time":"2026-11-19T20:23:38.445Z","pid":52063,"env":"test","msg":"Redis connected"}
+{"level":30,"time":"2026-11-19T20:23:40.606Z","pid":52063,"env":"test","msg":"profiler: prisma $use middleware attached"}
+{"level":30,"time":"2026-11-19T20:23:40.606Z","pid":52065,"env":"test","msg":"profiler: prisma $use middleware attached"}
+{"level":30,"time":"2026-11-19T20:23:40.607Z","pid":52064,"env":"test","msg":"profiler: prisma $use middleware attached"}
+{"level":30,"time":"2026-11-19T20:23:40.657Z","pid":52064,"env":"test","msg":"heartbeat patch installed: every cron loop will check in"}
+{"level":30,"time":"2026-11-19T20:23:40.657Z","pid":52063,"env":"test","msg":"heartbeat patch installed: every cron loop will check in"}
+{"level":30,"time":"2026-11-19T20:23:40.657Z","pid":52065,"env":"test","msg":"heartbeat patch installed: every cron loop will check in"}
+{"level":30,"time":"2026-11-19T20:23:40.657Z","pid":52064,"env":"test","msg":"Rate limiter using shared Redis connection (BullMQ/ioredis)"}
+{"level":30,"time":"2026-11-19T20:23:40.657Z","pid":52063,"env":"test","msg":"Rate limiter using shared Redis connection (BullMQ/ioredis)"}
+{"level":30,"time":"2026-11-19T20:23:40.657Z","pid":52065,"env":"test","msg":"Rate limiter using shared Redis connection (BullMQ/ioredis)"}
+{"level":30,"time":"2026-11-19T20:23:41.006Z","pid":52065,"env":"test","requestId":"08ce11b7-708c-4cb3-b4ea-bb3f6e1c76d9","ip":"::ffff:127.0.0.1","requestId":"08ce11b7-708c-4cb3-b4ea-bb3f6e1c76d9","method":"POST","path":"/register","route":"/register","statusCode":201,"durationMs":244,"contentLength":"641","msg":"request completed"}
+{"level":30,"time":"2026-11-19T20:23:41.008Z","pid":52063,"env":"test","requestId":"c367cb17-4eef-4c33-8040-359218d3778f","ip":"::ffff:127.0.0.1","requestId":"c367cb17-4eef-4c33-8040-359218d3778f","method":"POST","path":"/register","route":"/register","statusCode":201,"durationMs":247,"contentLength":"641","msg":"request completed"}
+{"level":30,"time":"2026-11-19T20:23:41.009Z","pid":52064,"env":"test","requestId":"f3a04807-c1ee-4eb7-96ca-dd2075cc6dcf","ip":"::ffff:127.0.0.1","requestId":"f3a04807-c1ee-4eb7-96ca-dd2075cc6dcf","method":"POST","path":"/register","route":"/register","statusCode":201,"durationMs":232,"contentLength":"641","msg":"request completed"}
+stdout | tests/integration/p18-accounting-journal.test.ts
+P18 seeded
+
+stdout | tests/integration/p18-accounting-journal.test.ts > P18 accounting journal (C2-prime/C6-prime) > S1: definition registered with Finance category
+P18 S1 OK
+
+stdout | tests/integration/p19-accounting-export.test.ts
+P19 seeded
+
+stdout | tests/integration/p19-rates-availability.test.ts
+P19 seeded
+
+stdout | tests/integration/p18-accounting-journal.test.ts > P18 accounting journal (C2-prime/C6-prime) > S2: runReport — in-window postings only, correct legs, reconciled totals, persisted run
+P18 S2 OK
+
+ ✓ tests/integration/p18-accounting-journal.test.ts (2 tests) 3626ms
+{"level":30,"time":"2026-11-19T20:23:41.179Z","pid":52063,"env":"test","requestId":"7ce0bd60-1f46-4dcb-8436-80bb209e1469","ip":"::ffff:127.0.0.1","requestId":"7ce0bd60-1f46-4dcb-8436-80bb209e1469","method":"PUT","path":"/config","route":"/config","statusCode":200,"durationMs":26,"contentLength":"163","tenantId":"cmwnzzql80000141mwd4yhn9x","userId":"cmwnzzql80001141m6btszfmx","msg":"request completed"}
+{"level":30,"time":"2026-11-19T20:23:41.197Z","pid":52063,"env":"test","requestId":"aec5c37d-2cb6-4843-83fc-ed6d72ab2b0d","ip":"::ffff:127.0.0.1","requestId":"aec5c37d-2cb6-4843-83fc-ed6d72ab2b0d","method":"GET","path":"/config","route":"/config","statusCode":200,"durationMs":11,"contentLength":"163","tenantId":"cmwnzzql80000141mwd4yhn9x","userId":"cmwnzzql80001141m6btszfmx","msg":"request completed"}
+{"level":30,"time":"2026-11-19T20:23:41.209Z","pid":52063,"env":"test","requestId":"874664ac-3aaf-42a8-bdc0-8dd9cb14437f","ip":"::ffff:127.0.0.1","requestId":"874664ac-3aaf-42a8-bdc0-8dd9cb14437f","method":"PUT","path":"/config","route":"/config","statusCode":200,"durationMs":7,"contentLength":"163","tenantId":"cmwnzzql80000141mwd4yhn9x","userId":"cmwnzzql80001141m6btszfmx","msg":"request completed"}
+{"level":30,"time":"2026-11-19T20:23:41.214Z","pid":52065,"env":"test","requestId":"35af1375-4e87-4675-8d10-917322666ff5","ip":"::ffff:127.0.0.1","requestId":"35af1375-4e87-4675-8d10-917322666ff5","method":"GET","path":"/availability","route":"/availability","statusCode":200,"durationMs":60,"contentLength":"401","tenantId":"cmwnzzql60000pt57qktoc8t2","userId":"cmwnzzql60001pt57zv8dntyj","msg":"request completed"}
+stdout | tests/integration/p19-accounting-export.test.ts > P19 accounting export gates > S1: config round-trip + single-row upsert
+P19 S1 OK
+
+stdout | tests/integration/p19-rates-availability.test.ts > P19 rates availability > S1: occupied night shows reduced availability; clean nights full; out-of-range excluded
+P19 S1 OK
+
+{"level":30,"time":"2026-11-19T20:23:41.232Z","pid":52063,"env":"test","requestId":"8af28914-b4fb-4e28-ae44-ac3361deb314","ip":"::ffff:127.0.0.1","requestId":"8af28914-b4fb-4e28-ae44-ac3361deb314","method":"POST","path":"/export","route":"/export","statusCode":200,"durationMs":16,"contentLength":"295","tenantId":"cmwnzzql80000141mwd4yhn9x","userId":"cmwnzzql80001141m6btszfmx","msg":"request completed"}
+stdout | tests/integration/p19-accounting-export.test.ts > P19 accounting export gates > S2: Xero export — mapping applied, header + legs correct
+P19 S2 OK
+
+{"level":30,"time":"2026-11-19T20:23:41.239Z","pid":52065,"env":"test","requestId":"e6de7d65-d84f-48cc-98a9-1edfbcafdd8c","ip":"::ffff:127.0.0.1","requestId":"e6de7d65-d84f-48cc-98a9-1edfbcafdd8c","method":"GET","path":"/availability","route":"/availability","statusCode":400,"durationMs":19,"contentLength":"87","tenantId":"cmwnzzql60000pt57qktoc8t2","userId":"cmwnzzql60001pt57zv8dntyj","msg":"request completed"}
+{"level":30,"time":"2026-11-19T20:23:41.247Z","pid":52063,"env":"test","requestId":"75cbcd51-1d8b-4b64-8ccb-6b19c69707a9","ip":"::ffff:127.0.0.1","requestId":"75cbcd51-1d8b-4b64-8ccb-6b19c69707a9","method":"POST","path":"/export","route":"/export","statusCode":200,"durationMs":10,"contentLength":"273","tenantId":"cmwnzzql80000141mwd4yhn9x","userId":"cmwnzzql80001141m6btszfmx","msg":"request completed"}
+stdout | tests/integration/p19-accounting-export.test.ts > P19 accounting export gates > S3: Pastel export — VatIndicator Y on REV:, N on RCV:
+P19 S3 OK
+
+stdout | tests/integration/p19-accounting-export.test.ts > P19 accounting export gates > S4: VAT201 boxes net credit notes; box 14 null
+P19 S4 OK
+
+{"level":30,"time":"2026-11-19T20:23:41.259Z","pid":52065,"env":"test","requestId":"4c34bde0-3f2d-49d3-83bb-3636e3946ec6","ip":"::ffff:127.0.0.1","requestId":"4c34bde0-3f2d-49d3-83bb-3636e3946ec6","method":"GET","path":"/v1/rates/availability","route":"/availability","statusCode":400,"durationMs":16,"contentLength":"62","tenantId":"cmwnzzql60000pt57qktoc8t2","userId":"cmwnzzql60001pt57zv8dntyj","msg":"request completed"}
+ ✓ tests/integration/p19-accounting-export.test.ts (4 tests) 3658ms
+stdout | tests/integration/p19-rates-availability.test.ts > P19 rates availability > S2: missing params and inverted range rejected
+P19 S2 OK
+
+ ✓ tests/integration/p19-rates-availability.test.ts (2 tests) 3665ms
+
+ Test Files  3 passed (3)
+      Tests  8 passed (8)
+   Start at  22:23:37
+   Duration  4.17s (transform 1.21s, setup 88ms, collect 358ms, tests 10.95s, environment 1ms, prepare 277ms)
+
