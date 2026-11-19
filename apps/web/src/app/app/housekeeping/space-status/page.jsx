@@ -86,8 +86,8 @@ const HK_STYLE = {
 };
 const SERVICE_STYLE = {
   active: null,
-  ooo: { label: 'OOO', ring: 'ring-2 ring-slate-500', badge: 'bg-slate-200 text-slate-700' },
-  oos: { label: 'OOS', ring: 'ring-2 ring-red-500', badge: 'bg-red-100 text-red-700' },
+  ooo: { label: 'OOO', ring: 'ring-2 ring-slate-500', badge: 'bg-slate-200 text-text-secondary' },
+  oos: { label: 'OOS', ring: 'ring-2 ring-red-500', badge: 'bg-danger/10 text-red-700' },
 };
 const HK_OPTIONS = ['clean', 'dirty', 'inspected', 'in_progress', 'ready'];
 const SERVICE_OPTIONS = ['active', 'ooo', 'oos'];

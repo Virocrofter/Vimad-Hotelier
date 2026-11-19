@@ -17,11 +17,11 @@ import { cn } from '../../../../lib/utils';
 import { Search, RefreshCw, Check, Brush, Sparkles, Ban, DoorOpen } from 'lucide-react';
 
 const HK_STYLE = {
-  clean: { label: 'Clean', chip: 'bg-blue-100 text-blue-700' },
-  dirty: { label: 'Dirty', chip: 'bg-orange-100 text-orange-700' },
-  inspected: { label: 'Inspected', chip: 'bg-green-100 text-green-700' },
-  in_progress: { label: 'In progress', chip: 'bg-yellow-100 text-yellow-700' },
-  ready: { label: 'Ready', chip: 'bg-emerald-100 text-emerald-700' },
+  clean: { label: 'Clean', chip: 'bg-accent/10 text-blue-700' },
+  dirty: { label: 'Dirty', chip: 'bg-warning/10 text-orange-700' },
+  inspected: { label: 'Inspected', chip: 'bg-success/10 text-green-700' },
+  in_progress: { label: 'In progress', chip: 'bg-warning/10 text-yellow-700' },
+  ready: { label: 'Ready', chip: 'bg-success/10 text-emerald-700' },
 };
 const ACTIONS = [
   { key: 'clean', label: 'Clean', icon: Check },
