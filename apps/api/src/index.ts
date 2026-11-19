@@ -42,6 +42,8 @@ import { gdprWorker } from './jobs/gdpr.job.js';
 import { deadLetterWorker, attachDeadLetterHandler } from './jobs/dead-letter.handler.js';
 // [PAYMENTS] Paystack payment worker (webhook → folio side effects)
 import { startAbandonedDepositScheduler, paymentWorker } from './jobs/payment.job.js';
+// [A1'] advance-deposit automation — daily auto-capture from saved cards
+import { startDepositCaptureScheduler } from './jobs/deposit-capture.job.js';
 // [DEPOSIT-AUTOMATION] payment request reminders + expiry/auto-cancel
 import { paymentRequestWorker, startPaymentRequestScheduler } from './jobs/payment-request.job.js';
 // [A3] transactional email — pre-arrival scanner
@@ -587,6 +589,7 @@ async function bootstrap() {
   void startTicketScheduler(); // [SUPPORT] SLA breach scan + escalation (every 5 min)
   void startArScheduler(); // [AR] overdue dunning scan (every 6h)
   void startAbandonedDepositScheduler(); // [E2x] cancel web bookings whose deposit checkout was abandoned (hourly)
+  void startDepositCaptureScheduler(); // [A1'] advance-deposit auto-capture from saved cards (daily 06:23)
   void startDlqAlertScheduler(); // [B3] notify tenants on unresolved dead-lettered jobs (hourly)
   void startReportsScheduler(); // [REPORTS] due scheduled reports (every min)
 

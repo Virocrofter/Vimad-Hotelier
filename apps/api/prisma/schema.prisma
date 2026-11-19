@@ -189,6 +189,7 @@ model PasswordReset {
 // ─── Property & Inventory ───
 
 model Property {
+  autoDepositDays        Int                  @default(0) // A1-prime: auto-capture deposits N days before arrival (0 = off)
   keyIssuances           KeyIssuance[]
   logbookEntries         LogbookEntry[]
   reservationRooms       ReservationRoom[]
