@@ -109,19 +109,17 @@ const stepLabels = {
 
 function StatCard({ icon: Icon, label, value, subtext, color }) {
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-4">
+    <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-center gap-3">
         <div className={`rounded-lg p-2 ${color}`}>
           <Icon className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
             {label}
           </p>
-          <p className="text-2xl font-semibold tabular-nums text-slate-900 dark:text-slate-100">
-            {value}
-          </p>
-          {subtext && <p className="text-xs text-slate-400 dark:text-slate-500">{subtext}</p>}
+          <p className="text-2xl font-semibold tabular-nums text-text-primary">{value}</p>
+          {subtext && <p className="text-xs text-text-muted">{subtext}</p>}
         </div>
       </div>
     </div>
@@ -135,12 +133,12 @@ function ChecklistItem({ item }) {
     <div className={`flex items-start gap-3 rounded-lg border p-3 ${config.bg} ${config.border}`}>
       <Icon className={`h-5 w-5 mt-0.5 shrink-0 ${config.color}`} />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{item.label}</p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{item.detail}</p>
+        <p className="text-sm font-medium text-text-primary">{item.label}</p>
+        <p className="text-xs text-text-muted mt-0.5">{item.detail}</p>
       </div>
       {item.count > 0 && (
         <span
-          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${config.color} bg-white dark:bg-slate-800 border ${config.border}`}
+          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${config.color} bg-card border ${config.border}`}
         >
           {item.count}
         </span>
@@ -152,19 +150,19 @@ function ChecklistItem({ item }) {
 function StepToggle({ label, checked, onChange, disabled }) {
   return (
     <label
-      className={`flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 p-3 cursor-pointer transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+      className={`flex items-center justify-between rounded-lg border border-border p-3 cursor-pointer transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800'}`}
     >
-      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{label}</span>
+      <span className="text-sm font-medium text-text-secondary">{label}</span>
       <button
         type="button"
         role="switch"
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'}`}
+        className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? 'bg-emerald-500' : 'bg-[var(--hq-surface-2)]'}`}
       >
         <span
-          className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform mt-0.5 ${checked ? 'translate-x-5' : 'translate-x-0.5'}`}
+          className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-card shadow transform transition-transform mt-0.5 ${checked ? 'translate-x-5' : 'translate-x-0.5'}`}
         />
       </button>
     </label>
@@ -186,7 +184,7 @@ function AuditProgress({ steps, currentStep, results }) {
                 ? 'bg-emerald-50 dark:bg-emerald-950/20'
                 : isCurrent
                   ? 'bg-blue-50 dark:bg-blue-950/20'
-                  : 'bg-slate-50 dark:bg-slate-800/50'
+                  : 'bg-[var(--hq-surface-2)]'
             }`}
           >
             {isDone ? (
@@ -194,7 +192,7 @@ function AuditProgress({ steps, currentStep, results }) {
             ) : isCurrent ? (
               <Loader2 className="h-5 w-5 text-blue-500 animate-spin shrink-0" />
             ) : (
-              <div className="h-5 w-5 rounded-full border-2 border-slate-300 dark:border-slate-600 shrink-0" />
+              <div className="h-5 w-5 rounded-full border-2 border-border shrink-0" />
             )}
             <span
               className={`text-sm font-medium ${
@@ -202,13 +200,13 @@ function AuditProgress({ steps, currentStep, results }) {
                   ? 'text-emerald-700 dark:text-emerald-400'
                   : isCurrent
                     ? 'text-blue-700 dark:text-blue-400'
-                    : 'text-slate-500 dark:text-slate-400'
+                    : 'text-text-muted'
               }`}
             >
               {label}
             </span>
             {isDone && results[key] && typeof results[key] === 'object' && (
-              <span className="ml-auto text-xs text-slate-400">
+              <span className="ml-auto text-xs text-text-muted">
                 {JSON.stringify(results[key]).slice(0, 60)}...
               </span>
             )}
@@ -222,7 +220,7 @@ function AuditProgress({ steps, currentStep, results }) {
 function HistoryTable({ audits, onViewReport, onRollback, rollingBack }) {
   if (!audits.length) {
     return (
-      <div className="text-center py-12 text-slate-400 dark:text-slate-500">
+      <div className="text-center py-12 text-text-muted">
         <History className="h-12 w-12 mx-auto mb-3 opacity-50" />
         <p>No audit history found</p>
       </div>
@@ -233,15 +231,13 @@ function HistoryTable({ audits, onViewReport, onRollback, rollingBack }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-200 dark:border-slate-700 text-left">
-            <th className="pb-3 font-medium text-slate-500 dark:text-slate-400">Date</th>
-            <th className="pb-3 font-medium text-slate-500 dark:text-slate-400">Property</th>
-            <th className="pb-3 font-medium text-slate-500 dark:text-slate-400">Status</th>
-            <th className="pb-3 font-medium text-slate-500 dark:text-slate-400">Completed</th>
-            <th className="pb-3 font-medium text-slate-500 dark:text-slate-400">By</th>
-            <th className="pb-3 font-medium text-slate-500 dark:text-slate-400 text-right">
-              Actions
-            </th>
+          <tr className="border-b border-border text-left">
+            <th className="pb-3 font-medium text-text-muted">Date</th>
+            <th className="pb-3 font-medium text-text-muted">Property</th>
+            <th className="pb-3 font-medium text-text-muted">Status</th>
+            <th className="pb-3 font-medium text-text-muted">Completed</th>
+            <th className="pb-3 font-medium text-text-muted">By</th>
+            <th className="pb-3 font-medium text-text-muted text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -254,9 +250,9 @@ function HistoryTable({ audits, onViewReport, onRollback, rollingBack }) {
             return (
               <tr
                 key={audit.id}
-                className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                className="border-b border-slate-100 hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800/30"
               >
-                <td className="py-3 font-medium text-slate-900 dark:text-slate-100">
+                <td className="py-3 font-medium text-text-primary">
                   {new Date(audit.auditDate).toLocaleDateString('en-US', {
                     weekday: 'short',
                     year: 'numeric',
@@ -264,9 +260,7 @@ function HistoryTable({ audits, onViewReport, onRollback, rollingBack }) {
                     day: 'numeric',
                   })}
                 </td>
-                <td className="py-3 text-slate-600 dark:text-slate-400">
-                  {audit.property?.name || '—'}
-                </td>
+                <td className="py-3 text-text-secondary">{audit.property?.name || '—'}</td>
                 <td className="py-3">
                   <span
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${status.color}`}
@@ -274,17 +268,17 @@ function HistoryTable({ audits, onViewReport, onRollback, rollingBack }) {
                     {status.label}
                   </span>
                 </td>
-                <td className="py-3 text-slate-500 dark:text-slate-400 text-xs">
+                <td className="py-3 text-text-muted text-xs">
                   {audit.completedAt ? new Date(audit.completedAt).toLocaleString() : '—'}
                 </td>
-                <td className="py-3 text-slate-500 dark:text-slate-400 text-xs">
+                <td className="py-3 text-text-muted text-xs">
                   {audit.results?.completedBy || '—'}
                 </td>
                 <td className="py-3 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => onViewReport(audit)}
-                      className="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                      className="rounded-lg p-1.5 text-text-muted hover:text-text-secondary dark:hover:text-slate-300 hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-700 transition-colors"
                       title="View Report"
                     >
                       <Eye className="h-4 w-4" />
@@ -325,15 +319,13 @@ function ReportModal({ audit, onClose }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-900 shadow-2xl m-4"
+        className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl bg-card shadow-2xl m-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-              Night Audit Report
-            </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <h2 className="text-lg font-semibold text-text-primary">Night Audit Report</h2>
+            <p className="text-sm text-text-muted">
               {audit.property?.name} —{' '}
               {new Date(audit.auditDate).toLocaleDateString('en-US', {
                 weekday: 'long',
@@ -345,7 +337,7 @@ function ReportModal({ audit, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className="rounded-lg p-2 text-text-muted hover:text-text-secondary dark:hover:text-slate-300 hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-700"
           >
             <X className="h-5 w-5" />
           </button>
@@ -382,54 +374,44 @@ function ReportModal({ audit, onClose }) {
           {/* Daily Stats */}
           {report && (
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" /> Daily Performance
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-center">
-                  <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                    {report.arrivals}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Arrivals</p>
+                <div className="rounded-lg bg-[var(--hq-surface-2)] p-3 text-center">
+                  <p className="text-2xl font-bold text-text-primary">{report.arrivals}</p>
+                  <p className="text-xs text-text-muted">Arrivals</p>
                 </div>
-                <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-center">
-                  <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                    {report.departures}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Departures</p>
+                <div className="rounded-lg bg-[var(--hq-surface-2)] p-3 text-center">
+                  <p className="text-2xl font-bold text-text-primary">{report.departures}</p>
+                  <p className="text-xs text-text-muted">Departures</p>
                 </div>
-                <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-center">
-                  <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                    {report.inHouse}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">In House</p>
+                <div className="rounded-lg bg-[var(--hq-surface-2)] p-3 text-center">
+                  <p className="text-2xl font-bold text-text-primary">{report.inHouse}</p>
+                  <p className="text-xs text-text-muted">In House</p>
                 </div>
-                <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-3 text-center">
-                  <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                    {report.noShows}
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">No-Shows</p>
+                <div className="rounded-lg bg-[var(--hq-surface-2)] p-3 text-center">
+                  <p className="text-2xl font-bold text-text-primary">{report.noShows}</p>
+                  <p className="text-xs text-text-muted">No-Shows</p>
                 </div>
               </div>
 
               {/* Occupancy */}
               {report.occupancy && (
-                <div className="mt-3 rounded-lg bg-slate-50 dark:bg-slate-800 p-4">
+                <div className="mt-3 rounded-lg bg-[var(--hq-surface-2)] p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Occupancy
-                    </span>
-                    <span className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                    <span className="text-sm font-medium text-text-secondary">Occupancy</span>
+                    <span className="text-lg font-bold text-text-primary">
                       {report.occupancy.rate}%
                     </span>
                   </div>
-                  <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                  <div className="w-full bg-[var(--hq-surface-2)] rounded-full h-2">
                     <div
                       className="bg-emerald-500 h-2 rounded-full transition-all"
                       style={{ width: `${report.occupancy.rate}%` }}
                     />
                   </div>
-                  <div className="flex justify-between mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  <div className="flex justify-between mt-2 text-xs text-text-muted">
                     <span>{report.occupancy.occupied} occupied</span>
                     <span>{report.occupancy.available} available</span>
                     <span>{report.occupancy.ooo} OOO</span>
@@ -465,7 +447,7 @@ function ReportModal({ audit, onClose }) {
 
           {/* Step Results */}
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
               <Zap className="h-4 w-4" /> Step Results
             </h3>
             <div className="space-y-2">
@@ -473,18 +455,13 @@ function ReportModal({ audit, onClose }) {
                 const result = results[key];
                 if (result === undefined) return null;
                 return (
-                  <div
-                    key={key}
-                    className="rounded-lg border border-slate-200 dark:border-slate-700 p-3"
-                  >
+                  <div key={key} className="rounded-lg border border-border p-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                        {label}
-                      </span>
+                      <span className="text-sm font-medium text-text-secondary">{label}</span>
                       <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                     </div>
                     {typeof result === 'object' && result !== null && (
-                      <pre className="mt-2 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 rounded p-2 overflow-x-auto">
+                      <pre className="mt-2 text-xs text-text-muted bg-[var(--hq-surface-2)] rounded p-2 overflow-x-auto">
                         {JSON.stringify(result, null, 2)}
                       </pre>
                     )}
@@ -496,13 +473,11 @@ function ReportModal({ audit, onClose }) {
 
           {/* Business Date Roll */}
           {results.businessDateRolled && (
-            <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-4 flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-slate-400" />
+            <div className="rounded-lg bg-[var(--hq-surface-2)] p-4 flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-text-muted" />
               <div>
-                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Business Date Rolled
-                </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-sm font-medium text-text-secondary">Business Date Rolled</p>
+                <p className="text-xs text-text-muted">
                   {results.businessDateRolled.previousDate} → {results.businessDateRolled.newDate}
                 </p>
               </div>
@@ -518,10 +493,10 @@ function ReportModal({ audit, onClose }) {
           )}
         </div>
 
-        <div className="sticky bottom-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 px-6 py-4 flex items-center justify-end gap-3">
+        <div className="sticky bottom-0 bg-card border-t border-border px-6 py-4 flex items-center justify-end gap-3">
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 transition-colors"
           >
             <Printer className="h-4 w-4" /> Print
           </button>
@@ -536,7 +511,7 @@ function ReportModal({ audit, onClose }) {
               a.click();
               URL.revokeObjectURL(url);
             }}
-            className="flex items-center gap-2 rounded-lg bg-slate-900 dark:bg-slate-100 px-4 py-2 text-sm font-medium text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors"
+            className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-[var(--hq-surface-2)] transition-colors"
           >
             <Download className="h-4 w-4" /> Export JSON
           </button>
@@ -784,13 +759,13 @@ export default function NightAuditPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-3">
             <div className="rounded-xl bg-indigo-100 dark:bg-indigo-900/30 p-2">
               <Moon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
             </div>
             Night Audit
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-sm text-text-muted mt-1">
             Close the business day, post charges, and roll to the next date
           </p>
         </div>
@@ -802,7 +777,7 @@ export default function NightAuditPage() {
                 const prop = properties.find((p) => p.id === e.target.value);
                 setSelectedProperty(prop);
               }}
-              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-text-secondary focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               {properties.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -816,7 +791,7 @@ export default function NightAuditPage() {
               fetchPreChecks();
               fetchStatus();
             }}
-            className="rounded-lg border border-slate-200 dark:border-slate-700 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+            className="rounded-lg border border-border p-2 text-text-muted hover:text-text-secondary dark:hover:text-slate-300 hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 transition-colors"
             title="Refresh"
           >
             <RefreshCw className="h-4 w-4" />
@@ -844,7 +819,7 @@ export default function NightAuditPage() {
             >
               {auditStatus.isDayClosed ? 'Business Day Closed' : 'Business Day Open'}
             </p>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-text-muted">
               Current business date:{' '}
               {auditStatus.businessDate
                 ? new Date(auditStatus.businessDate).toLocaleDateString('en-US', {
@@ -861,26 +836,20 @@ export default function NightAuditPage() {
           {todayStats && (
             <div className="hidden md:flex items-center gap-6 text-sm">
               <div className="text-center">
-                <p className="font-bold text-slate-900 dark:text-slate-100">
-                  {todayStats.occupancyRate}%
-                </p>
-                <p className="text-xs text-slate-400">Occupancy</p>
+                <p className="font-bold text-text-primary">{todayStats.occupancyRate}%</p>
+                <p className="text-xs text-text-muted">Occupancy</p>
               </div>
               <div className="text-center">
-                <p className="font-bold text-slate-900 dark:text-slate-100">{todayStats.inHouse}</p>
-                <p className="text-xs text-slate-400">In House</p>
+                <p className="font-bold text-text-primary">{todayStats.inHouse}</p>
+                <p className="text-xs text-text-muted">In House</p>
               </div>
               <div className="text-center">
-                <p className="font-bold text-slate-900 dark:text-slate-100">
-                  {todayStats.arrivals}
-                </p>
-                <p className="text-xs text-slate-400">Arrivals</p>
+                <p className="font-bold text-text-primary">{todayStats.arrivals}</p>
+                <p className="text-xs text-text-muted">Arrivals</p>
               </div>
               <div className="text-center">
-                <p className="font-bold text-slate-900 dark:text-slate-100">
-                  {todayStats.departures}
-                </p>
-                <p className="text-xs text-slate-400">Departures</p>
+                <p className="font-bold text-text-primary">{todayStats.departures}</p>
+                <p className="text-xs text-text-muted">Departures</p>
               </div>
             </div>
           )}
@@ -922,7 +891,7 @@ export default function NightAuditPage() {
       )}
 
       {/* Tabs */}
-      <div className="border-b border-slate-200 dark:border-slate-700">
+      <div className="border-b border-border">
         <nav className="flex gap-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -933,7 +902,7 @@ export default function NightAuditPage() {
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                    : 'border-transparent text-text-muted hover:text-text-secondary dark:hover:text-slate-300 hover:border-border dark:hover:border-slate-600'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -950,13 +919,13 @@ export default function NightAuditPage() {
           {/* Left: Pre-Checks + Steps */}
           <div className="space-y-6">
             {/* Pre-Audit Checklist */}
-            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-6">
+            <div className="rounded-xl border border-border bg-card p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                   <Shield className="h-5 w-5 text-indigo-500" />
                   Pre-Audit Checklist
                 </h2>
-                {loadingPreChecks && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}
+                {loadingPreChecks && <Loader2 className="h-4 w-4 animate-spin text-text-muted" />}
               </div>
 
               {preChecks ? (
@@ -968,14 +937,14 @@ export default function NightAuditPage() {
                   </div>
 
                   {/* Summary */}
-                  <div className="rounded-lg bg-slate-50 dark:bg-slate-800 p-4 grid grid-cols-3 gap-4 text-center">
+                  <div className="rounded-lg bg-[var(--hq-surface-2)] p-4 grid grid-cols-3 gap-4 text-center">
                     <div>
                       <p
                         className={`text-xl font-bold ${preChecks.blockerCount > 0 ? 'text-red-500' : 'text-emerald-500'}`}
                       >
                         {preChecks.blockerCount}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Blockers</p>
+                      <p className="text-xs text-text-muted">Blockers</p>
                     </div>
                     <div>
                       <p
@@ -983,7 +952,7 @@ export default function NightAuditPage() {
                       >
                         {preChecks.warningCount}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Warnings</p>
+                      <p className="text-xs text-text-muted">Warnings</p>
                     </div>
                     <div>
                       <p
@@ -991,20 +960,20 @@ export default function NightAuditPage() {
                       >
                         {preChecks.canRunAudit ? 'Yes' : 'No'}
                       </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Can Run</p>
+                      <p className="text-xs text-text-muted">Can Run</p>
                     </div>
                   </div>
                 </>
               ) : (
-                <div className="text-center py-8 text-slate-400 dark:text-slate-500">
+                <div className="text-center py-8 text-text-muted">
                   {loadingPreChecks ? 'Loading checks...' : 'Select a property to view checks'}
                 </div>
               )}
             </div>
 
             {/* Audit Steps Configuration */}
-            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <div className="rounded-xl border border-border bg-card p-6">
+              <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                 <Settings className="h-5 w-5 text-indigo-500" />
                 Audit Steps
               </h2>
@@ -1025,8 +994,8 @@ export default function NightAuditPage() {
           {/* Right: Run + Progress */}
           <div className="space-y-6">
             {/* Run Button */}
-            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-6">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <div className="rounded-xl border border-border bg-card p-6">
+              <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                 <Play className="h-5 w-5 text-indigo-500" />
                 Execute Night Audit
               </h2>
@@ -1043,10 +1012,10 @@ export default function NightAuditPage() {
                 </div>
               ) : (
                 <>
-                  <div className="mb-4 rounded-lg bg-slate-50 dark:bg-slate-800 p-4">
+                  <div className="mb-4 rounded-lg bg-[var(--hq-surface-2)] p-4">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">Audit Date</span>
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                      <span className="text-text-muted">Audit Date</span>
+                      <span className="font-medium text-text-primary">
                         {new Date().toLocaleDateString('en-US', {
                           weekday: 'long',
                           year: 'numeric',
@@ -1056,14 +1025,14 @@ export default function NightAuditPage() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm mt-2">
-                      <span className="text-slate-500 dark:text-slate-400">Property</span>
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                      <span className="text-text-muted">Property</span>
+                      <span className="font-medium text-text-primary">
                         {selectedProperty?.name || '—'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm mt-2">
-                      <span className="text-slate-500 dark:text-slate-400">Steps Selected</span>
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                      <span className="text-text-muted">Steps Selected</span>
+                      <span className="font-medium text-text-primary">
                         {Object.values(steps).filter(Boolean).length} of {Object.keys(steps).length}
                       </span>
                     </div>
@@ -1086,7 +1055,7 @@ export default function NightAuditPage() {
                     className={`w-full flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-lg font-semibold transition-all ${
                       canRun && !isRunning
                         ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-500/25'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+                        : 'bg-[var(--hq-surface-2)] text-text-muted cursor-not-allowed'
                     }`}
                   >
                     {isRunning ? (
@@ -1107,8 +1076,8 @@ export default function NightAuditPage() {
 
             {/* Progress / Results */}
             {(isRunning || runResult) && (
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-6">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+              <div className="rounded-xl border border-border bg-card p-6">
+                <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
                   {runResult?.status === 'failed' ? (
                     <>
                       <XCircle className="h-5 w-5 text-red-500" /> Audit Failed
@@ -1158,25 +1127,25 @@ export default function NightAuditPage() {
       )}
 
       {activeTab === 'history' && (
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-6">
+        <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
               <History className="h-5 w-5 text-indigo-500" />
               Audit History
-              <span className="text-sm font-normal text-slate-400">
+              <span className="text-sm font-normal text-text-muted">
                 ({history.meta.total} total)
               </span>
             </h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={handleExportHistory}
-                className="flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 transition-colors"
               >
                 <Download className="h-4 w-4" /> Export
               </button>
               <button
                 onClick={() => fetchHistory(historyPage)}
-                className="rounded-lg border border-slate-200 dark:border-slate-700 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                className="rounded-lg border border-border p-1.5 text-text-muted hover:text-text-secondary dark:hover:text-slate-300 transition-colors"
               >
                 <RefreshCw className="h-4 w-4" />
               </button>
@@ -1198,8 +1167,8 @@ export default function NightAuditPage() {
 
               {/* Pagination */}
               {history.meta.totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
+                  <p className="text-sm text-text-muted">
                     Page {history.meta.page} of {history.meta.totalPages}
                   </p>
                   <div className="flex items-center gap-2">
@@ -1210,7 +1179,7 @@ export default function NightAuditPage() {
                         fetchHistory(newPage);
                       }}
                       disabled={historyPage <= 1}
-                      className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Previous
                     </button>
@@ -1221,7 +1190,7 @@ export default function NightAuditPage() {
                         fetchHistory(newPage);
                       }}
                       disabled={historyPage >= history.meta.totalPages}
-                      className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="rounded-lg border border-border px-3 py-1.5 text-sm text-text-secondary hover:bg-[var(--hq-surface-2)] dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Next
                     </button>
@@ -1235,24 +1204,22 @@ export default function NightAuditPage() {
 
       {activeTab === 'automation' && (
         <div className="max-w-2xl space-y-6">
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 p-6">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2 flex items-center gap-2">
+          <div className="rounded-xl border border-border bg-card p-6">
+            <h2 className="text-lg font-semibold text-text-primary mb-2 flex items-center gap-2">
               <Settings className="h-5 w-5 text-indigo-500" />
               Automation Settings
             </h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            <p className="text-sm text-text-muted mb-6">
               Configure automatic night audit execution. When enabled, the audit will run at the
               scheduled time without manual intervention.
             </p>
 
             <div className="space-y-6">
               {/* Enable/Disable */}
-              <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+              <div className="flex items-center justify-between rounded-lg border border-border p-4">
                 <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100">
-                    Enable Automation
-                  </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="font-medium text-text-primary">Enable Automation</p>
+                  <p className="text-sm text-text-muted">
                     Automatically run night audit on schedule
                   </p>
                 </div>
@@ -1261,19 +1228,19 @@ export default function NightAuditPage() {
                   role="switch"
                   aria-checked={scheduleForm.isActive}
                   onClick={() => setScheduleForm((prev) => ({ ...prev, isActive: !prev.isActive }))}
-                  className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${scheduleForm.isActive ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${scheduleForm.isActive ? 'bg-emerald-500' : 'bg-[var(--hq-surface-2)]'}`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform mt-0.5 ${scheduleForm.isActive ? 'translate-x-5' : 'translate-x-0.5'}`}
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-card shadow transform transition-transform mt-0.5 ${scheduleForm.isActive ? 'translate-x-5' : 'translate-x-0.5'}`}
                   />
                 </button>
               </div>
 
               {/* Auto Run vs Reminder */}
-              <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+              <div className="flex items-center justify-between rounded-lg border border-border p-4">
                 <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100">Auto-Run Mode</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="font-medium text-text-primary">Auto-Run Mode</p>
+                  <p className="text-sm text-text-muted">
                     {scheduleForm.autoRun
                       ? 'Audit runs automatically without confirmation'
                       : 'Send reminder email only, manual confirmation required'}
@@ -1284,10 +1251,10 @@ export default function NightAuditPage() {
                   role="switch"
                   aria-checked={scheduleForm.autoRun}
                   onClick={() => setScheduleForm((prev) => ({ ...prev, autoRun: !prev.autoRun }))}
-                  className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${scheduleForm.autoRun ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${scheduleForm.autoRun ? 'bg-emerald-500' : 'bg-[var(--hq-surface-2)]'}`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform mt-0.5 ${scheduleForm.autoRun ? 'translate-x-5' : 'translate-x-0.5'}`}
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-card shadow transform transition-transform mt-0.5 ${scheduleForm.autoRun ? 'translate-x-5' : 'translate-x-0.5'}`}
                   />
                 </button>
               </div>
@@ -1295,7 +1262,7 @@ export default function NightAuditPage() {
               {/* Schedule Time */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     Scheduled Time
                   </label>
                   <input
@@ -1304,11 +1271,11 @@ export default function NightAuditPage() {
                     onChange={(e) =>
                       setScheduleForm((prev) => ({ ...prev, scheduledTime: e.target.value }))
                     }
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-text-secondary focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-text-secondary mb-2">
                     Timezone
                   </label>
                   <select
@@ -1316,7 +1283,7 @@ export default function NightAuditPage() {
                     onChange={(e) =>
                       setScheduleForm((prev) => ({ ...prev, timezone: e.target.value }))
                     }
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-text-secondary focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="UTC">UTC</option>
                     <option value="Africa/Johannesburg">Africa/Johannesburg (SAST)</option>
@@ -1335,7 +1302,7 @@ export default function NightAuditPage() {
 
               {/* Steps for automation */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-text-secondary mb-3">
                   Automated Steps
                 </label>
                 <div className="space-y-2">
@@ -1357,19 +1324,19 @@ export default function NightAuditPage() {
 
               {/* Notification Emails */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
                   Notification Emails
                 </label>
                 <div className="flex gap-2 mb-3">
                   <div className="relative flex-1">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-muted" />
                     <input
                       type="email"
                       value={newEmail}
                       onChange={(e) => setNewEmail(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddEmail()}
                       placeholder="manager@hotel.com"
-                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full rounded-lg border border-border bg-card pl-10 pr-3 py-2 text-sm text-text-secondary focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                   <button
