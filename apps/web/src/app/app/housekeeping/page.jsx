@@ -72,12 +72,12 @@ import {
 // ─── Constants ───
 
 const STATUS_COLUMNS = [
-  { key: 'pending', label: 'Pending', color: 'bg-yellow-500', hex: '#eab308', icon: Clock },
-  { key: 'in_progress', label: 'In Progress', color: 'bg-blue-500', hex: '#3b82f6', icon: Play },
+  { key: 'pending', label: 'Pending', color: 'bg-warning/100', hex: '#eab308', icon: Clock },
+  { key: 'in_progress', label: 'In Progress', color: 'bg-accent/100', hex: '#3b82f6', icon: Play },
   {
     key: 'completed',
     label: 'Completed',
-    color: 'bg-green-500',
+    color: 'bg-success/100',
     hex: '#22c55e',
     icon: CheckCircle,
   },
@@ -85,9 +85,9 @@ const STATUS_COLUMNS = [
 ];
 
 const PRIORITY_COLORS = {
-  urgent: 'bg-red-500',
-  high: 'bg-orange-500',
-  normal: 'bg-blue-500',
+  urgent: 'bg-danger/100',
+  high: 'bg-warning/100',
+  normal: 'bg-accent/100',
   low: 'bg-gray-400',
 };
 
@@ -193,7 +193,7 @@ function TaskCard({ task, onStart, onComplete, onInspect, onSkip, onAssign, staf
     <Card
       className={cn(
         'p-3 cursor-pointer hover:shadow-md transition-shadow',
-        overdue && 'border-red-300 bg-red-50'
+        overdue && 'border-red-300 bg-danger/10'
       )}
     >
       <div className="flex items-start justify-between mb-2">
@@ -335,7 +335,7 @@ function TaskListView({ tasks, onStart, onComplete, onInspect, onAssign, staff }
       </TableHeader>
       <TableBody>
         {tasks.map((task) => (
-          <TableRow key={task.id} className={cn(isOverdue(task) && 'bg-red-50')}>
+          <TableRow key={task.id} className={cn(isOverdue(task) && 'bg-danger/10')}>
             <TableCell className="font-medium">{task.room?.number}</TableCell>
             <TableCell>{TYPE_LABELS[task.type]}</TableCell>
             <TableCell>
@@ -399,9 +399,9 @@ function ReportsView({ stats }) {
         <CardContent>
           <div className="space-y-3">
             {[
-              { label: 'Pending', value: today.pending, color: 'bg-yellow-500' },
-              { label: 'In Progress', value: today.inProgress, color: 'bg-blue-500' },
-              { label: 'Completed', value: today.completed, color: 'bg-green-500' },
+              { label: 'Pending', value: today.pending, color: 'bg-warning/100' },
+              { label: 'In Progress', value: today.inProgress, color: 'bg-accent/100' },
+              { label: 'Completed', value: today.completed, color: 'bg-success/100' },
               { label: 'Inspected', value: today.inspected, color: 'bg-purple-500' },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-3">
