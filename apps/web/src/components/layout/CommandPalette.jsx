@@ -228,7 +228,8 @@ export default function CommandPalette({ open, onOpen, onClose }) {
           apiClient.get('/tasks', { params: { q: term, pageSize: 5 } }),
           apiClient.get('/payments', { params: { pageSize: 50 } }).catch(() => null),
         ]);
-        const allPayments = pay?.data?.data ?? pay?.data ?? [];
+        const pd = pay?.data?.data ?? pay?.data ?? [];
+        const allPayments = Array.isArray(pd) ? pd : (pd?.items ?? []);
         setPaymentHits(
           allPayments
             .filter((x) =>
