@@ -16,6 +16,7 @@ import {
   BedDouble,
   CalendarCheck,
   ClipboardList,
+  CreditCard,
   Map,
   DollarSign,
   LogIn,
@@ -162,6 +163,7 @@ export default function CommandPalette({ open, onOpen, onClose }) {
   const [resHits, setResHits] = useState([]);
   const [roomHits, setRoomHits] = useState([]);
   const [taskHits, setTaskHits] = useState([]);
+  const [paymentHits, setPaymentHits] = useState([]);
   const [searching, setSearching] = useState(false);
   const [index, setIndex] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -212,18 +214,30 @@ export default function CommandPalette({ open, onOpen, onClose }) {
       setResHits([]);
       setRoomHits([]);
       setTaskHits([]);
+      setPaymentHits([]);
       return undefined;
     }
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
       try {
-        const [g, r, rm, t] = await Promise.all([
+        const [g, r, rm, t, pay] = await Promise.all([
           apiClient.get('/guests', { params: { search: term, pageSize: 5 } }),
           apiClient.get('/reservations', { params: { search: term, pageSize: 5 } }),
           apiClient.get('/rooms', { params: { search: term, pageSize: 5 } }),
           apiClient.get('/tasks', { params: { q: term, pageSize: 5 } }),
+          apiClient.get('/payments', { params: { pageSize: 50 } }).catch(() => null),
         ]);
+        const allPayments = pay?.data?.data ?? pay?.data ?? [];
+        setPaymentHits(
+          allPayments
+            .filter((x) =>
+              String(x.reference ?? '')
+                .toLowerCase()
+                .includes(term.toLowerCase())
+            )
+            .slice(0, 5)
+        );
         setGuestHits(
           mode === 'guest'
             ? (g.data?.data ?? [])
@@ -339,6 +353,17 @@ export default function CommandPalette({ open, onOpen, onClose }) {
       group: 'Rooms',
       score: frecencyScore(frecency[`room-${rm.id}`]),
     }));
+    const payments = paymentHits.map((p) => ({
+      key: `pay-${p.id}`,
+      label: p.reference,
+      hint: `${p.guest ? `${p.guest.firstName} ${p.guest.lastName}` : 'Payment'} · ${String(
+        p.status ?? ''
+      ).replace(/_/g, ' ')}`,
+      icon: CreditCard,
+      to: '/app/billing/payments',
+      group: 'Payments',
+      score: frecencyScore(frecency[`pay-${p.id}`]),
+    }));
     const tasks = taskHits.map((t) => ({
       key: `task-${t.id}`,
       label: t.title,
@@ -352,9 +377,9 @@ export default function CommandPalette({ open, onOpen, onClose }) {
     const pools = {
       action: [...actions],
       guest: [...guests],
-      room: [...rooms, ...res],
+      room: [...rooms, ...res, ...payments],
       help: [...help],
-      all: [...actions, ...guests, ...res, ...rooms, ...tasks, ...pages, ...help],
+      all: [...actions, ...guests, ...res, ...rooms, ...payments, ...tasks, ...pages, ...help],
     };
     let list = pools[mode] ?? pools.all;
 
@@ -432,7 +457,16 @@ export default function CommandPalette({ open, onOpen, onClose }) {
     }
   };
 
-  const groupOrder = ['Actions', 'Guests', 'Reservations', 'Rooms', 'Tasks', 'Pages', 'Help'];
+  const groupOrder = [
+    'Actions',
+    'Guests',
+    'Reservations',
+    'Rooms',
+    'Payments',
+    'Tasks',
+    'Pages',
+    'Help',
+  ];
   const ordered = [...items].sort(
     (a, b) =>
       (groupOrder.indexOf(a.group) + 1 || 99) - (groupOrder.indexOf(b.group) + 1 || 99) ||
