@@ -19,7 +19,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return body.data as T;
 }
 
+export interface OfferMessagePayload {
+  productId?: string;
+  name?: string;
+  price?: number;
+  currency?: string;
+}
+
 export interface ChatMessageItem {
+  type?: 'offer' | null;
+  payload?: OfferMessagePayload | null;
+
   id: string;
   authorType: 'guest' | 'staff';
   authorName: string;
@@ -68,6 +78,18 @@ export const guestCommsApi = {
     request<{ id: string; status: string }>(
       `/comms/chat/${encodeURIComponent(token)}/thread/close`,
       { method: 'POST' }
+    ),
+
+  chatAcceptOffer: (token: string, messageId: string) =>
+    request<{ accepted: boolean; total: number }>(
+      `/comms/chat/${encodeURIComponent(token)}/offers/accept`,
+      { method: 'POST', body: JSON.stringify({ messageId }) }
+    ),
+
+  acceptOffer: (token: string, input: { messageId: string; quantity?: number }) =>
+    request<{ accepted: boolean; total: number }>(
+      `/comms/chat/${encodeURIComponent(token)}/offers/accept`,
+      { method: 'POST', body: JSON.stringify(input) }
     ),
 
   announcements: (token: string) =>

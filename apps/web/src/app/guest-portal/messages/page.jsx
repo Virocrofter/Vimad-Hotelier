@@ -1,11 +1,11 @@
 /* src/app/guest-portal/messages/page.jsx — G5: real two-way chat */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertTriangle, Send, CheckCircle2, X } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertTriangle, Send, CheckCircle2, X, Gift } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../../../components/ui/button';
 import { getGuestToken } from '../../../hooks/guestPortalApi';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { io } from 'socket.io-client';
 import {
   useChatThread,
@@ -13,11 +13,57 @@ import {
   useCloseChatThread,
 } from '../../../hooks/useGuestComms';
 import { formatDate } from '../../../lib/guest-utils';
+import { guestCommsApi } from '../../../hooks/guestCommsApi';
+import { formatMoney } from '../../../lib/money';
 
 function newClientId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function')
     return crypto.randomUUID();
   return `c-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+function OfferCard({ message }) {
+  const qc = useQueryClient();
+  const [done, setDone] = useState(false);
+  const accept = useMutation({
+    mutationFn: () => guestCommsApi.chatAcceptOffer(getGuestToken() ?? '', message.id),
+    onSuccess: () => {
+      setDone(true);
+      qc.invalidateQueries({ queryKey: ['gp-chat'] });
+    },
+  });
+  const p = message.payload ?? {};
+  const price = Number(p.price ?? 0);
+  return (
+    <div className="flex justify-start">
+      <div className="max-w-[85%] rounded-2xl rounded-bl-sm border border-border bg-surface px-4 py-3">
+        <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+          <Gift className="h-3 w-3" /> Special offer
+        </p>
+        {p.name && <p className="mt-1 text-sm font-semibold text-text-primary">{p.name}</p>}
+        {price > 0 && (
+          <p className="text-base font-semibold tabular-nums text-secondary">
+            {formatMoney(price, p.currency ?? 'ZAR')}
+          </p>
+        )}
+        <p className="mt-1 whitespace-pre-wrap text-xs text-text-secondary">{message.body}</p>
+        {done ? (
+          <p className="mt-2 inline-flex items-center gap-1 rounded-lg bg-secondary/10 px-3 py-1.5 text-xs font-medium text-secondary">
+            <CheckCircle2 className="h-3.5 w-3.5" /> Added to your bill
+          </p>
+        ) : (
+          <button
+            onClick={() => accept.mutate()}
+            disabled={accept.isPending}
+            className="mt-2 rounded-lg bg-secondary px-4 py-1.5 text-xs font-semibold text-white transition-opacity disabled:opacity-60"
+          >
+            {accept.isPending ? 'Adding…' : 'Accept offer'}
+          </button>
+        )}
+        {accept.isError && <p className="mt-1 text-[11px] text-danger">{accept.error?.message}</p>}
+      </div>
+    </div>
+  );
 }
 
 export default function MessagesPage() {
@@ -151,6 +197,9 @@ export default function MessagesPage() {
           </div>
         )}
         {messages.map((m) => {
+          if (m.type === 'offer' && m.payload) {
+            return <OfferCard key={m.id} message={m} />;
+          }
           const mine = m.authorType === 'guest';
           return (
             <div key={m.id} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
