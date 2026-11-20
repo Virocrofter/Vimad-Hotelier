@@ -56,7 +56,9 @@ export function usePropertyScope(): PropertyScopeResult {
   // request carries x-property-id (SH-05: zero cross-property leaks by
   // default). An explicit "All properties" pick (hasChosen) is respected.
   useEffect(() => {
-    if (hasChosen || storedId || data?.currentPropertyId || properties.length === 0 || isLoading) {
+    // No isLoading gate: the scope query can error/retry for non-chain tenants
+    // while the fallback properties list is already resolved.
+    if (hasChosen || storedId || data?.currentPropertyId || properties.length === 0) {
       return;
     }
     void selectProperty(properties[0].id);
