@@ -233,7 +233,9 @@ export default function CommandPalette({ open, onOpen, onClose }) {
         // Endpoints vary in envelope shape: flat | {data:[…]} | paginated {data:{items}}.
         const asArr = (resp) => {
           const d = resp?.data?.data ?? resp?.data ?? [];
-          return Array.isArray(d) ? d : (d?.items ?? []);
+          if (Array.isArray(d)) return d;
+          if (Array.isArray(d?.data)) return d.data; // /v1/tasks double-wraps: {data:{data:[…]}}
+          return d?.items ?? [];
         };
         setPaymentHits(
           asArr(pay)
