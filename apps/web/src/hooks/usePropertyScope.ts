@@ -3,7 +3,7 @@
  * property (store choice → server-sticky choice → null = whole chain/tenant),
  * persists changes server-side, and invalidates the query cache on switch.
  */
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getScope,
@@ -28,6 +28,7 @@ export interface PropertyScopeResult {
 export function usePropertyScope(): PropertyScopeResult {
   const queryClient = useQueryClient();
   const storedId = usePropertyStore((s) => s.currentPropertyId);
+  const hasChosen = usePropertyStore((s) => s.hasChosen);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['property-scope'],
@@ -39,8 +40,20 @@ export function usePropertyScope(): PropertyScopeResult {
   const preferred = storedId ?? data?.currentPropertyId ?? null;
   const current = properties.find((p) => p.id === preferred) ?? null;
 
+  // F-5: a never-chosen session defaults to the first property so every
+  // request carries x-property-id (SH-05: zero cross-property leaks by
+  // default). An explicit "All properties" pick (hasChosen) is respected.
+  useEffect(() => {
+    if (hasChosen || storedId || data?.currentPropertyId || properties.length === 0 || isLoading) {
+      return;
+    }
+    void selectProperty(properties[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasChosen, storedId, data?.currentPropertyId, properties.length, isLoading]);
+
   const selectProperty = useCallback(
     async (propertyId: string | null) => {
+      usePropertyStore.getState().markChosen();
       usePropertyStore.getState().setCurrentPropertyId(propertyId);
       if (propertyId) {
         try {
