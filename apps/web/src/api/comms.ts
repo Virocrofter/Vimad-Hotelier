@@ -18,6 +18,8 @@ export interface CommsMessage {
   authorType: 'guest' | 'staff';
   authorName: string;
   body: string;
+  type?: string;
+  payload?: { name?: string; price?: number; currency?: string; productId?: string } | null;
   createdAt: string;
 }
 
@@ -38,8 +40,14 @@ export const commsApi = {
     apiClient.get('/comms/chat/inbox', { params: { status } }).then((r) => r.data),
   messages: (threadId: string) =>
     apiClient.get(`/comms/chat/threads/${threadId}/messages`).then((r) => r.data),
-  reply: (threadId: string, body: string) =>
-    apiClient.post(`/comms/chat/threads/${threadId}/messages`, { body }).then((r) => r.data),
+  reply: (
+    threadId: string,
+    body: string,
+    extras?: { type?: 'text' | 'offer'; payload?: Record<string, unknown> }
+  ) =>
+    apiClient
+      .post(`/comms/chat/threads/${threadId}/messages`, { body, ...extras })
+      .then((r) => r.data),
   setStatus: (threadId: string, status: 'open' | 'closed') =>
     apiClient.patch(`/comms/chat/threads/${threadId}`, { status }).then((r) => r.data),
   reviews: (status = 'pending') =>

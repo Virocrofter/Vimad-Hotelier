@@ -1,9 +1,10 @@
 /* src/app/app/comms/page.jsx — staff comms desk: chat inbox + review moderation */
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MessageSquare, Star, CheckCircle2, XCircle, Loader2, RefreshCw } from 'lucide-react';
+import { MessageSquare, Star, CheckCircle2, XCircle, Loader2, RefreshCw, Gift } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { commsApi } from '../../../api/comms';
+import { listUpsellProducts } from '../../../api/upsell-api';
 import { GuestCardDrawer } from '../../../components/guests/GuestCardDrawer';
 import { getReservation } from '../../../api/api-reservations';
 import { formatCurrency } from '../../../lib/guest-utils';
@@ -63,6 +64,13 @@ function ChatInbox({ onOpenCard }) {
   const qc = useQueryClient();
   const [activeId, setActiveId] = useState(null);
   const [draft, setDraft] = useState('');
+  const [offerPicker, setOfferPicker] = useState(false);
+
+  const { data: productsData } = useQuery({
+    queryKey: ['upsell-products'],
+    queryFn: listUpsellProducts,
+  });
+  const offerProducts = productsData ?? [];
 
   const { data: inboxData } = useQuery({
     queryKey: ['comms-inbox'],
@@ -84,6 +92,28 @@ function ChatInbox({ onOpenCard }) {
     mutationFn: () => commsApi.reply(activeId, draft.trim()),
     onSuccess: () => {
       setDraft('');
+      qc.invalidateQueries({ queryKey: ['comms-thread', activeId] });
+      qc.invalidateQueries({ queryKey: ['comms-inbox'] });
+    },
+  });
+
+  const sendOffer = useMutation({
+    mutationFn: (product) =>
+      commsApi.reply(
+        activeId,
+        'Special offer for you: ' + product.name + ' — ' + formatCurrency(Number(product.price)),
+        {
+          type: 'offer',
+          payload: {
+            productId: product.id,
+            name: product.name,
+            price: Number(product.price),
+            currency: 'ZAR',
+          },
+        }
+      ),
+    onSuccess: () => {
+      setOfferPicker(false);
       qc.invalidateQueries({ queryKey: ['comms-thread', activeId] });
       qc.invalidateQueries({ queryKey: ['comms-inbox'] });
     },
@@ -156,7 +186,22 @@ function ChatInbox({ onOpenCard }) {
                     {m.authorType === 'guest' && (
                       <p className="text-[10px] font-semibold">{m.authorName}</p>
                     )}
-                    <p className="whitespace-pre-wrap">{m.body}</p>
+                    {m.type === 'offer' && m.payload ? (
+                      <div className="rounded-md bg-background/90 px-3 py-2 text-text-primary shadow-sm">
+                        <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                          <Gift className="h-3 w-3" /> Special offer
+                        </p>
+                        <p className="mt-0.5 text-sm font-semibold">{m.payload.name}</p>
+                        <p className="text-base font-semibold tabular-nums hq-revenue">
+                          {formatCurrency(Number(m.payload.price ?? 0))}
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-xs text-text-secondary">
+                          {m.body}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{m.body}</p>
+                    )}
                     <p className="mt-1 text-[10px] opacity-70">
                       {new Date(m.createdAt).toLocaleTimeString([], {
                         hour: '2-digit',
@@ -167,7 +212,32 @@ function ChatInbox({ onOpenCard }) {
                 </div>
               ))}
             </div>
-            <div className="flex items-end gap-2 border-t p-3">
+            <div className="relative flex items-end gap-2 border-t p-3">
+              {offerPicker && (
+                <div className="absolute bottom-14 left-3 right-3 z-10 rounded-lg border border-border bg-surface p-2 shadow-xl">
+                  <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                    Send an offer
+                  </p>
+                  {offerProducts.length === 0 ? (
+                    <p className="px-2 py-1 text-xs text-text-muted">
+                      No upsell products — create some on the Upsells page.
+                    </p>
+                  ) : (
+                    offerProducts.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => sendOffer.mutate(p)}
+                        className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted"
+                      >
+                        <span>{p.name}</span>
+                        <span className="tabular-nums hq-revenue">
+                          {formatCurrency(Number(p.price))}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
               <textarea
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
@@ -175,6 +245,14 @@ function ChatInbox({ onOpenCard }) {
                 placeholder="Reply…"
                 className="flex-1 rounded-md border bg-background px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
+              <Button
+                variant="outline"
+                size="icon"
+                title="Send an offer"
+                onClick={() => setOfferPicker((v) => !v)}
+              >
+                <Gift className="h-4 w-4" />
+              </Button>
               <Button disabled={!draft.trim() || reply.isPending} onClick={() => reply.mutate()}>
                 {reply.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
