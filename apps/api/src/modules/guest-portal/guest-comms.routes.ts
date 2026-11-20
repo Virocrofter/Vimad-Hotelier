@@ -18,7 +18,7 @@ import { env } from '../../common/env.js';
 import { AppError } from '../../common/errors.js';
 import { logger } from '../../common/logger.js';
 import { resolveToken } from './guest-portal.service.js';
-import { sellProduct } from '../../upsell/upsell.service.js';
+import { sellProduct } from '../upsell/upsell.service.js';
 import { emitToTenant } from '../../common/socket.js';
 
 export const guestCommsRouter = Router();
