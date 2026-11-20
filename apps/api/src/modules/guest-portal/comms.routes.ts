@@ -89,7 +89,11 @@ commsRouter.get(
   }
 );
 
-const staffMessageSchema = z.object({ body: z.string().min(1).max(2000) });
+const staffMessageSchema = z.object({
+  body: z.string().min(1).max(2000),
+  type: z.enum(['text', 'offer']).optional(),
+  payload: z.record(z.unknown()).optional(),
+});
 
 commsRouter.post(
   '/chat/threads/:id/messages',
@@ -109,6 +113,8 @@ commsRouter.post(
           authorId: req.auth.userId,
           authorName: req.auth.email ?? 'Staff',
           body: input.body,
+          type: input.type ?? 'text',
+          payload: input.payload ? JSON.parse(JSON.stringify(input.payload)) : undefined,
         },
       });
 
