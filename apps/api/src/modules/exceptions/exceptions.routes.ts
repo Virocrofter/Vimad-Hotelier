@@ -71,7 +71,10 @@ async function upsert(tenantId: string, d: Detected): Promise<void> {
 
 async function detect(tenantId: string): Promise<void> {
   const now = new Date();
-  const start = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  // UTC day parts, not local-date-as-UTC: the old window straddled local
+  // midnight (SAST 00:00-02:00 = still "yesterday" UTC), blinding the
+  // detector to every arrival-readiness exception during night-shift hours.
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const end = new Date(start);
   end.setUTCDate(end.getUTCDate() + 1);
 
@@ -190,16 +193,23 @@ async function detect(tenantId: string): Promise<void> {
       (p) => Number(p.amountMinor) > 0 && Number(p.refundedMinor ?? 0) < Number(p.amountMinor)
     );
     if (kept.length === 0) continue;
+    // EX-02: failed payments never settled — demote failed-only cancellations
+    // to low with an explicit no-recovery action instead of a refund demand.
+    const failedOnly = kept.every((p) => p.status === 'failed');
     const keptMinor = kept.reduce(
       (sum, p) => sum + (Number(p.amountMinor) - Number(p.refundedMinor ?? 0)),
       0
     );
     await upsert(tenantId, {
       type: 'payment_policy',
-      severity: 'high',
-      title: `Cancelled reservation with payment: ${r.confirmationNumber}`,
-      detail: `${r.guest?.firstName ?? ''} ${r.guest?.lastName ?? ''} — ${(keptMinor / 100).toFixed(2)} kept on a cancelled reservation (cancelled ${r.cancelledAt ? new Date(r.cancelledAt).toISOString().slice(0, 10) : '—'})`,
-      recommendedAction: 'Review — refund or record a policy decision',
+      severity: failedOnly ? 'low' : 'high',
+      title: failedOnly
+        ? `Cancelled reservation with failed payment: ${r.confirmationNumber}`
+        : `Cancelled reservation with payment: ${r.confirmationNumber}`,
+      detail: `${r.guest?.firstName ?? ''} ${r.guest?.lastName ?? ''} — ${(keptMinor / 100).toFixed(2)} ${failedOnly ? 'attempted (never settled)' : 'kept'} on a cancelled reservation (cancelled ${r.cancelledAt ? new Date(r.cancelledAt).toISOString().slice(0, 10) : '—'})`,
+      recommendedAction: failedOnly
+        ? 'No recovery needed — the payment failed before settlement'
+        : 'Review — refund or record a policy decision',
       actionUrl: `/app/reservations/${r.id}`,
       dedupeKey: `cancelled-with-payment:${r.id}`,
       slaDueAt: new Date(now.getTime() + 24 * 3600_000),

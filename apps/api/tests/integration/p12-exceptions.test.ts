@@ -56,7 +56,11 @@ beforeAll(async () => {
     },
   });
   ctx.roomId = room.id;
-  // Arrival TODAY assigned to a dirty room -> room_readiness
+  // Arrival on the PROPERTY'S BUSINESS DATE assigned to a dirty room ->
+  // room_readiness. Wall-clock `new Date()` flakes across midnight for
+  // properties whose business day is ahead of UTC (HK-05 class).
+  const propRow = await prisma.property.findUnique({ where: { id: prop.id } });
+  const businessToday = propRow?.businessDate ? new Date(propRow.businessDate) : new Date();
   const res = await prisma.reservation.create({
     data: {
       tenantId: t.id,
@@ -64,8 +68,8 @@ beforeAll(async () => {
       guestId: g.id,
       confirmationNumber: 'P12-ARR-' + runId.toUpperCase(),
       status: 'confirmed',
-      arrivalDate: new Date(),
-      departureDate: new Date(Date.now() + 86400_000),
+      arrivalDate: businessToday,
+      departureDate: new Date(businessToday.getTime() + 86400_000),
       nights: 1,
       totalAmount: 1000,
       balance: 1000,
@@ -73,7 +77,7 @@ beforeAll(async () => {
   });
   ctx.reservationId = res.id;
   await prisma.reservationStay.create({
-    data: { reservationId: res.id, roomId: room.id, date: new Date(), rate: 1000 },
+    data: { reservationId: res.id, roomId: room.id, date: businessToday, rate: 1000 },
   });
   // Failed payment -> payment_failed
   ctx.pay = await prisma.payment.create({
