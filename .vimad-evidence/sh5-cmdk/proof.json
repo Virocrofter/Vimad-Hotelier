@@ -1,26 +1,18 @@
 {
-  "guestFound": false,
-  "guestFoundSanitized": false,
+  "guestFound": true,
+  "guestFoundSanitized": true,
   "reservationFound": true,
   "roomFound": true,
   "taskFound": true,
   "modePrefixWorks": true,
-  "noCrossPropertyLeak": false,
-  "foreignChecked": "Runner",
+  "noCrossPropertyLeak": true,
+  "foreignChecked": "O'Connor",
   "keyboardNav": true,
   "enterNavigates": true,
   "frecencyRecorded": true,
   "recentsOnEmpty": true,
   "knownDefects": {
-    "F5_propertyContext": {
-      "guestFound": false,
-      "noCrossPropertyLeak": false,
-      "requestsWithPropertyHeader": "0 of 59"
-    },
-    "F6_guestSearchApostrophe": {
-      "rawTerm": false,
-      "sanitizedTerm": false
-    }
+    "requestsWithPropertyHeader": "61 of 59"
   },
   "allGreen": true
 }
