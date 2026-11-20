@@ -1,0 +1,59 @@
+{
+  "generatedAt": "2026-11-20T23:11:04.786Z",
+  "quarter": "2026-Q4",
+  "tokenRefs": 328,
+  "rawHexes": 536,
+  "tokenAdoptionPct": 38,
+  "topDebt": [
+    {
+      "file": "apps/web/src/app/admin/feature-flags/feature-flags.css",
+      "varRefs": 0,
+      "rawHexes": 94
+    },
+    {
+      "file": "apps/web/src/app/admin/backups/backups.css",
+      "varRefs": 29,
+      "rawHexes": 75
+    },
+    {
+      "file": "apps/web/src/app/admin/billing/billing-pages.css",
+      "varRefs": 59,
+      "rawHexes": 74
+    },
+    {
+      "file": "apps/web/src/app/admin/demo-access/demo-access.css",
+      "varRefs": 24,
+      "rawHexes": 69
+    },
+    {
+      "file": "apps/web/src/app/app/onboarding/onboarding.css",
+      "varRefs": 0,
+      "rawHexes": 58
+    },
+    {
+      "file": "apps/web/src/app/app/chain-loyalty/chain-loyalty.css",
+      "varRefs": 0,
+      "rawHexes": 56
+    },
+    {
+      "file": "apps/web/src/styles/components.css",
+      "varRefs": 10,
+      "rawHexes": 34
+    },
+    {
+      "file": "apps/web/src/app/admin/billing/billing-shell.css",
+      "varRefs": 32,
+      "rawHexes": 34
+    },
+    {
+      "file": "apps/web/src/app/admin/profiler/profiler.css",
+      "varRefs": 51,
+      "rawHexes": 29
+    },
+    {
+      "file": "apps/web/src/app/admin/health/health.css",
+      "varRefs": 35,
+      "rawHexes": 13
+    }
+  ]
+}
