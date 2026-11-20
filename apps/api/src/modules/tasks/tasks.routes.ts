@@ -137,7 +137,14 @@ tasksRouter.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const tenantId = (req as AuthenticatedRequest).auth.tenantId;
-      res.json({ data: await listTasks(tenantId, req.validatedQuery as Record<string, string>) });
+      const query = req.validatedQuery as Record<string, string>;
+      // F-8: scope by the x-property-id header when the caller didn't pass an
+      // explicit propertyId. Headerless (intentional All-properties mode)
+      // requests stay tenant-wide.
+      const headerPropertyId = req.headers['x-property-id'] as string | undefined;
+      const scopedQuery =
+        headerPropertyId && !query.propertyId ? { ...query, propertyId: headerPropertyId } : query;
+      res.json({ data: await listTasks(tenantId, scopedQuery) });
     } catch (err) {
       next(err);
     }
