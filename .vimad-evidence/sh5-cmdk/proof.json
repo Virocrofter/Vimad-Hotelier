@@ -1,0 +1,26 @@
+{
+  "guestFound": false,
+  "guestFoundSanitized": false,
+  "reservationFound": true,
+  "roomFound": true,
+  "taskFound": true,
+  "modePrefixWorks": true,
+  "noCrossPropertyLeak": false,
+  "foreignChecked": "Runner",
+  "keyboardNav": true,
+  "enterNavigates": true,
+  "frecencyRecorded": true,
+  "recentsOnEmpty": true,
+  "knownDefects": {
+    "F5_propertyContext": {
+      "guestFound": false,
+      "noCrossPropertyLeak": false,
+      "requestsWithPropertyHeader": "0 of 59"
+    },
+    "F6_guestSearchApostrophe": {
+      "rawTerm": false,
+      "sanitizedTerm": false
+    }
+  },
+  "allGreen": true
+}
