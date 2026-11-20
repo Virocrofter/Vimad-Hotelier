@@ -126,6 +126,10 @@ describe('P12 exception engine', () => {
     (await prisma.user.findFirst({ where: { tenantId: agent.tenantId } }))?.id ?? 'p12-test-owner';
 
   it('S1: all four detectors fire; idempotent on re-read', async () => {
+    const detect = await request(app)
+      .post('/v1/exceptions/detect')
+      .set('Authorization', 'Bearer ' + agent.token);
+    expect(detect.status).toBe(200);
     const res = await request(app)
       .get('/v1/exceptions')
       .set('Authorization', 'Bearer ' + agent.token);
@@ -214,6 +218,10 @@ describe('P12 exception engine', () => {
   it('S3: resolved/dismissed survive re-detection; tenant isolation', async () => {
     // Conditions still hold (payment still failed, connection still failed) —
     // but human decisions must stand.
+    const detect = await request(app)
+      .post('/v1/exceptions/detect')
+      .set('Authorization', 'Bearer ' + agent.token);
+    expect(detect.status).toBe(200);
     const res = await request(app)
       .get('/v1/exceptions?status=all')
       .set('Authorization', 'Bearer ' + agent.token);
