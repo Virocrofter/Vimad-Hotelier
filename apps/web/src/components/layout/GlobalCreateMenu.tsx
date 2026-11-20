@@ -2,7 +2,7 @@
  * actions, shell-wide via Topbar. UI filtering only - the server enforces. */
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarCheck, ClipboardList, DollarSign, Plus, Users } from 'lucide-react';
+import { CalendarCheck, ClipboardList, DollarSign, MessageSquare, Plus, Users } from 'lucide-react';
 import { usePermissionChecker } from '../../hooks/usePermissions';
 import { LINKS } from '../../lib/dashLinks';
 
@@ -16,6 +16,7 @@ const ITEMS = [
   { label: 'Add guest', perm: 'guest:create', to: '/app/guests', Icon: Users },
   { label: 'Create task', perm: 'task:create', to: LINKS.tasks, Icon: ClipboardList },
   { label: 'Record payment', perm: 'folio:payment', to: LINKS.billing, Icon: DollarSign },
+  { label: 'Message guest', perm: 'ticket:update', to: LINKS.comms, Icon: MessageSquare },
 ];
 
 export default function GlobalCreateMenu() {

@@ -5,6 +5,12 @@
  * it. Group order = task frequency. Naming is binding: Inbox (not Comms),
  * Tape Chart (not Room Plan/calendar). Needs Attention is NOT a nav item —
  * it lives in the topbar alert cluster (P3.1b) and links to /app/exceptions.
+ * SH-03 decision (2026-11-20): Space Status + HK Activity are NOT nav items
+ * (board lives at /app/rooms; activity stays in House Ops context). Payment
+ * Requests + VCC demoted from Finance nav to config-only surfaces — still
+ * reachable via /app/billing/*, Command Palette (P4 payments group) and deep
+ * links. No new group map: the blueprint chassis is final. Group sizes ≤6–7
+ * (Front Desk 7 at the bound, Finance now 4, all others ≤5).
  */
 import {
   LayoutDashboard,
@@ -74,10 +80,8 @@ export const NAV_GROUPS = [
     items: [
       { label: 'Folios & Billing', to: '/app/billing' },
       { label: 'Payments', to: '/app/billing/payments' },
-      { label: 'Payment Requests', to: '/app/billing/payment-requests' },
       { label: 'Invoices', to: '/app/billing/invoices' },
       { label: 'AR', to: '/app/ar' },
-      { label: 'VCC', to: '/app/vcc' },
     ],
   },
   {
