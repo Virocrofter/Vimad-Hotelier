@@ -454,6 +454,14 @@ export function AttentionStrip({ exceptions, loading }) {
           </div>
         );
       })}
+      {items.length > 1 && (
+        <Link
+          to="/app/exceptions"
+          className="mt-1 flex items-center justify-center gap-1 rounded-lg border border-border px-3 py-1.5 text-[11px] font-medium text-text-secondary transition-colors hover:bg-surface-elevated"
+        >
+          Open full exceptions queue <ArrowRight className="h-3 w-3" />
+        </Link>
+      )}
     </div>
   );
 }

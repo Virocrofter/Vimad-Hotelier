@@ -6,7 +6,6 @@ import {
   CalendarCheck,
   CalendarX,
   DollarSign,
-  LogIn,
   Plus,
   RefreshCw,
   Search,
@@ -30,7 +29,6 @@ import {
   ActivityFeed,
   AlertsPanel,
   KpiCard,
-  MovementsPanel,
   NightAuditChip,
   QuickActionsFab,
   RecentReservations,
@@ -50,8 +48,6 @@ import { cn } from '../../../lib/utils';
 import CrmPulse from './CrmPulse';
 import TodayCockpit from './TodayCockpit';
 import { ErrorState } from '../../../components/ui/ErrorState';
-import { FlagGate } from '../../../components/FlagGate';
-import { flags } from '../../../lib/flags';
 
 function AppDashboardV1() {
   // D1.3 — respect the chain-admin sticky property (C1 property switcher)
@@ -168,8 +164,28 @@ function AppDashboardV1() {
     );
   }
 
+  // SH-02 — role-aware home: sections reorder per role via flex order (no
+  // structural change). admin/owner get the manager view.
+  const roleKey = (sessionUser?.role ?? '').toLowerCase();
+  const roleMap =
+    roleKey === 'front_desk' || roleKey === 'frontdesk'
+      ? 'frontdesk'
+      : ['admin', 'owner', 'manager'].includes(roleKey)
+        ? 'manager'
+        : ['housekeeping', 'finance'].includes(roleKey)
+          ? roleKey
+          : 'default';
+  const ROLE_ORDER = {
+    default: { kpi: 10, worklist: 20, ops: 30, roomboard: 40, chart: 50 },
+    frontdesk: { worklist: 10, kpi: 20, ops: 30, roomboard: 40, chart: 50 },
+    housekeeping: { roomboard: 10, ops: 20, worklist: 30, kpi: 40, chart: 50 },
+    manager: { kpi: 10, chart: 20, worklist: 30, ops: 40, roomboard: 50 },
+    finance: { chart: 10, ops: 20, kpi: 30, worklist: 40, roomboard: 50 },
+  };
+  const orderFor = (section) => ROLE_ORDER[roleMap][section] ?? 60;
+
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -244,13 +260,15 @@ function AppDashboardV1() {
         </div>
       </div>
 
-      {/* Today cockpit v2 (UX addendum F) — behind the todayV2 flag. Renders
-          above the legacy board during validation; the legacy sections stay
-          for cross-checking until the flag graduates. */}
-      {flags.todayV2 && <TodayCockpit propertyId={propertyId} onMutated={() => ops.refetch()} />}
+      {/* SH-04 — TodayCockpit graduated (HK-01 flag cleanup): live for all roles. */}
+      <TodayCockpit propertyId={propertyId} onMutated={() => ops.refetch()} />
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
+      <div
+        data-section="kpi"
+        style={{ order: orderFor('kpi') }}
+        className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6"
+      >
         <KpiCard
           label="Occupancy"
           value={loading ? '—' : `${data.occupancyRate}%`}
@@ -345,15 +363,13 @@ function AppDashboardV1() {
 
       {/* Today strip */}
       {ops.data?.exceptions && (
-        <FlagGate flag="todayV2">
-          <AttentionStrip exceptions={ops.data.exceptions} loading={ops.isLoading} />
-        </FlagGate>
+        <AttentionStrip exceptions={ops.data.exceptions} loading={ops.isLoading} />
       )}
       <TodayStrip ops={ops.data} loading={ops.isLoading} />
 
       {/* Ops core: arrivals + departures */}
-      {canReadReservations &&
-        (flags.todayV2 ? (
+      <div data-section="worklist" style={{ order: orderFor('worklist') }}>
+        {canReadReservations && (
           <PriorityWorklist
             arrivals={frontDesk.data?.arrivals ?? []}
             departures={frontDesk.data?.departures ?? []}
@@ -362,32 +378,16 @@ function AppDashboardV1() {
             loading={frontDesk.isLoading || ops.isLoading}
             viewAllTo={LINKS.arrivalsBoard}
           />
-        ) : (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <MovementsPanel
-              title="Arrivals Today"
-              icon={LogIn}
-              items={frontDesk.data?.arrivals ?? []}
-              type="arrival"
-              currency={currency}
-              loading={frontDesk.isLoading}
-              viewAllTo={LINKS.arrivalsBoard}
-            />
-            <MovementsPanel
-              title="Departures Today"
-              icon={CalendarX}
-              items={frontDesk.data?.departures ?? []}
-              type="departure"
-              currency={currency}
-              loading={frontDesk.isLoading}
-              viewAllTo={LINKS.arrivalsBoard}
-            />
-          </div>
-        ))}
+        )}
+      </div>
 
       {/* Ops widgets */}
       {(canReadTasks || canReadFolios || canReadReservations) && (
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+        <div
+          data-section="ops"
+          style={{ order: orderFor('ops') }}
+          className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3"
+        >
           {canReadTasks && <TasksMiniBoard tasks={ops.data?.tasks} loading={ops.isLoading} />}
           {canReadFolios && (
             <UnsettledDepartures
@@ -403,7 +403,11 @@ function AppDashboardV1() {
       )}
 
       {/* Room board + activity */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div
+        data-section="roomboard"
+        style={{ order: orderFor('roomboard') }}
+        className="grid grid-cols-1 gap-6 lg:grid-cols-3"
+      >
         {canReadHousekeeping && (
           <div className="lg:col-span-2">
             <RoomBoard rooms={frontDesk.data?.rooms ?? []} loading={frontDesk.isLoading} />
@@ -415,7 +419,11 @@ function AppDashboardV1() {
       </div>
 
       {/* Chart + alerts */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div
+        data-section="chart"
+        style={{ order: orderFor('chart') }}
+        className="grid grid-cols-1 gap-6 lg:grid-cols-3"
+      >
         <div className="lg:col-span-2">
           <RevenueChart data={data?.revenueByDay ?? []} currency={currency} loading={loading} />
         </div>
