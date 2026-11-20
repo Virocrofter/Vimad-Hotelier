@@ -18,6 +18,7 @@ import { env } from '../../common/env.js';
 import { AppError } from '../../common/errors.js';
 import { logger } from '../../common/logger.js';
 import { resolveToken } from './guest-portal.service.js';
+import { sellProduct } from '../../upsell/upsell.service.js';
 import { emitToTenant } from '../../common/socket.js';
 
 export const guestCommsRouter = Router();
@@ -87,6 +88,8 @@ const messageSelect = {
   authorType: true,
   authorName: true,
   body: true,
+  type: true,
+  payload: true,
   clientId: true,
   readAt: true,
   createdAt: true,
@@ -330,6 +333,40 @@ guestCommsRouter.post(
     logger.info({ reviewId: review.id, rating: input.rating }, 'guest review submitted');
 
     return ok(res, { review, idempotentReplay: false });
+  })
+);
+
+// ─── Conversational upsell: guest accepts an offer sent in chat ───
+
+guestCommsRouter.post(
+  '/chat/:token/offers/accept',
+  asyncRoute(async (req, res) => {
+    const reservation = await resolveToken(String(req.params.token));
+    const input = z
+      .object({
+        messageId: z.string().min(1),
+        quantity: z.number().int().min(1).max(20).optional(),
+      })
+      .parse(req.body ?? {});
+
+    const thread = await getOrCreateThread(reservation);
+    const message = await prisma.chatMessage.findFirst({
+      where: { id: input.messageId, threadId: thread.id, authorType: 'staff', type: 'offer' },
+    });
+    if (!message) throw new AppError(404, 'Offer not found', 'NOT_FOUND');
+
+    const payload = (message.payload ?? {}) as { productId?: string };
+    if (!payload.productId) throw new AppError(400, 'Offer has no product', 'VALIDATION_ERROR');
+
+    const result = await sellProduct(reservation.tenantId, 'guest-portal', {
+      productId: payload.productId,
+      reservationId: reservation.id,
+      quantity: input.quantity ?? 1,
+    });
+
+    logger.info({ messageId: message.id, saleId: result.saleId }, 'guest accepted chat offer');
+
+    return ok(res, { accepted: true, total: result.total });
   })
 );
 
