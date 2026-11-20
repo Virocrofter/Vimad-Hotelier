@@ -3089,6 +3089,8 @@ model ChatMessage {
   authorId   String?
   authorName String
   body       String
+  type       String     @default("text") // text | offer
+  payload    Json?
   clientId   String?
   readAt     DateTime?
   createdAt  DateTime   @default(now())
