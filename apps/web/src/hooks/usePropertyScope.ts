@@ -11,6 +11,7 @@ import {
   type PropertyScope,
   type ScopeProperty,
 } from '../api/chains';
+import { listProperties } from '../api/properties';
 import { usePropertyStore } from '../stores/propertyStore';
 
 export interface PropertyScopeResult {
@@ -36,7 +37,18 @@ export function usePropertyScope(): PropertyScopeResult {
     staleTime: 30_000,
   });
 
-  const properties = data?.properties ?? [];
+  // getScope is chain-centric and returns an empty property list for
+  // non-chain tenants — fall back to the plain properties list (F-5).
+  const { data: propertyList } = useQuery({
+    queryKey: ['properties'],
+    queryFn: listProperties,
+    staleTime: 60_000,
+  });
+  // Cast: Property lacks ScopeProperty._count (reservation counts, optional
+  // display only) — id/name exist on both shapes.
+  const properties = (
+    data?.properties?.length ? data.properties : (propertyList ?? [])
+  ) as ScopeProperty[];
   const preferred = storedId ?? data?.currentPropertyId ?? null;
   const current = properties.find((p) => p.id === preferred) ?? null;
 
