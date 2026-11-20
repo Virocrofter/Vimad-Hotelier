@@ -1,10 +1,10 @@
 /* apps/web/src/hooks/guestCommsApi.ts — G5 chat / reviews / announcements client */
 import { getGuestToken, GuestPortalError } from './guestPortalApi';
 
-const API_BASE: string = (import.meta as any).env?.VITE_API_URL ?? '/api/v1';
+const API_BASE: string = (import.meta as any).env?.VITE_API_URL ?? '/api';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}/guest-portal${path}`, {
+  const res = await fetch(`${API_BASE}/v1/guest-portal${path}`, {
     headers: { 'Content-Type': 'application/json', ...init?.headers },
     ...init,
   });
