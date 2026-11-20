@@ -20,8 +20,8 @@ const resolveTheme = (theme: ThemeMode): 'light' | 'dark' => {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
-      theme: 'system',
-      resolvedTheme: resolveTheme('system'),
+      theme: 'dark',
+      resolvedTheme: resolveTheme('dark'),
       setTheme: (theme) => {
         const resolved = resolveTheme(theme);
         set({ theme, resolvedTheme: resolved });
@@ -53,7 +53,7 @@ export const initializeTheme = (): void => {
   try {
     const stored = localStorage.getItem('pms-theme-storage');
     const parsed = stored ? JSON.parse(stored) : null;
-    const theme: ThemeMode = parsed?.state?.theme || 'system';
+    const theme: ThemeMode = parsed?.state?.theme || 'dark';
     const resolved = resolveTheme(theme);
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(resolved);
