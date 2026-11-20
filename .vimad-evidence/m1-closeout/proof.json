@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-11-20T21:23:21.854Z",
+  "hk04_staffJwtPayload": {
+    "userId": "cmvpvm9hh0002afx41ryj2d7i",
+    "tenantId": "cmvpvm9cr0000afx46emxw02w",
+    "email": "admin@demo.com",
+    "role": "admin",
+    "iat": 1795209795,
+    "exp": 1795210695
+  },
+  "reservationId": "cmvtjt0m9007s4iyjk2xwg3ld",
+  "product": {
+    "id": "cmvrdz02d000o6a4h8a5j875t",
+    "name": "Late Checkout",
+    "price": "350"
+  },
+  "folioBalanceBefore": 145,
+  "folioBalanceAfter": 495,
+  "folioItem": {
+    "id": "cmwphkc5u00wc115in7egv3oj",
+    "type": "upsell",
+    "description": "Upsell: Late Checkout",
+    "amount": 350,
+    "quantity": 1,
+    "postedAt": "2026-11-20T21:23:21.617Z"
+  }
+}
