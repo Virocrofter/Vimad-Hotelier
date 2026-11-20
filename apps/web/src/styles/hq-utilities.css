@@ -1,0 +1,163 @@
+/* apps/web/src/styles/hq-utilities.css
+ * HQ-0 utility classes + glass, moved verbatim from tokens/calm-premium.css
+ * when the token variable blocks became generated (DS-01, 2026-11-20).
+ * Values live in generated/themes.css via design-tokens/tokens.json. */
+
+/* ─── Glassmorphism — SPARINGLY: 1–3 focal surfaces only ─── */
+.glass {
+  background: color-mix(in srgb, var(--surface) 74%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.35);
+  backdrop-filter: blur(14px) saturate(1.35);
+  border: 1px solid color-mix(in srgb, var(--surface) 65%, transparent);
+  box-shadow:
+    0 1px 2px rgb(19 43 58 / 0.04),
+    0 12px 32px -12px rgb(19 43 58 / 0.18);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px -1px rgb(19 43 58 / 0.08);
+  }
+}
+
+/* Selected/insight surface (mint) — chips, active rows */
+.surface-insight {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Tabular numerals — money, counts, room numbers, deltas */
+.hq-tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Type utilities */
+.hq-text-display {
+  font-size: var(--hq-text-display-size);
+  line-height: var(--hq-text-display-line);
+}
+.hq-text-title {
+  font-size: var(--hq-text-title-size);
+  line-height: var(--hq-text-title-line);
+}
+.hq-text-section {
+  font-size: var(--hq-text-section-size);
+  line-height: var(--hq-text-section-line);
+  font-weight: 600;
+}
+.hq-text-body {
+  font-size: var(--hq-text-body-size);
+  line-height: var(--hq-text-body-line);
+}
+.hq-text-caption {
+  font-size: var(--hq-text-caption-size);
+  line-height: var(--hq-text-caption-line);
+}
+
+/* Resting card — hairline border, no shadow */
+.hq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--hq-radius-md);
+  box-shadow: none;
+}
+
+/* Two-layer focus ring */
+.hq-focus:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--hq-focus-halo),
+    0 0 0 4px var(--hq-focus-ring);
+}
+
+/* Status color map — one accent; text always accompanies color */
+.hq-status-ready,
+.hq-status-inspected {
+  color: var(--primary);
+}
+.hq-status-dirty,
+.hq-status-in-progress {
+  color: var(--warning);
+}
+.hq-status-ooo,
+.hq-status-oos,
+.hq-status-clean {
+  color: var(--text-secondary);
+}
+.hq-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  margin-right: 6px;
+}
+.hq-status-dot.ready,
+.hq-status-dot.inspected {
+  background: var(--primary);
+}
+.hq-status-dot.dirty,
+.hq-status-dot.in-progress {
+  background: var(--warning);
+}
+.hq-status-dot.ooo,
+.hq-status-dot.oos,
+.hq-status-dot.clean {
+  background: var(--text-muted);
+}
+
+/* Surface ladder utilities */
+.hq-surface-0 {
+  background: var(--hq-surface-0);
+}
+.hq-surface-1 {
+  background: var(--hq-surface-1);
+  border: 1px solid var(--hq-hairline);
+}
+.hq-surface-2 {
+  background: var(--hq-surface-2);
+  border: 1px solid var(--hq-hairline);
+}
+.hq-surface-3 {
+  background: var(--hq-surface-3);
+  border: 1px solid var(--hq-hairline-strong);
+}
+
+/* Keycap glyphs for shortcuts */
+.hq-keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 4px;
+  border: 1px solid var(--hq-hairline-strong);
+  border-bottom-width: 2px;
+  background: linear-gradient(var(--hq-surface-2), var(--hq-surface-1));
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+}
+
+/* Magenta RESERVED: revenue figures, AI features, optimization toggles */
+.hq-revenue {
+  color: var(--hq-magenta);
+}
+.hq-revenue-soft {
+  background: var(--hq-magenta-soft);
+  color: var(--hq-magenta);
+}
+
+/* Lime money chip */
+.hq-money-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--hq-lime) 16%, transparent);
+  color: var(--hq-lime);
+  font-variant-numeric: tabular-nums;
+}

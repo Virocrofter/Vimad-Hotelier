@@ -165,3 +165,13 @@ export async function setCellOverride(input: {
   const response = await apiPatch<{ data: RateCellOverride }>('/v1/rates/overrides/cell', input);
   return response.data;
 }
+
+export async function clearCellOverride(
+  ratePlanId: string,
+  date: string
+): Promise<{ cleared: number }> {
+  const response = await apiDelete<{ data: { cleared: number } }>(
+    `/v1/rates/overrides/cell?ratePlanId=${ratePlanId}&date=${date}`
+  );
+  return response.data;
+}

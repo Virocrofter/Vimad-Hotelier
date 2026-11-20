@@ -1,0 +1,4 @@
+# Token definitions legitimately carry raw values (generated from DTCG source)
+src/styles/generated/**
+# Legacy debt: raw-hex fallback values — sweep is a follow-up (see bug ledger)
+src/styles/components.css

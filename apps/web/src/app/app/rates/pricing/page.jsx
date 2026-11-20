@@ -1,4 +1,5 @@
 /* apps/web/src/app/app/rates/pricing/page.jsx — C1' pricing console */
+import { formatMoney } from '../../../../lib/money';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../../../../api/client';
@@ -26,7 +27,7 @@ const plus = (n) => {
   d.setDate(d.getDate() + n);
   return d.toISOString().slice(0, 10);
 };
-const money = (n) => (n ?? 0).toLocaleString('en-ZA', { style: 'currency', currency: 'ZAR' });
+const money = (n) => formatMoney(n ?? 0, 'ZAR');
 
 export default function PricingConsolePage() {
   const { currentPropertyId } = usePropertyScope();

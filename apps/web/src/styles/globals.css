@@ -51,10 +51,9 @@
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
-@import './themes/light.css';
-@import './themes/dark.css';
+@import './generated/themes.css';
 @import './components.css';
-@import './tokens/calm-premium.css';
+@import './hq-utilities.css';
 
 html {
   scroll-behavior: smooth;

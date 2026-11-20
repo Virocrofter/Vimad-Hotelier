@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "color-no-hex": true,
+    "declaration-property-unit-disallowed-list": {
+      "font-size": ["px"]
+    },
+    "declaration-property-value-allowed-list": {
+      "font-family": ["/^var\\(--font-/"]
+    }
+  }
+}

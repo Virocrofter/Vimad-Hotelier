@@ -1,4 +1,5 @@
 /* src/app/app/sales-catering/events/page.jsx */
+import { formatMoney } from '../../../../lib/money';
 import { useState, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -30,12 +31,7 @@ import {
 } from '../../../../hooks/useSalesCatering';
 import { useToast } from '../../../../hooks/use-toast';
 
-const fmt = (n) =>
-  new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-    maximumFractionDigits: 0,
-  }).format(n || 0);
+const fmt = (amount, currency = 'ZAR') => formatMoney(amount, currency);
 const fmtDate = (d) =>
   d
     ? new Date(d).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })

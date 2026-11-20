@@ -9,6 +9,7 @@
  * Behind the reservationWorkspace flag; mutations reuse the existing,
  * already-tested reservation endpoints.
  */
+import { formatMoney } from '../../../../lib/money';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -43,12 +44,7 @@ const STATUS = {
   cancelled: { label: 'Cancelled', cls: 'bg-danger/10 text-danger border-danger/20' },
   no_show: { label: 'No-show', cls: 'bg-danger/10 text-danger border-danger/20' },
 };
-const money = (v, c = 'ZAR') =>
-  new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: c,
-    maximumFractionDigits: 0,
-  }).format(Number(v ?? 0));
+const money = (amount, currency = 'ZAR') => formatMoney(amount, currency);
 const day = (d) => (d ?? '').slice(0, 10);
 
 function Section({ icon: Icon, title, children, right }) {

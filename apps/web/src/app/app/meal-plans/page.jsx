@@ -1,4 +1,5 @@
 /* src/app/app/meal-plans/page.jsx — T7: fully wired to /v1/meal-plans */
+import { formatMoney } from '../../../lib/money';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { usePropertyStore } from '../../../stores/propertyStore';
 import {
@@ -49,9 +50,7 @@ const TABS = [
   { id: 'covers', label: 'Covers Forecast' },
 ];
 
-function formatCurrency(amount, currency = 'ZAR') {
-  return new Intl.NumberFormat('en-ZA', { style: 'currency', currency }).format(amount ?? 0);
-}
+const formatCurrency = (amount, currency = 'ZAR') => formatMoney(amount, currency);
 
 function todayStr(offset = 0) {
   const d = new Date();
