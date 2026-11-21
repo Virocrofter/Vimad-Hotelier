@@ -63,6 +63,27 @@ const STATUS_LABEL = {
   cancelled: 'Cancelled',
 };
 
+// ─── AR stack: segmented invoice-status bar (AR completion) ───
+function InvoiceStatusBar({ invoices }) {
+  const counts = {};
+  for (const inv of invoices ?? []) counts[inv.status] = (counts[inv.status] ?? 0) + 1;
+  const keys = Object.keys(STATUS_STYLE).filter((k) => counts[k] > 0);
+  if (keys.length === 0) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-2" aria-label="Invoice status summary">
+      {keys.map((k) => (
+        <span
+          key={k}
+          className={`inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-[11px] font-medium ${STATUS_STYLE[k]}`}
+        >
+          <span className="hq-tnum font-semibold">{counts[k]}</span>
+          {STATUS_LABEL[k]}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 const inputCls =
   'w-full rounded-md border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300';
 const thCls = 'px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-text-muted';
@@ -1069,6 +1090,7 @@ export default function ArPage() {
       </div>
 
       <AgingBar buckets={summary?.buckets} />
+      <InvoiceStatusBar invoices={invoices} />
 
       {/* Tabs + filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -1238,6 +1260,16 @@ export default function ArPage() {
                     </td>
                     <td className={`${tdCls} text-right font-medium`}>
                       {fmtMoney(a.outstanding ?? 0)}
+                      {a.creditLimit ? (
+                        <span className="mt-0.5 block text-[10px] text-text-muted">
+                          limit {fmtMoney(a.creditLimit)} ·{' '}
+                          {Math.min(
+                            100,
+                            Math.round((Number(a.outstanding ?? 0) / Number(a.creditLimit)) * 100)
+                          )}
+                          % used
+                        </span>
+                      ) : null}
                     </td>
                     <td
                       className={`${tdCls} text-right ${over ? 'font-semibold text-red-600' : ''}`}
