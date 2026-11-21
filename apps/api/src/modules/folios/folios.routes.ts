@@ -561,7 +561,7 @@ foliosRouter.post(
           error: { code: 'VALIDATION_ERROR', message: 'itemId and targetFolioId are required' },
         });
       }
-      const actor = ((req as any).user?.userId ?? (req as any).user?.id ?? null) as string | null;
+      const actor = String((req as any).user?.userId ?? (req as any).user?.id ?? 'system');
       const data = await moveFolioItem(req.tenantId, actor, String(itemId), String(targetFolioId));
       return res.json({ data });
     } catch (err) {
