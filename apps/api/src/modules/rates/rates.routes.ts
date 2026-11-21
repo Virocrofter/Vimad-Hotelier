@@ -114,7 +114,7 @@ ratesRouter.get(
       );
       res.json(result);
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -180,7 +180,7 @@ ratesRouter.get(
       const result = await getRatePlan(req.tenantId, req.params.id);
       res.json({ data: result });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -229,7 +229,7 @@ ratesRouter.post(
       const result = await createRatePlan(req.tenantId, req.validatedBody as RatePlanCreateInput);
       res.status(201).json({ data: result });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -283,7 +283,7 @@ ratesRouter.patch(
       );
       res.json({ data: result });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -323,7 +323,7 @@ ratesRouter.delete(
       await deleteRatePlan(req.tenantId, req.params.id);
       res.status(204).send();
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -377,7 +377,7 @@ ratesRouter.patch(
         ),
       });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -392,7 +392,7 @@ ratesRouter.delete(
         data: await clearCellOverride(req.tenantId, q.propertyId, q.ratePlanId, q.date),
       });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -422,7 +422,7 @@ ratesRouter.patch(
       });
       return res.json({ data });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -437,7 +437,7 @@ ratesRouter.get(
         data: await listCellOverrides(req.tenantId, q.propertyId, q.from, q.to),
       });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );

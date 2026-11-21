@@ -141,7 +141,7 @@ foliosRouter.get(
       );
       res.json(result);
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -182,7 +182,7 @@ foliosRouter.get(
       const result = await getFolio(req.tenantId, req.params.id);
       res.json({ data: result });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -231,7 +231,7 @@ foliosRouter.post(
       const result = await createFolio(req.tenantId, req.validatedBody as FolioCreateInput);
       res.status(201).json({ data: result });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -285,7 +285,7 @@ foliosRouter.post(
       );
       res.status(201).json({ data: result });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -340,7 +340,7 @@ foliosRouter.post(
       );
       res.json({ data: result });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -394,7 +394,7 @@ foliosRouter.post(
       );
       res.status(201).json({ data: result });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -439,7 +439,7 @@ foliosRouter.post(
       const result = await transferToCityLedger(req.tenantId, req.params.id);
       res.json({ data: result });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -483,7 +483,7 @@ foliosRouter.delete(
       await deleteFolio(req.tenantId, req.params.id);
       res.status(204).send();
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
@@ -532,7 +532,7 @@ foliosRouter.post(
           .json({ error: { code: 'NO_FOLIO', message: 'Reservation has no folio' } });
       }
       const data = await postCharge(req.tenantId, folio.id, {
-        type: 'misc',
+        type: 'incidental',
         description: String(body.description),
         amount: Number(body.amount),
         quantity: 1,
@@ -540,7 +540,7 @@ foliosRouter.post(
       });
       return res.json({ data });
     } catch (err) {
-      next(err);
+      return next(err);
     }
   }
 );
