@@ -94,9 +94,7 @@ export async function createFolio(tenantId: string, input: FolioCreateInput) {
     where: { reservationId: input.reservationId },
     orderBy: { createdAt: 'asc' },
   });
-  if (_existing) {
-    throw new AppError(409, 'Folio already exists for this reservation', 'CONFLICT');
-  }
+  void _existing; // master = first-created folio; additional bills allowed since P24.
 
   return prisma.folio.create({
     data: {

@@ -1,4 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
+import { moveFolioItem } from './group-billing.service.js';
 import { prisma } from '../../common/prisma.js';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
@@ -538,6 +539,30 @@ foliosRouter.post(
         quantity: 1,
         postedAt: new Date(),
       });
+      return res.json({ data });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+// ─── Split bills: move a line item between a reservation's folios. ───
+foliosRouter.post(
+  '/move-item',
+  requirePermission('folio', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { itemId, targetFolioId } = (req.body ?? {}) as {
+        itemId?: string;
+        targetFolioId?: string;
+      };
+      if (!itemId || !targetFolioId) {
+        return res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'itemId and targetFolioId are required' },
+        });
+      }
+      const actor = ((req as any).user?.userId ?? (req as any).user?.id ?? null) as string | null;
+      const data = await moveFolioItem(req.tenantId, actor, String(itemId), String(targetFolioId));
       return res.json({ data });
     } catch (err) {
       return next(err);

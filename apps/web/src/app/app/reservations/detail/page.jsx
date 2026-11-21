@@ -190,7 +190,7 @@ export default function ReservationDetailPage() {
   const guest = r.guest ?? {};
   const guestName =
     r.guestName || `${guest.firstName ?? ''} ${guest.lastName ?? ''}`.trim() || 'Unnamed Guest';
-  const folio = r.folio;
+  const folio = r.folios?.[0];
   const folioItems = folio?.items ?? [];
   const totalCharges = folio ? Number(folio.totalCharges) : 0;
   const totalPayments = folio ? Number(folio.totalPayments) : 0;
@@ -701,6 +701,13 @@ export default function ReservationDetailPage() {
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={emailFolio}>
                   <Mail className="mr-1.5 h-4 w-4" /> Email Folio
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => (window.location.href = '/app/split-bill?reservation=' + r.id)}
+                >
+                  Split bills
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => window.print()}>
                   <Printer className="mr-1.5 h-4 w-4" /> Print
