@@ -23,6 +23,7 @@ import {
   newIdempotencyKey,
 } from '../../../hooks/useGuestPay';
 import { formatCurrency, formatDate, folioCategoryMeta } from '../../../lib/guest-utils';
+import { ReceiptCard } from '../../../components/billing/ReceiptCard';
 
 const payStatusMeta = {
   success: { label: 'Paid', chip: 'bg-accent/10 text-accent border-accent/20' },
@@ -334,48 +335,8 @@ export default function BillingPage() {
         </div>
       )}
 
-      {/* Folio line items */}
-      <div className="rounded-xl border border-border bg-surface overflow-hidden">
-        <div className="border-b border-border bg-background px-4 py-3 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-            <Receipt className="h-4 w-4 text-secondary" /> Folio charges
-          </h3>
-          <span className="text-xs text-text-muted">{items.length} items</span>
-        </div>
-        {items.length === 0 ? (
-          <p className="px-4 py-6 text-center text-sm text-text-muted">No charges yet.</p>
-        ) : (
-          <div className="divide-y divide-border">
-            {items.map((item) => {
-              const cat = categoryForType(item.type);
-              const meta = folioCategoryMeta[cat] || folioCategoryMeta.services;
-              return (
-                <div key={item.id} className="flex items-center justify-between px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn('flex h-8 w-8 items-center justify-center rounded-md', meta.bg)}
-                    >
-                      <span className={cn('text-xs font-bold', meta.color)}>{meta.label[0]}</span>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-text-primary">{item.description}</p>
-                      <p className="text-[10px] text-text-muted">{formatDate(item.postedAt)}</p>
-                    </div>
-                  </div>
-                  <p
-                    className={cn(
-                      'text-sm font-mono font-medium',
-                      item.type === 'payment' ? 'text-accent' : 'text-text-primary'
-                    )}
-                  >
-                    {formatCurrency(item.amount * item.quantity)}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {/* Folio receipt — P7.3 ReceiptCard rollout (blueprint S6 anatomy) */}
+      <ReceiptCard folio={{ ...folio, items }} currency="ZAR" />
 
       {/* Invoices */}
       {invoices.length > 0 && (

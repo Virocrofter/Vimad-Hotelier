@@ -2,6 +2,7 @@
  * Deposit requests visible on the reservation folio — pay-now links,
  * reminder status, auto-cancel outcome.
  */
+import { formatMoneyMinor } from '../../../../lib/money';
 import { useState } from 'react';
 import { Plus, Mail, Ban, Copy, Check } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
@@ -13,7 +14,7 @@ import { paymentRequestsApi } from '../../../../api/payment-requests';
 
 const fmtMoney = (minor, currency) => {
   const sym = currency === 'ZAR' ? 'R' : '$';
-  return `${sym} ${((minor ?? 0) / 100).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return formatMoneyMinor(minor ?? 0);
 };
 
 export default function PaymentRequestsPanel({ reservationId }) {

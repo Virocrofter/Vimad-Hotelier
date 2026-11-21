@@ -9,7 +9,7 @@
  * Behind the reservationWorkspace flag; mutations reuse the existing,
  * already-tested reservation endpoints.
  */
-import { formatMoney } from '../../../../lib/money';
+import { formatMoneyMinor, formatMoney } from '../../../../lib/money';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -361,7 +361,7 @@ export default function ReservationWorkspace({ reservationId }) {
                       </span>
                     </span>
                     <span className="font-mono text-text-primary">
-                      {money(p.amountMinor / 100, p.currency ?? d.preview.currency)}
+                      {formatMoneyMinor(p.amountMinor, p.currency ?? d.preview.currency)}
                     </span>
                   </p>
                 ))}
