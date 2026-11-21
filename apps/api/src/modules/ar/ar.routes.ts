@@ -1,5 +1,5 @@
 /* apps/api/src/modules/ar/ar.routes.ts */
-import { Router, type Request, type Response } from 'express';
+import { Router, type Request, type Response, NextFunction } from 'express';
 import { prisma } from '../../common/prisma.js';
 import { z } from '../../common/zod.js';
 import {
@@ -247,7 +247,7 @@ arRouter.post(
   requirePermission('ar', 'read'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const account = await prisma.arAccount.findFirst({
+      const account = await prisma.corporateAccount.findFirst({
         where: { id: String((req.params as { id: string }).id), tenantId: req.tenantId },
       });
       if (!account) {
@@ -260,7 +260,10 @@ arRouter.post(
         },
         orderBy: { dueDate: 'asc' },
       });
-      const totalOutstanding = invoices.reduce((sum, i) => sum + Number(i.balance ?? 0), 0);
+      const totalOutstanding = invoices.reduce(
+        (sum, inv) => sum + (Number(inv.total ?? 0) - Number(inv.amountPaid ?? 0)),
+        0
+      );
       return res.json({
         data: { account, invoices, totalOutstanding, generatedAt: new Date().toISOString() },
       });
