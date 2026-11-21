@@ -36,6 +36,7 @@ import {
   cancelReservation,
   noShowReservation,
   updateReservation,
+  resendConfirmation,
 } from '../../../../api/api-reservations';
 import { cn } from '../../../../lib/utils';
 
@@ -508,8 +509,23 @@ export default function ReservationWorkspace({ reservationId }) {
           icon={MessageSquare}
           title="Messages"
           right={
-            <span className="text-xs text-text-muted">
-              {d.messages.length} thread{d.messages.length === 1 ? '' : 's'}
+            <span className="flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  setActionErr(null);
+                  try {
+                    await resendConfirmation(reservationId);
+                  } catch (e) {
+                    setActionErr(e?.response?.data?.error?.message ?? 'Resend failed');
+                  }
+                }}
+                className="rounded border border-border px-2 py-0.5 text-[11px] text-text-secondary hover:bg-surface-elevated"
+              >
+                Resend confirmation
+              </button>
+              <span className="text-xs text-text-muted">
+                {d.messages.length} thread{d.messages.length === 1 ? '' : 's'}
+              </span>
             </span>
           }
         >
