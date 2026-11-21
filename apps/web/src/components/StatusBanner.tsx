@@ -42,7 +42,7 @@ export function StatusBanner() {
       className={
         critical
           ? 'flex items-center gap-2 border-b border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/15'
-          : 'flex items-center gap-2 border-b border-warning/30 bg-warning/10 px-4 py-2 text-sm font-medium text-warning hover:bg-warning/15'
+          : 'flex items-center gap-2 border-b border-warning/30 bg-warning/10 px-4 py-2 text-sm font-medium text-warning hover:bg-warning/25'
       }
     >
       <AlertTriangle className="h-4 w-4 shrink-0" />

@@ -190,7 +190,7 @@ export function UnsettledDepartures({ data, currency, loading }) {
           <CalendarX className="h-4 w-4 text-warning" />
           <h3 className="text-sm font-semibold text-text-primary">Un-settled Departures</h3>
           {!loading && data && data.count > 0 && (
-            <span className="rounded-full bg-warning/15 px-2 py-0.5 text-[11px] font-semibold text-warning">
+            <span className="rounded-full bg-warning/25 px-2 py-0.5 text-[11px] font-semibold text-warning">
               {data.count}
             </span>
           )}
@@ -471,9 +471,9 @@ export function AttentionStrip({ exceptions, loading }) {
 // then urgent tasks, then remaining departures, then arrivals.
 
 const kindMeta = {
-  Departure: { icon: CalendarX, chip: 'bg-info/15 text-info' },
+  Departure: { icon: CalendarX, chip: 'bg-info/25 text-info' },
   Arrival: { icon: CalendarCheck, chip: 'bg-accent/10 text-accent' },
-  Task: { icon: AlertTriangle, chip: 'bg-warning/15 text-warning' },
+  Task: { icon: AlertTriangle, chip: 'bg-warning/25 text-warning' },
 };
 
 export function PriorityWorklist({ arrivals, departures, tasksTop, currency, loading, viewAllTo }) {

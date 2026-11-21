@@ -48,8 +48,8 @@ const fmtDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : '—');
 const STATUS_STYLE = {
   draft: 'bg-[var(--hq-surface-2)] text-text-secondary',
   sent: 'bg-accent/15 text-accent',
-  partially_paid: 'bg-warning/15 text-warning',
-  overdue: 'bg-danger/15 text-danger',
+  partially_paid: 'bg-warning/25 text-warning',
+  overdue: 'bg-danger/25 text-danger',
   paid: 'bg-success/15 text-success',
   cancelled: 'bg-[var(--hq-surface-2)] text-text-muted line-through',
 };

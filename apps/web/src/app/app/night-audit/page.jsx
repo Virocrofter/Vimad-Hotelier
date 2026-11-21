@@ -78,11 +78,11 @@ const statusConfig = {
   },
   failed: {
     label: 'Failed',
-    color: 'bg-danger/15 text-danger',
+    color: 'bg-danger/25 text-danger',
   },
   rolled_back: {
     label: 'Rolled Back',
-    color: 'bg-warning/15 text-warning',
+    color: 'bg-warning/25 text-warning',
   },
 };
 

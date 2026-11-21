@@ -63,7 +63,7 @@ export function AlertCluster() {
         <AlertTriangle className="h-4 w-4" />
         {needsAttention !== null && (
           <span
-            className="text-xs font-semibold text-text-primary"
+            className="text-xs font-semibold text-foreground"
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
             {needsAttention}
@@ -74,7 +74,7 @@ export function AlertCluster() {
         <Inbox className="h-4 w-4" />
         {inboxUnread !== null && inboxUnread > 0 && (
           <span
-            className="text-xs font-semibold text-text-primary"
+            className="text-xs font-semibold text-foreground"
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
             {inboxUnread}

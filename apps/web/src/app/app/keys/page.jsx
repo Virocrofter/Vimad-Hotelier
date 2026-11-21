@@ -169,9 +169,9 @@ export default function KeysPage() {
                 <Badge
                   className={
                     i.status === 'active'
-                      ? 'bg-warning/15 text-warning'
+                      ? 'bg-warning/25 text-warning'
                       : i.status === 'lost'
-                        ? 'bg-danger/15 text-danger'
+                        ? 'bg-danger/25 text-danger'
                         : 'bg-muted text-muted-foreground'
                   }
                 >

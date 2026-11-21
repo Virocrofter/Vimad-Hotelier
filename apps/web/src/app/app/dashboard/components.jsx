@@ -357,8 +357,8 @@ export function MovementsPanel({ title, icon: Icon, items, type, currency, loadi
 
 const roomStateStyles = {
   occupied: 'bg-secondary/15 border-secondary/40 text-secondary',
-  dirty: 'bg-warning/15 border-warning/40 text-warning',
-  out_of_order: 'bg-danger/15 border-danger/40 text-danger',
+  dirty: 'bg-warning/25 border-warning/40 text-warning',
+  out_of_order: 'bg-danger/25 border-danger/40 text-danger',
   ready: 'bg-accent/10 border-accent/30 text-accent',
 };
 
