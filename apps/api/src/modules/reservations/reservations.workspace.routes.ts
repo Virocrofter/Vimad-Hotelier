@@ -141,6 +141,7 @@ reservationWorkspaceRouter.get('/:id', async (req: Request, res: Response) => {
         confirmationNumber: reservation.confirmationNumber,
         status: reservation.status,
         source: reservation.source,
+        groupId: reservation.groupId ?? null,
         arrivalDate: reservation.arrivalDate,
         departureDate: reservation.departureDate,
         nights: reservation.nights,

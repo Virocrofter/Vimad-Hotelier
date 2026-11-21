@@ -157,6 +157,54 @@ function DateChangePreview({ d, onSaved }) {
   );
 }
 
+// 4.5 — group rooming list: sibling reservations of the same block
+// (guest, room, status, balance). Renders nothing for non-group stays.
+function GroupSection({ groupId, currency }) {
+  const [group, setGroup] = useState(null);
+  useEffect(() => {
+    if (!groupId) return;
+    apiClient
+      .get('/groups/' + groupId)
+      .then((r) => setGroup(r?.data?.data ?? r?.data))
+      .catch(() => setGroup(null));
+  }, [groupId]);
+  if (!groupId || !group) return null;
+  const members = group.reservations ?? group.members ?? [];
+  return (
+    <Section
+      icon={Users}
+      title={'Group — ' + (group.name ?? 'block')}
+      right={
+        <a href="/app/groups" className="text-[11px] text-text-muted underline">
+          Open groups
+        </a>
+      }
+    >
+      <ul className="max-h-40 space-y-1 overflow-y-auto">
+        {members.map((m) => (
+          <li key={m.id} className="flex items-center justify-between gap-2 text-xs">
+            <span className="truncate text-text-secondary">
+              {m.guestName ??
+                (m.guest ? m.guest.firstName + ' ' + m.guest.lastName : null) ??
+                m.confirmationNumber}
+            </span>
+            <span className="flex shrink-0 items-center gap-2 text-text-muted">
+              <span>{m.assignedRoom?.number ?? m.roomNumber ?? '—'}</span>
+              <span className={m.status === 'checked_in' ? 'text-accent-foreground' : ''}>
+                {String(m.status ?? '').replace(/_/g, ' ')}
+              </span>
+              <span className="hq-tnum">{money(Number(m.balance ?? 0), currency)}</span>
+            </span>
+          </li>
+        ))}
+        {members.length === 0 && (
+          <li className="text-xs text-text-muted">No members listed on the group detail yet.</li>
+        )}
+      </ul>
+    </Section>
+  );
+}
+
 // 4.4 — reservation document repository: list, upload (base64 -> putFile),
 // and the signature workflow (pending -> signed, with deadlines).
 function DocumentsSection({ reservationId }) {
@@ -709,6 +757,8 @@ export default function ReservationWorkspace({ reservationId }) {
             ))
           )}
         </Section>
+        <GroupSection groupId={h.groupId} currency={d.preview.currency} />
+
         <DocumentsSection reservationId={reservationId} />
 
         <Section icon={History} title="Timeline / audit">
