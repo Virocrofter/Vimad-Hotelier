@@ -26,6 +26,7 @@ import {
   resolveException,
 } from '../../../api/exceptions';
 import { flags } from '../../../lib/flags';
+import PaymentExceptions from '../billing/PaymentExceptions';
 import { cn } from '../../../lib/utils';
 
 const SEV = {
@@ -71,14 +72,16 @@ const TABS = [
   ['acknowledged', 'Acknowledged'],
   ['in_progress', 'In progress'],
   ['all', 'All'],
+  ['payments', 'Payments'],
 ];
 
 function ExceptionsPage() {
   const [tab, setTab] = useState('active');
+  const [selected, setSelected] = useState([]);
   const [prompt, setPrompt] = useState(null); // {kind, item}
   const [busyId, setBusyId] = useState(null);
   const [err, setErr] = useState(null);
-  const q = useExceptions(tab);
+  const q = useExceptions(tab === 'payments' ? 'active' : tab);
   const qc = useQueryClient();
   const invalidate = () => qc.invalidateQueries({ queryKey: ['exceptions'] });
 
@@ -151,7 +154,10 @@ function ExceptionsPage() {
         {TABS.map(([k, label]) => (
           <button
             key={k}
-            onClick={() => setTab(k)}
+            onClick={() => {
+              setTab(k);
+              setSelected([]);
+            }}
             className={cn(
               'rounded-full px-3 py-1 text-xs font-medium',
               tab === k
@@ -159,10 +165,63 @@ function ExceptionsPage() {
                 : 'border border-border text-text-secondary hover:bg-surface-elevated'
             )}
           >
-            {label} ({k === 'active' ? activeCount : (d.counts[k] ?? 0)})
+            {label}
+            {k === 'payments' ? '' : ` (${k === 'active' ? activeCount : (d.counts[k] ?? 0)})`}
           </button>
         ))}
       </div>
+
+      {selected.length > 0 && (
+        <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-surface px-3 py-2">
+          <span className="text-xs font-medium text-text-primary">{selected.length} selected</span>
+          <span className="text-[11px] text-text-muted">one audit row per item</span>
+          <div className="ml-auto flex gap-1.5">
+            <button
+              disabled={!!busyId}
+              onClick={() => setPrompt({ kind: 'bulk-resolve', item: { id: 'bulk' } })}
+              className="rounded bg-primary px-2 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
+            >
+              Resolve all
+            </button>
+            <button
+              disabled={!!busyId}
+              onClick={() => setPrompt({ kind: 'bulk-dismiss', item: { id: 'bulk' } })}
+              className="rounded border border-warning/40 px-2 py-1 text-[11px] font-medium text-warning disabled:opacity-40"
+            >
+              Dismiss all
+            </button>
+            <button
+              onClick={() => setSelected([])}
+              className="rounded border border-border px-2 py-1 text-[11px] text-text-secondary"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+      {['bulk-resolve', 'bulk-dismiss'].includes(prompt?.kind) && (
+        <ReasonPrompt
+          title={
+            prompt.kind === 'bulk-dismiss'
+              ? `Dismiss ${selected.length} items — reason required (audited)`
+              : `Resolve ${selected.length} items — how were they fixed?`
+          }
+          requireReason={prompt.kind === 'bulk-dismiss'}
+          busy={busyId === 'bulk' + prompt.kind}
+          onConfirm={(text) =>
+            run({ id: 'bulk' }, prompt.kind, () =>
+              Promise.all(
+                selected.map((id) =>
+                  prompt.kind === 'bulk-dismiss'
+                    ? dismissException(id, text)
+                    : resolveException(id, text)
+                )
+              ).then(() => setSelected([]))
+            )()
+          }
+          onCancel={() => setPrompt(null)}
+        />
+      )}
 
       {err && (
         <p className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
@@ -170,7 +229,9 @@ function ExceptionsPage() {
         </p>
       )}
 
-      {items.length === 0 ? (
+      {tab === 'payments' ? (
+        <PaymentExceptions />
+      ) : items.length === 0 ? (
         <p className="flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-6 text-xs text-text-muted">
           <ShieldCheck className="h-4 w-4 text-accent-foreground" /> No exceptions in this view.
           Everything is under control.
@@ -180,6 +241,14 @@ function ExceptionsPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-border text-[10px] uppercase tracking-wide text-text-muted">
+                <th className="px-4 py-2.5">
+                  <input
+                    type="checkbox"
+                    aria-label="Select all"
+                    checked={items.length > 0 && selected.length === items.length}
+                    onChange={(e) => setSelected(e.target.checked ? items.map((i) => i.id) : [])}
+                  />
+                </th>
                 <th className="px-4 py-2.5">Severity</th>
                 <th className="px-4 py-2.5">Exception</th>
                 <th className="px-4 py-2.5">Status</th>
@@ -190,6 +259,18 @@ function ExceptionsPage() {
             <tbody className="divide-y divide-border">
               {items.map((item) => (
                 <tr key={item.id} className="align-top">
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      aria-label={'Select ' + item.title}
+                      checked={selected.includes(item.id)}
+                      onChange={(e) =>
+                        setSelected((s) =>
+                          e.target.checked ? [...s, item.id] : s.filter((id) => id !== item.id)
+                        )
+                      }
+                    />
+                  </td>
                   <td className="px-4 py-3">
                     <span
                       className={cn(
