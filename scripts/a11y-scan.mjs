@@ -47,7 +47,7 @@ for (const [path, name] of PAGES) {
       impact: v.impact,
       help: v.help,
       nodes: v.nodes.length,
-      firstTarget: v.nodes[0]?.target?.join(' '),
+      targets: v.nodes.map((n) => n.target.join(' ')),
     })),
     counts,
   };
