@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T19:14:02.045Z",
+  "generatedAt": "2026-11-21T19:23:01.037Z",
   "pages": {
     "dashboard": {
       "url": "/app/dashboard",
@@ -8,13 +8,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 4,
-          "firstTarget": "a[title=\"Needs Attention queue\"] > .font-semibold.text-xs"
+          "nodes": 3,
+          "firstTarget": ".w-8"
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 4,
+        "serious": 3,
         "moderate": 0,
         "minor": 0
       }
@@ -23,23 +23,16 @@
       "url": "/app/reservations",
       "violations": [
         {
-          "id": "button-name",
-          "impact": "critical",
-          "help": "Buttons must have discernible text",
-          "nodes": 1,
-          "firstTarget": "th:nth-child(1) > .hover\\:text-text-primary.text-text-muted"
-        },
-        {
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 3,
-          "firstTarget": ".font-semibold.text-xs"
+          "nodes": 2,
+          "firstTarget": ".bg-primary\\/10"
         }
       ],
       "counts": {
-        "critical": 1,
-        "serious": 3,
+        "critical": 0,
+        "serious": 2,
         "moderate": 0,
         "minor": 0
       }
@@ -51,13 +44,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 3,
-          "firstTarget": ".font-semibold.text-xs"
+          "nodes": 2,
+          "firstTarget": ".w-8"
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 3,
+        "serious": 2,
         "moderate": 0,
         "minor": 0
       }
@@ -69,13 +62,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 5,
-          "firstTarget": "a[title=\"Needs Attention queue\"] > .font-semibold"
+          "nodes": 4,
+          "firstTarget": ".w-8"
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 5,
+        "serious": 4,
         "moderate": 0,
         "minor": 0
       }
@@ -87,21 +80,21 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 12,
-          "firstTarget": "a[title=\"Needs Attention queue\"] > .font-semibold.text-xs"
+          "nodes": 11,
+          "firstTarget": ".w-8"
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 12,
+        "serious": 11,
         "moderate": 0,
         "minor": 0
       }
     }
   },
   "totals": {
-    "critical": 1,
-    "serious": 27,
+    "critical": 0,
+    "serious": 22,
     "moderate": 0,
     "minor": 0
   }

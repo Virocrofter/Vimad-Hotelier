@@ -62,7 +62,10 @@ export function AlertCluster() {
       <Link to="/app/exceptions" className={CHIP} style={alertStyle} title="Needs Attention queue">
         <AlertTriangle className="h-4 w-4" />
         {needsAttention !== null && (
-          <span className="text-xs font-semibold" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <span
+            className="text-xs font-semibold text-text-primary"
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
             {needsAttention}
           </span>
         )}
@@ -70,7 +73,10 @@ export function AlertCluster() {
       <Link to="/app/comms" className={CHIP} style={BASE} title="Inbox">
         <Inbox className="h-4 w-4" />
         {inboxUnread !== null && inboxUnread > 0 && (
-          <span className="text-xs font-semibold" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <span
+            className="text-xs font-semibold text-text-primary"
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
             {inboxUnread}
           </span>
         )}

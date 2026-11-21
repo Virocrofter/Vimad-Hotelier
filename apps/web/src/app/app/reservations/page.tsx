@@ -626,6 +626,7 @@ export default function ReservationsPage() {
                 <tr>
                   <th className="px-4 py-3 w-10">
                     <button
+                      aria-label="Select all reservations"
                       onClick={toggleSelectAll}
                       className="text-text-muted hover:text-text-primary"
                     >
