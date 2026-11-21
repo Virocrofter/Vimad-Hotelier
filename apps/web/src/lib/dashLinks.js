@@ -17,6 +17,7 @@ export const LINKS = {
   billingPayments: '/app/billing/payments',
   paymentRequests: '/app/billing/payment-requests',
   comms: '/app/comms',
+  chargeToRoom: '/app/charge-to-room',
   loyalty: '/app/loyalty',
   channelManager: '/app/channel-manager',
   parking: '/app/parking',

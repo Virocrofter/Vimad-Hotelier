@@ -350,6 +350,28 @@ export async function bulkUpdate(
   }
   const plan = await prisma.ratePlan.findFirst({ where: { id: ratePlanId, propertyId } });
   if (!plan) throw new AppError(404, 'Rate plan not found', 'NOT_FOUND');
+  // P25: a fat-fingered bulk update cannot publish out of range.
+  const gv = Number((input.value as number) ?? 0);
+  const ge =
+    method === 'fixed'
+      ? round2(gv)
+      : method === 'amount'
+        ? round2(Number(plan.baseRate) + gv)
+        : round2(Number(plan.baseRate) * (1 + gv / 100));
+  if (plan.rateFloor != null && ge < Number(plan.rateFloor)) {
+    throw new AppError(
+      422,
+      `Rate ${ge} is below the floor ${plan.rateFloor} for this plan`,
+      'RATE_OUT_OF_RANGE'
+    );
+  }
+  if (plan.rateCeiling != null && ge > Number(plan.rateCeiling)) {
+    throw new AppError(
+      422,
+      `Rate ${ge} is above the ceiling ${plan.rateCeiling} for this plan`,
+      'RATE_OUT_OF_RANGE'
+    );
+  }
   const fromD = new Date(`${from}T00:00:00.000Z`);
   const toD = new Date(`${to}T00:00:00.000Z`);
   let written = 0;

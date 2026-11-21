@@ -1,4 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
+import { prisma } from '../../common/prisma.js';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
@@ -347,6 +348,26 @@ ratesRouter.patch(
         rate: number;
         propertyId: string;
       };
+      const gp = await prisma.ratePlan.findFirst({
+        where: { id: body.ratePlanId, propertyId: body.propertyId },
+        select: { rateFloor: true, rateCeiling: true },
+      });
+      if (gp?.rateFloor != null && body.rate < Number(gp.rateFloor)) {
+        return res.status(422).json({
+          error: {
+            code: 'RATE_OUT_OF_RANGE',
+            message: `Rate below the floor ${gp.rateFloor} for this plan`,
+          },
+        });
+      }
+      if (gp?.rateCeiling != null && body.rate > Number(gp.rateCeiling)) {
+        return res.status(422).json({
+          error: {
+            code: 'RATE_OUT_OF_RANGE',
+            message: `Rate above the ceiling ${gp.rateCeiling} for this plan`,
+          },
+        });
+      }
       res.json({
         data: await setCellOverride(
           req.tenantId,
@@ -377,6 +398,35 @@ ratesRouter.delete(
 );
 
 // Read-back for the calendar cell editor (two-segment path: no /:id conflict)
+// P25: per-plan rate guardrails (floor/ceiling) — enforced on bulkUpdate + cell overrides.
+ratesRouter.patch(
+  '/plans/:id/guardrails',
+  requirePermission('rate_plan', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { floor, ceiling } = (req.body ?? {}) as {
+        floor?: number | null;
+        ceiling?: number | null;
+      };
+      if (floor != null && ceiling != null && Number(floor) > Number(ceiling)) {
+        return res
+          .status(400)
+          .json({ error: { code: 'VALIDATION_ERROR', message: 'floor cannot exceed ceiling' } });
+      }
+      const data = await prisma.ratePlan.update({
+        where: { id: String((req.params as { id: string }).id) },
+        data: {
+          rateFloor: floor == null ? null : Number(floor),
+          rateCeiling: ceiling == null ? null : Number(ceiling),
+        },
+      });
+      return res.json({ data });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 ratesRouter.get(
   '/overrides/cell',
   requirePermission('rate_plan', 'read'),

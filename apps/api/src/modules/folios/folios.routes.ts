@@ -1,4 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
+import { prisma } from '../../common/prisma.js';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
@@ -481,6 +482,63 @@ foliosRouter.delete(
     try {
       await deleteFolio(req.tenantId, req.params.id);
       res.status(204).send();
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ─── Charge-to-room (Phase 3): staff posts an ad-hoc charge to an
+// in-house guest's master folio through the postCharge chokepoint. ───
+foliosRouter.post(
+  '/charge-to-room',
+  requirePermission('folio', 'create'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = (req.body ?? {}) as {
+        reservationId?: string;
+        description?: string;
+        amount?: number;
+      };
+      if (
+        !body.reservationId ||
+        !body.description ||
+        !Number(body.amount) ||
+        Number(body.amount) <= 0
+      ) {
+        return res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'reservationId, description and a positive amount are required',
+          },
+        });
+      }
+      const reservation = await prisma.reservation.findFirst({
+        where: { id: String(body.reservationId), tenantId: req.tenantId },
+        include: { folios: { orderBy: { createdAt: 'asc' }, take: 1 } },
+      });
+      if (!reservation || reservation.status !== 'checked_in') {
+        return res.status(409).json({
+          error: {
+            code: 'NOT_IN_HOUSE',
+            message: 'Charge-to-room requires a checked-in reservation',
+          },
+        });
+      }
+      const folio = reservation.folios?.[0];
+      if (!folio) {
+        return res
+          .status(409)
+          .json({ error: { code: 'NO_FOLIO', message: 'Reservation has no folio' } });
+      }
+      const data = await postCharge(req.tenantId, folio.id, {
+        type: 'misc',
+        description: String(body.description),
+        amount: Number(body.amount),
+        quantity: 1,
+        postedAt: new Date(),
+      });
+      return res.json({ data });
     } catch (err) {
       next(err);
     }
