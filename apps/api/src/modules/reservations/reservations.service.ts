@@ -468,7 +468,7 @@ async function syncReservationTotals(
       data: { totalAmount, balance },
     });
     if (reservation.folios?.[0]) {
-      await client.folio.update({ where: { reservationId }, data: { balance } });
+      await client.folio.updateMany({ where: { reservationId }, data: { balance } });
     }
   }
   return { totalAmount, balance };
