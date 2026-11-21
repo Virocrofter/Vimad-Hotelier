@@ -354,7 +354,9 @@ reservationsRouter.post(
   requirePropertyScope(),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await checkInReservation(req.tenantId, req.params.id, actorOf(req));
+      const result = await checkInReservation(req.tenantId, req.params.id, actorOf(req), {
+        force: (req.body as { force?: boolean } | undefined)?.force === true,
+      });
       res.json({ data: result });
     } catch (err) {
       next(err);

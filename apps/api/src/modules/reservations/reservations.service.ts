@@ -910,7 +910,8 @@ export async function updateReservation(
 export async function checkInReservation(
   tenantId: string,
   id: string,
-  actor: AuditActor = SYSTEM_ACTOR
+  actor: AuditActor = SYSTEM_ACTOR,
+  opts?: { force?: boolean }
 ) {
   const reservation = await getReservation(tenantId, id);
 
@@ -924,6 +925,23 @@ export async function checkInReservation(
 
   if (reservation.stays.length === 0) {
     throw new AppError(409, 'Assign a room before check-in', 'NO_ROOM_ASSIGNED');
+  }
+
+  // 4.1b: HK-readiness guardrail — only 'ready' rooms in active service may
+  // check in. The client interrupts with Make-ready / reassign exits, or the
+  // caller passes { force: true } (the dialog's "check in anyway").
+  const stay = reservation.stays[0];
+  const room: any = (stay as any)?.room;
+  if (
+    !opts?.force &&
+    room &&
+    (room.serviceStatus !== 'active' || room.housekeepingStatus !== 'ready')
+  ) {
+    throw new AppError(
+      409,
+      `Room ${room.number} is not ready (${room.housekeepingStatus})`,
+      'ROOM_NOT_READY'
+    );
   }
 
   // P1-C1: atomic transition guard. The status predicate lives INSIDE the

@@ -28,6 +28,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useReservationWorkspace } from '../../../../hooks/useReservations';
+import CheckInDialog from '../../../../components/reservations/CheckInDialog';
 import {
   checkInReservation,
   checkOutReservation,
@@ -157,10 +158,15 @@ export default function ReservationWorkspace({ reservationId }) {
   const qc = useQueryClient();
   const [busy, setBusy] = useState(null);
   const [actionErr, setActionErr] = useState(null);
+  const [checkInOpen, setCheckInOpen] = useState(false);
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: ['reservations', 'workspace', reservationId] });
 
   const run = async (action) => {
+    if (action === 'check-in') {
+      setCheckInOpen(true);
+      return;
+    }
     setBusy(action);
     setActionErr(null);
     try {
@@ -294,6 +300,17 @@ export default function ReservationWorkspace({ reservationId }) {
           </button>
         </div>
       </header>
+
+      {checkInOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <CheckInDialog
+            reservationId={reservationId}
+            room={h.assignedRoom}
+            onClose={() => setCheckInOpen(false)}
+            onCheckedIn={invalidate}
+          />
+        </div>
+      )}
 
       <DateChangePreview d={d} onSaved={invalidate} />
 
