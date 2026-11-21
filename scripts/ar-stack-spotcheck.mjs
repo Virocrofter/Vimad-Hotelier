@@ -1,0 +1,18 @@
+import { chromium } from 'playwright';
+const WEB = 'http://localhost:5173';
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await page.goto(WEB + '/auth/login');
+await page.locator('#tenantSlug').fill('demo-hotel');
+await page.locator('#email').fill('admin@demo.com');
+await page.locator('#password').fill('admin123');
+await page.locator('button[type="submit"]').click();
+await page.waitForURL('**/app/**', { timeout: 20000 });
+await page.goto(WEB + '/app/ar');
+await page.waitForTimeout(4000);
+const statusBar = await page.locator('[aria-label="Invoice status summary"]').count();
+const creditMeter = await page.locator('text=% used').count();
+await page.screenshot({ path: '.vimad-evidence/ar-stack/01-ar-stack.png', fullPage: false });
+console.log(JSON.stringify({ statusBar, creditMeter }));
+console.log(statusBar > 0 ? '=== SHIPPED: AR stack slice ===' : '=== status bar not visible (no invoices?) ===');
+await browser.close();
