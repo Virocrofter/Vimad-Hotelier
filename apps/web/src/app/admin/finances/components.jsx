@@ -728,8 +728,8 @@ export function TaxJurisdictionTable({ jurisdictions }) {
                   className={cn(
                     'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
                     j.pending < 5000
-                      ? 'bg-accent/10 text-accent border-accent/20'
-                      : 'bg-warning/10 text-warning border-warning/20'
+                      ? 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20'
+                      : 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20'
                   )}
                 >
                   {j.pending < 5000 ? (

@@ -393,7 +393,11 @@ export function SuspiciousActivityRow({ entry, expanded, onToggle, onAcknowledge
                     <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Confirm Resolved
                   </Button>
                 )}
-                <Button size="sm" variant="ghost" className="text-danger hover:bg-danger/10">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-[var(--danger-soft-fg)] hover:bg-danger/10"
+                >
                   <Ban className="mr-1.5 h-3.5 w-3.5" /> Dismiss
                 </Button>
               </div>
@@ -601,7 +605,7 @@ export function IPAllowlistCard({ entry, onToggle, onDelete }) {
         <Button
           size="sm"
           variant="ghost"
-          className="text-danger hover:bg-danger/10 flex-1"
+          className="text-[var(--danger-soft-fg)] hover:bg-danger/10 flex-1"
           onClick={() => onDelete(entry.id)}
         >
           <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Remove

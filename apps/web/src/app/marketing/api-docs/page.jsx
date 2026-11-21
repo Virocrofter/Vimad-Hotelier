@@ -275,10 +275,10 @@ export default function ApiDocsPage() {
                       <span
                         className={cn(
                           'inline-flex h-6 items-center rounded px-2 text-[10px] font-bold uppercase tracking-wider',
-                          ep.method === 'GET' && 'bg-info/10 text-info',
-                          ep.method === 'POST' && 'bg-accent/10 text-accent',
-                          ep.method === 'PATCH' && 'bg-warning/10 text-warning',
-                          ep.method === 'DELETE' && 'bg-danger/10 text-danger'
+                          ep.method === 'GET' && 'bg-info/10 text-[var(--info-soft-fg)]',
+                          ep.method === 'POST' && 'bg-accent/10 text-[var(--accent-soft-fg)]',
+                          ep.method === 'PATCH' && 'bg-warning/10 text-[var(--warning-soft-fg)]',
+                          ep.method === 'DELETE' && 'bg-danger/10 text-[var(--danger-soft-fg)]'
                         )}
                       >
                         {ep.method}

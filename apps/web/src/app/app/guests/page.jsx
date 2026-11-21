@@ -548,9 +548,9 @@ function GuestsTableSkeleton({ rows = 5 }) {
 function StatCard({ icon: Icon, label, value, tone = 'secondary' }) {
   const tones = {
     secondary: 'bg-secondary/10 text-secondary',
-    accent: 'bg-accent/10 text-accent',
-    warning: 'bg-warning/10 text-warning',
-    danger: 'bg-danger/10 text-danger',
+    accent: 'bg-accent/10 text-[var(--accent-soft-fg)]',
+    warning: 'bg-warning/10 text-[var(--warning-soft-fg)]',
+    danger: 'bg-danger/10 text-[var(--danger-soft-fg)]',
   };
   return (
     <Card>

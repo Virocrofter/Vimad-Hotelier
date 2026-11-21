@@ -47,7 +47,7 @@ const NODE_TYPES = {
   trigger: {
     label: 'Trigger',
     icon: Zap,
-    color: 'bg-accent/10 text-accent border-accent/20',
+    color: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
     desc: 'Starts the workflow',
     category: 'triggers',
     inputs: 0,
@@ -86,7 +86,7 @@ const NODE_TYPES = {
   delay: {
     label: 'Wait',
     icon: Timer,
-    color: 'bg-info/10 text-info border-info/20',
+    color: 'bg-info/10 text-[var(--info-soft-fg)] border-info/20',
     desc: 'Pause for a set time',
     category: 'flow',
     inputs: 1,
@@ -128,7 +128,7 @@ const NODE_TYPES = {
   condition: {
     label: 'Condition',
     icon: Filter,
-    color: 'bg-warning/10 text-warning border-warning/20',
+    color: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
     desc: 'Branch based on rules',
     category: 'flow',
     inputs: 1,
@@ -289,7 +289,7 @@ const NODE_TYPES = {
   end: {
     label: 'End',
     icon: CheckCircle2,
-    color: 'bg-danger/10 text-danger border-danger/20',
+    color: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
     desc: 'Terminate workflow',
     category: 'flow',
     inputs: 1,
@@ -832,7 +832,7 @@ function PropertyPanel({ node, onChange, onDelete }) {
       <div className="border-t border-border p-4">
         <button
           onClick={() => onDelete(node.id)}
-          className="flex w-full items-center justify-center gap-2 rounded-md border border-danger/20 bg-danger/5 px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10 transition-colors"
+          className="flex w-full items-center justify-center gap-2 rounded-md border border-danger/20 bg-danger/5 px-3 py-2 text-sm font-medium text-[var(--danger-soft-fg)] hover:bg-danger/10 transition-colors"
         >
           <Trash2 className="h-4 w-4" /> Delete Node
         </button>
@@ -1411,7 +1411,7 @@ export function AutomationPage() {
               <div className="flex-1 p-4">
                 <button
                   onClick={() => deleteEdge(selectedEdge.id)}
-                  className="flex w-full items-center justify-center gap-2 rounded-md border border-danger/20 bg-danger/5 px-3 py-2 text-sm font-medium text-danger hover:bg-danger/10"
+                  className="flex w-full items-center justify-center gap-2 rounded-md border border-danger/20 bg-danger/5 px-3 py-2 text-sm font-medium text-[var(--danger-soft-fg)] hover:bg-danger/10"
                 >
                   <Trash2 className="h-4 w-4" /> Delete Connection
                 </button>

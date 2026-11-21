@@ -50,10 +50,10 @@ const eventTypes = {
 };
 const statusMeta = {
   lead: { label: 'Lead', cls: 'bg-neutral/10 text-text-muted' },
-  quoted: { label: 'Quoted', cls: 'bg-info/10 text-info' },
-  contracted: { label: 'Contracted', cls: 'bg-warning/10 text-warning' },
+  quoted: { label: 'Quoted', cls: 'bg-info/10 text-[var(--info-soft-fg)]' },
+  contracted: { label: 'Contracted', cls: 'bg-warning/10 text-[var(--warning-soft-fg)]' },
   confirmed: { label: 'Confirmed', cls: 'bg-secondary/10 text-secondary' },
-  in_progress: { label: 'In Progress', cls: 'bg-accent/10 text-accent' },
+  in_progress: { label: 'In Progress', cls: 'bg-accent/10 text-[var(--accent-soft-fg)]' },
   completed: { label: 'Completed', cls: 'bg-success/10 text-success' },
   cancelled: { label: 'Cancelled', cls: 'bg-neutral/10 text-text-muted' },
   lost: { label: 'Lost', cls: 'bg-error/10 text-error' },

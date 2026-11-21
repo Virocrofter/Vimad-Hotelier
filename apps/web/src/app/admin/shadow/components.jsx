@@ -125,7 +125,7 @@ export function ShadowUserSelector({ user, activity, onImpersonate, onViewHistor
               </h3>
               <p className="text-sm text-muted-foreground">{user.email}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
+                <span className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-[var(--foreground)]">
                   {user.role}
                 </span>
                 <span className="text-xs text-muted-foreground">{user.tenantName}</span>
@@ -376,7 +376,7 @@ export function AuditLogTable({ logs, meta, isLoading, page, onPageChange }) {
     impersonate_end: 'bg-purple-100 text-purple-800',
     page_view: 'bg-green-100 text-green-800',
     data_access: 'bg-yellow-100 text-yellow-800',
-    action_performed: 'bg-primary/10 text-primary',
+    action_performed: 'bg-primary/10 text-[var(--foreground)]',
   };
 
   return (

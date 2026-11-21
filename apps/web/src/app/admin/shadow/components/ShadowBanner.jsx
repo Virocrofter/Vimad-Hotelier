@@ -168,7 +168,7 @@ export function ShadowBanner() {
                   </button>
                   <button
                     onClick={() => endShadow('manual')}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-danger/20 bg-danger/5 px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger/10 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-danger/20 bg-danger/5 px-3 py-1.5 text-xs font-medium text-[var(--danger-soft-fg)] hover:bg-danger/10 transition-colors"
                   >
                     <LogOut className="h-3 w-3" /> End Shadow
                   </button>

@@ -459,7 +459,7 @@ export function TenantRow({ tenant }) {
               ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
               : tenant.plan === 'Professional'
                 ? 'bg-secondary/10 text-secondary border-secondary/20'
-                : 'bg-info/10 text-info border-info/20'
+                : 'bg-info/10 text-[var(--info-soft-fg)] border-info/20'
           )}
         >
           {tenant.plan}
@@ -475,14 +475,14 @@ export function TenantRow({ tenant }) {
           className={cn(
             'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
             tenant.compliance === 'gdpr'
-              ? 'bg-accent/10 text-accent border-accent/20'
+              ? 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20'
               : tenant.compliance === 'pdpa'
-                ? 'bg-info/10 text-info border-info/20'
+                ? 'bg-info/10 text-[var(--info-soft-fg)] border-info/20'
                 : tenant.compliance === 'trial'
-                  ? 'bg-warning/10 text-warning border-warning/20'
+                  ? 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20'
                   : tenant.compliance === 'churned'
                     ? 'bg-neutral/10 text-text-muted border-border'
-                    : 'bg-accent/10 text-accent border-accent/20'
+                    : 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20'
           )}
         >
           {tenant.compliance === 'gdpr' && <Shield className="h-3 w-3" />}

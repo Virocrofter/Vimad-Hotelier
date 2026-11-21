@@ -472,7 +472,7 @@ export function AttentionStrip({ exceptions, loading }) {
 
 const kindMeta = {
   Departure: { icon: CalendarX, chip: 'bg-info/25 text-[var(--info-soft-fg)]' },
-  Arrival: { icon: CalendarCheck, chip: 'bg-accent/10 text-accent' },
+  Arrival: { icon: CalendarCheck, chip: 'bg-accent/10 text-[var(--accent-soft-fg)]' },
   Task: { icon: AlertTriangle, chip: 'bg-warning/25 text-[var(--warning-soft-fg)]' },
 };
 

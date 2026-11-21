@@ -115,7 +115,7 @@ export default function EvChargingPage() {
                       disabled={busyId === bay.id || bay.chargingStatus === s}
                       className={`rounded-md px-2 py-1 text-[11px] font-medium disabled:opacity-40 ${
                         bay.chargingStatus === s
-                          ? 'bg-primary/10 text-primary'
+                          ? 'bg-primary/10 text-[var(--foreground)]'
                           : 'border border-border text-text-secondary hover:text-text-primary'
                       }`}
                     >

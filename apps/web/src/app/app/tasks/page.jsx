@@ -80,7 +80,7 @@ const PRIORITY_STYLE = {
   low: 'bg-slate-500/10 text-slate-500 border-slate-500/20',
   normal: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
   high: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-  urgent: 'bg-danger/10 text-danger border-danger/20',
+  urgent: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
 };
 
 const DEPT_LABEL = Object.fromEntries(DEPARTMENTS.map((d) => [d, d.replace(/_/g, ' ')]));

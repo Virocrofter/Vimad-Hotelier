@@ -42,7 +42,10 @@ const fmtDate = (d) =>
 
 const beoStatusMeta = {
   draft: { label: 'Draft', cls: 'bg-neutral/10 text-text-muted' },
-  pending_approval: { label: 'Pending Approval', cls: 'bg-warning/10 text-warning' },
+  pending_approval: {
+    label: 'Pending Approval',
+    cls: 'bg-warning/10 text-[var(--warning-soft-fg)]',
+  },
   approved: { label: 'Approved', cls: 'bg-secondary/10 text-secondary' },
   signed: { label: 'Signed', cls: 'bg-success/10 text-success' },
   changes_requested: { label: 'Changes Requested', cls: 'bg-error/10 text-error' },

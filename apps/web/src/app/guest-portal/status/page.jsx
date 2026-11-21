@@ -87,10 +87,10 @@ export default function GuestStatusPage() {
                     className={cn(
                       'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize',
                       ok
-                        ? 'bg-accent/10 text-accent'
+                        ? 'bg-accent/10 text-[var(--accent-soft-fg)]'
                         : bad
                           ? 'bg-red-500/10 text-red-500'
-                          : 'bg-warning/10 text-warning'
+                          : 'bg-warning/10 text-[var(--warning-soft-fg)]'
                     )}
                   >
                     {ok ? (

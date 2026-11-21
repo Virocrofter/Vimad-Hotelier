@@ -197,7 +197,7 @@ export default function TenantDetailDrawer({ tenant, onClose, onUpdateStatus }) 
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-warning border-warning/30 hover:bg-warning/10"
+                    className="text-[var(--warning-soft-fg)] border-warning/30 hover:bg-warning/10"
                     onClick={() => onUpdateStatus(tenant.id, 'suspended')}
                   >
                     <Pause className="mr-1.5 h-3.5 w-3.5" /> Suspend
@@ -207,7 +207,7 @@ export default function TenantDetailDrawer({ tenant, onClose, onUpdateStatus }) 
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-accent border-accent/30 hover:bg-accent/10"
+                    className="text-[var(--accent-soft-fg)] border-accent/30 hover:bg-accent/10"
                     onClick={() => onUpdateStatus(tenant.id, 'active')}
                   >
                     <Play className="mr-1.5 h-3.5 w-3.5" /> Reactivate
@@ -217,7 +217,7 @@ export default function TenantDetailDrawer({ tenant, onClose, onUpdateStatus }) 
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-accent border-accent/30 hover:bg-accent/10"
+                    className="text-[var(--accent-soft-fg)] border-accent/30 hover:bg-accent/10"
                     onClick={() => onUpdateStatus(tenant.id, 'active')}
                   >
                     <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Convert to Paid
@@ -230,7 +230,7 @@ export default function TenantDetailDrawer({ tenant, onClose, onUpdateStatus }) 
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-danger hover:bg-danger/10 ml-auto"
+                    className="text-[var(--danger-soft-fg)] hover:bg-danger/10 ml-auto"
                   >
                     <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
                   </Button>

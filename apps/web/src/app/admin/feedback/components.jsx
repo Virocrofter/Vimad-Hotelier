@@ -159,9 +159,15 @@ export function NpsScoreBadge({ score }) {
 export function CategoryBadge({ category }) {
   const meta = {
     product: { label: 'Product', class: 'bg-secondary/10 text-secondary border-secondary/20' },
-    feature: { label: 'Feature', class: 'bg-info/10 text-info border-info/20' },
-    support: { label: 'Support', class: 'bg-warning/10 text-warning border-warning/20' },
-    billing: { label: 'Billing', class: 'bg-danger/10 text-danger border-danger/20' },
+    feature: { label: 'Feature', class: 'bg-info/10 text-[var(--info-soft-fg)] border-info/20' },
+    support: {
+      label: 'Support',
+      class: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+    },
+    billing: {
+      label: 'Billing',
+      class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+    },
     performance: {
       label: 'Performance',
       class: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
@@ -189,20 +195,24 @@ export function FeatureStatusBadge({ status }) {
       class: 'bg-neutral/10 text-text-muted border-border',
       dot: 'bg-text-muted',
     },
-    planned: { label: 'Planned', class: 'bg-info/10 text-info border-info/20', dot: 'bg-info' },
+    planned: {
+      label: 'Planned',
+      class: 'bg-info/10 text-[var(--info-soft-fg)] border-info/20',
+      dot: 'bg-info',
+    },
     'in-progress': {
       label: 'In Progress',
-      class: 'bg-warning/10 text-warning border-warning/20',
+      class: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
       dot: 'bg-warning',
     },
     shipped: {
       label: 'Shipped',
-      class: 'bg-accent/10 text-accent border-accent/20',
+      class: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
       dot: 'bg-accent',
     },
     declined: {
       label: 'Declined',
-      class: 'bg-danger/10 text-danger border-danger/20',
+      class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
       dot: 'bg-danger',
     },
   }[status] || {
@@ -227,9 +237,12 @@ export function FeatureStatusBadge({ status }) {
 /* ─── Priority Badge ─── */
 export function PriorityBadge({ priority }) {
   const meta = {
-    critical: { label: 'Critical', class: 'bg-danger/10 text-danger border-danger/20' },
-    high: { label: 'High', class: 'bg-warning/10 text-warning border-warning/20' },
-    medium: { label: 'Medium', class: 'bg-info/10 text-info border-info/20' },
+    critical: {
+      label: 'Critical',
+      class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+    },
+    high: { label: 'High', class: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20' },
+    medium: { label: 'Medium', class: 'bg-info/10 text-[var(--info-soft-fg)] border-info/20' },
     low: { label: 'Low', class: 'bg-neutral/10 text-text-muted border-border' },
   }[priority] || { label: priority, class: 'bg-neutral/10 text-text-muted border-border' };
 

@@ -47,18 +47,24 @@ const timeAgo = (iso) => {
 };
 
 const ROLE_META = {
-  owner: { label: 'Owner', class: 'bg-danger/10 text-danger border-danger/20' },
+  owner: { label: 'Owner', class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20' },
   admin: { label: 'Admin', class: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
-  manager: { label: 'Manager', class: 'bg-warning/10 text-warning border-warning/20' },
+  manager: {
+    label: 'Manager',
+    class: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+  },
   staff: { label: 'Staff', class: 'bg-secondary/10 text-secondary border-secondary/20' },
-  housekeeper: { label: 'Housekeeper', class: 'bg-accent/10 text-accent border-accent/20' },
+  housekeeper: {
+    label: 'Housekeeper',
+    class: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  },
 };
 
 function StatusBadge({ status }) {
   const meta = {
     active: {
       label: 'Active',
-      class: 'bg-accent/10 text-accent border-accent/20',
+      class: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
       dot: 'bg-accent',
     },
     inactive: {
@@ -68,7 +74,7 @@ function StatusBadge({ status }) {
     },
     suspended: {
       label: 'Suspended',
-      class: 'bg-danger/10 text-danger border-danger/20',
+      class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
       dot: 'bg-danger',
     },
   }[status] || {
@@ -563,7 +569,7 @@ export default function UserDetailPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-start text-warning border-warning/30 hover:bg-warning/10"
+                    className="w-full justify-start text-[var(--warning-soft-fg)] border-warning/30 hover:bg-warning/10"
                     onClick={() => setStatus('inactive')}
                   >
                     <Ban className="mr-2 h-4 w-4" /> Deactivate Account
@@ -572,7 +578,7 @@ export default function UserDetailPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-start text-accent border-accent/30 hover:bg-accent/10"
+                    className="w-full justify-start text-[var(--accent-soft-fg)] border-accent/30 hover:bg-accent/10"
                     onClick={() => setStatus('active')}
                   >
                     <CheckCircle2 className="mr-2 h-4 w-4" /> Activate Account
@@ -582,7 +588,7 @@ export default function UserDetailPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-start text-danger border-danger/30 hover:bg-danger/10"
+                    className="w-full justify-start text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10"
                     onClick={() => setStatus('suspended')}
                   >
                     <AlertTriangle className="mr-2 h-4 w-4" /> Suspend Account
@@ -739,7 +745,7 @@ export default function UserDetailPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-danger border-danger/30 hover:bg-danger/10"
+                  className="text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10"
                   onClick={() => setStatus('suspended')}
                 >
                   <Ban className="mr-1.5 h-4 w-4" /> Suspend
@@ -749,7 +755,7 @@ export default function UserDetailPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-accent border-accent/30 hover:bg-accent/10"
+                  className="text-[var(--accent-soft-fg)] border-accent/30 hover:bg-accent/10"
                   onClick={() => setStatus('active')}
                 >
                   <CheckCircle2 className="mr-1.5 h-4 w-4" /> Reactivate

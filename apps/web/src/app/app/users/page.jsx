@@ -40,18 +40,28 @@ const timeAgo = (iso) => {
 };
 
 const ROLE_META = {
-  owner: { label: 'Owner', class: 'bg-danger/10 text-danger border-danger/20' },
+  owner: { label: 'Owner', class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20' },
   admin: { label: 'Admin', class: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
-  manager: { label: 'Manager', class: 'bg-warning/10 text-warning border-warning/20' },
+  manager: {
+    label: 'Manager',
+    class: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+  },
   staff: { label: 'Staff', class: 'bg-secondary/10 text-secondary border-secondary/20' },
-  housekeeper: { label: 'Housekeeper', class: 'bg-accent/10 text-accent border-accent/20' },
+  housekeeper: {
+    label: 'Housekeeper',
+    class: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  },
 };
 
 const STATUS_META = {
-  active: { label: 'Active', class: 'bg-accent/10 text-accent border-accent/20', dot: 'bg-accent' },
+  active: {
+    label: 'Active',
+    class: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+    dot: 'bg-accent',
+  },
   suspended: {
     label: 'Suspended',
-    class: 'bg-danger/10 text-danger border-danger/20',
+    class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
     dot: 'bg-danger',
   },
   inactive: {
@@ -752,7 +762,7 @@ export default function UsersPage() {
               </Button>
               <Button
                 variant="outline"
-                className="text-danger border-danger/30 hover:bg-danger/10"
+                className="text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10"
                 onClick={handleSuspend}
                 disabled={!suspendReason.trim()}
               >

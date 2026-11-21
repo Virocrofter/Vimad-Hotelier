@@ -111,7 +111,7 @@ export default function ScheduleModal({ report, onClose, onSave }) {
                   className={cn(
                     'rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
                     form.frequency === freq.key
-                      ? 'border-accent bg-accent/10 text-accent'
+                      ? 'border-accent bg-accent/10 text-[var(--accent-soft-fg)]'
                       : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                   )}
                 >

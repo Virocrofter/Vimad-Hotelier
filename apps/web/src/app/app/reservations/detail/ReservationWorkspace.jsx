@@ -43,11 +43,17 @@ import {
 import { cn } from '../../../../lib/utils';
 
 const STATUS = {
-  confirmed: { label: 'Confirmed', cls: 'bg-accent/10 text-accent border-accent/20' },
+  confirmed: {
+    label: 'Confirmed',
+    cls: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  },
   checked_in: { label: 'In house', cls: 'bg-secondary/10 text-secondary border-secondary/20' },
   checked_out: { label: 'Checked out', cls: 'bg-neutral/10 text-text-muted border-border' },
-  cancelled: { label: 'Cancelled', cls: 'bg-danger/10 text-danger border-danger/20' },
-  no_show: { label: 'No-show', cls: 'bg-danger/10 text-danger border-danger/20' },
+  cancelled: {
+    label: 'Cancelled',
+    cls: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+  },
+  no_show: { label: 'No-show', cls: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20' },
 };
 const money = (amount, currency = 'ZAR') => formatMoney(amount, currency);
 const day = (d) => (d ?? '').slice(0, 10);

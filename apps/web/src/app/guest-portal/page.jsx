@@ -58,8 +58,8 @@ export default function GuestPortalPage() {
   );
   const phase = stay.checkedIn ? 'during' : now < arrival ? 'pre' : 'post';
   const phaseConfig = {
-    pre: { label: 'Upcoming Stay', color: 'bg-info/10 text-info' },
-    during: { label: 'Current Stay', color: 'bg-accent/10 text-accent' },
+    pre: { label: 'Upcoming Stay', color: 'bg-info/10 text-[var(--info-soft-fg)]' },
+    during: { label: 'Current Stay', color: 'bg-accent/10 text-[var(--accent-soft-fg)]' },
     post: { label: 'Past Stay', color: 'bg-background-secondary text-text-secondary' },
   };
   const cfg = phaseConfig[phase];

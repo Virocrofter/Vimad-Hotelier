@@ -118,7 +118,7 @@ function SidebarItem({ to, label, icon: Icon, exact, collapsed }) {
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
         isActive
-          ? 'bg-danger/10 text-danger'
+          ? 'bg-danger/10 text-[var(--danger-soft-fg)]'
           : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary',
         collapsed && 'justify-center px-2'
       )}

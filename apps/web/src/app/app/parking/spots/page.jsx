@@ -37,9 +37,9 @@ const ZONES = [
 
 const BAY_STATUS_STYLE = {
   available: 'bg-success/10 text-success',
-  occupied: 'bg-primary/10 text-primary',
-  reserved: 'bg-warning/10 text-warning',
-  out_of_service: 'bg-danger/10 text-danger',
+  occupied: 'bg-primary/10 text-[var(--foreground)]',
+  reserved: 'bg-warning/10 text-[var(--warning-soft-fg)]',
+  out_of_service: 'bg-danger/10 text-[var(--danger-soft-fg)]',
 };
 
 const inputCls =

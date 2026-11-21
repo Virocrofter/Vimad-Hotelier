@@ -14,10 +14,10 @@ const variantClasses: Record<BadgeVariant, string> = {
   default: 'bg-surface text-text-primary border-border',
   secondary: 'bg-secondary/10 text-secondary border-secondary/20',
   outline: 'bg-transparent text-text-primary border-border',
-  accent: 'bg-accent/10 text-accent border-accent/20',
-  warning: 'bg-warning/10 text-warning border-warning/20',
-  danger: 'bg-danger/10 text-danger border-danger/20',
-  info: 'bg-info/10 text-info border-info/20',
+  accent: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  warning: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+  danger: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+  info: 'bg-info/10 text-[var(--info-soft-fg)] border-info/20',
 };
 
 export function Badge({ children, variant = 'default', className }: BadgeProps) {

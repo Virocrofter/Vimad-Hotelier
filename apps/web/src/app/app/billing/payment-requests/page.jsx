@@ -31,10 +31,10 @@ import { apiGet } from '../../../../api/client';
 const fmtMoney = (minor, currency = 'ZAR') => formatMoneyMinor(minor, currency);
 
 const STATUS_STYLE = {
-  pending: 'bg-warning/10 text-warning border-warning/20',
+  pending: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
   sent: 'bg-secondary/10 text-secondary border-secondary/20',
-  paid: 'bg-accent/10 text-accent border-accent/20',
-  expired: 'bg-danger/10 text-danger border-danger/20',
+  paid: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  expired: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
   cancelled: 'bg-neutral/10 text-text-muted border-border',
 };
 

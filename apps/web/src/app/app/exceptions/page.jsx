@@ -31,9 +31,9 @@ import { useTenantUsers } from '../../../hooks/useTenantUsers';
 import { cn } from '../../../lib/utils';
 
 const SEV = {
-  critical: 'border-danger/30 bg-danger/10 text-danger',
-  high: 'border-warning/40 bg-warning/10 text-warning',
-  medium: 'border-info/30 bg-info/10 text-info',
+  critical: 'border-danger/30 bg-danger/10 text-[var(--danger-soft-fg)]',
+  high: 'border-warning/40 bg-warning/10 text-[var(--warning-soft-fg)]',
+  medium: 'border-info/30 bg-info/10 text-[var(--info-soft-fg)]',
   low: 'border-border bg-surface-elevated text-text-muted',
 };
 
@@ -142,7 +142,9 @@ function ExceptionsPage() {
         <span
           className={cn(
             'rounded-full px-2 py-0.5 text-[11px] font-bold',
-            activeCount ? 'bg-danger/10 text-danger' : 'bg-accent/10 text-accent-foreground'
+            activeCount
+              ? 'bg-danger/10 text-[var(--danger-soft-fg)]'
+              : 'bg-accent/10 text-[var(--accent-soft-fg)]-foreground'
           )}
         >
           {activeCount}

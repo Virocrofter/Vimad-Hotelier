@@ -391,7 +391,7 @@ export default function ReportsPage() {
                     className={cn(
                       'rounded-full border px-2 py-0.5 text-[10px] font-medium',
                       t.type === 'system'
-                        ? 'bg-info/10 text-info border-info/20'
+                        ? 'bg-info/10 text-[var(--info-soft-fg)] border-info/20'
                         : 'bg-secondary/10 text-secondary border-secondary/20'
                     )}
                   >
@@ -514,10 +514,10 @@ export default function ReportsPage() {
                       className={cn(
                         'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium',
                         r.status === 'completed'
-                          ? 'bg-accent/10 text-accent border-accent/20'
+                          ? 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20'
                           : r.status === 'failed'
-                            ? 'bg-danger/10 text-danger border-danger/20'
-                            : 'bg-info/10 text-info border-info/20'
+                            ? 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20'
+                            : 'bg-info/10 text-[var(--info-soft-fg)] border-info/20'
                       )}
                     >
                       {r.status === 'completed' ? (

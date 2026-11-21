@@ -102,7 +102,9 @@ function CriticalStrip({ critical }) {
                 <span
                   className={cn(
                     'rounded-full px-2 py-0.5 text-[11px] font-bold',
-                    isRed ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning'
+                    isRed
+                      ? 'bg-danger/10 text-[var(--danger-soft-fg)]'
+                      : 'bg-warning/10 text-[var(--warning-soft-fg)]'
                   )}
                 >
                   {c.count}

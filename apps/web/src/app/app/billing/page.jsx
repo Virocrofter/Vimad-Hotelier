@@ -352,7 +352,7 @@ export default function BillingPage() {
           className={cn(
             'flex items-center gap-2 rounded-lg border px-4 py-3 text-sm',
             notice.kind === 'success'
-              ? 'border-accent/20 bg-accent/5 text-accent'
+              ? 'border-accent/20 bg-accent/5 text-[var(--accent-soft-fg)]'
               : 'border-danger/20 bg-danger/5 text-danger'
           )}
         >
@@ -426,7 +426,7 @@ export default function BillingPage() {
           onClick={() => setConfirmAction({ kind: 'delete' })}
           variant="outline"
           size="sm"
-          className="text-danger border-danger/30 hover:bg-danger/10"
+          className="text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10"
           disabled={!folio || items.length > 0}
           title={items.length > 0 ? 'Only empty folios can be deleted' : 'Delete empty folio'}
         >
@@ -437,7 +437,7 @@ export default function BillingPage() {
           onClick={() => setShowShiftClose(true)}
           variant="outline"
           size="sm"
-          className="text-danger border-danger/30 hover:bg-danger/10"
+          className="text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10"
         >
           <Lock className="mr-1.5 h-4 w-4" /> Close Shift
         </Button>
@@ -462,7 +462,7 @@ export default function BillingPage() {
           <p
             className={cn(
               'mt-1 text-xl font-bold font-mono',
-              currentBalance > 0 ? 'text-danger' : 'text-accent'
+              currentBalance > 0 ? 'text-danger' : 'text-[var(--accent-soft-fg)]'
             )}
           >
             {formatCurrency(Math.abs(currentBalance))}
@@ -1004,7 +1004,11 @@ function RoutingModal({ transactions, onClose, onRoute, routingTargets }) {
                     <p
                       className={cn(
                         'text-sm font-mono font-semibold truncate',
-                        total > 0 ? 'text-danger' : total < 0 ? 'text-accent' : 'text-text-primary'
+                        total > 0
+                          ? 'text-danger'
+                          : total < 0
+                            ? 'text-[var(--accent-soft-fg)]'
+                            : 'text-text-primary'
                       )}
                     >
                       {count} items · {formatCurrency(Math.abs(total))}
@@ -1118,7 +1122,10 @@ function ReceiptPreviewModal({ onClose, folio, guestName, transactions }) {
               <div key={tx.id} className="flex justify-between text-sm">
                 <span className="text-text-secondary">{tx.description}</span>
                 <span
-                  className={cn('font-mono', tx.charge > 0 ? 'text-text-primary' : 'text-accent')}
+                  className={cn(
+                    'font-mono',
+                    tx.charge > 0 ? 'text-text-primary' : 'text-[var(--accent-soft-fg)]'
+                  )}
                 >
                   {tx.charge > 0 ? formatCurrency(tx.charge) : `-${formatCurrency(tx.payment)}`}
                 </span>
@@ -1134,13 +1141,18 @@ function ReceiptPreviewModal({ onClose, folio, guestName, transactions }) {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-text-secondary">Total Payments</span>
-              <span className="font-mono font-medium text-accent">
+              <span className="font-mono font-medium text-[var(--accent-soft-fg)]">
                 -{formatCurrency(totalPayments)}
               </span>
             </div>
             <div className="flex justify-between text-base font-bold pt-1">
               <span className="text-text-primary">Balance Due</span>
-              <span className={cn('font-mono', balance > 0 ? 'text-danger' : 'text-accent')}>
+              <span
+                className={cn(
+                  'font-mono',
+                  balance > 0 ? 'text-danger' : 'text-[var(--accent-soft-fg)]'
+                )}
+              >
                 {formatCurrency(Math.abs(balance))}
               </span>
             </div>
@@ -1268,7 +1280,7 @@ function ShiftCloseModal({ onClose, items, folios }) {
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-lg border border-border bg-surface p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="h-4 w-4 text-accent" />
+                  <DollarSign className="h-4 w-4 text-[var(--accent-soft-fg)]" />
                   <span className="text-xs font-medium text-text-secondary uppercase">
                     Cash Drawer
                   </span>
@@ -1544,7 +1556,9 @@ function ConfirmModal({ title, description, confirmLabel, danger, onCancel, onCo
           <Button
             type="button"
             variant={danger ? 'outline' : 'secondary'}
-            className={danger ? 'text-danger border-danger/30 hover:bg-danger/10' : ''}
+            className={
+              danger ? 'text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10' : ''
+            }
             disabled={submitting}
             onClick={async () => {
               setSubmitting(true);

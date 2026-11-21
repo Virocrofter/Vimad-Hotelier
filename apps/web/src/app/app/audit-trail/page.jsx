@@ -84,19 +84,19 @@ const severityMeta = {
   info: {
     label: 'Info',
     dot: 'bg-accent',
-    class: 'bg-accent/10 text-accent border-accent/20',
+    class: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
     icon: Info,
   },
   warning: {
     label: 'Warning',
     dot: 'bg-warning',
-    class: 'bg-warning/10 text-warning border-warning/20',
+    class: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
     icon: AlertTriangle,
   },
   danger: {
     label: 'Critical',
     dot: 'bg-danger',
-    class: 'bg-danger/10 text-danger border-danger/20',
+    class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
     icon: XCircle,
   },
 };

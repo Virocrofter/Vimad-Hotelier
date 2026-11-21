@@ -72,9 +72,9 @@ export function NotificationItem({ notification, onRead, onArchive }) {
 
   const colors = {
     message: 'text-secondary bg-secondary/10',
-    alert: 'text-danger bg-danger/10',
-    promo: 'text-accent bg-accent/10',
-    system: 'text-info bg-info/10',
+    alert: 'text-[var(--danger-soft-fg)] bg-danger/10',
+    promo: 'text-[var(--accent-soft-fg)] bg-accent/10',
+    system: 'text-[var(--info-soft-fg)] bg-info/10',
   };
 
   return (

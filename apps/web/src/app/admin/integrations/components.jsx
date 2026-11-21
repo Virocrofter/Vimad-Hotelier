@@ -340,7 +340,7 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-danger hover:bg-danger/10 ml-auto"
+                className="text-[var(--danger-soft-fg)] hover:bg-danger/10 ml-auto"
                 onClick={() => onDisconnect?.(integration.id)}
               >
                 <WifiOff className="mr-1.5 h-3.5 w-3.5" /> Disconnect
@@ -358,7 +358,7 @@ export function IntegrationCard({ integration, onToggle, onConfigure, onDisconne
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-danger hover:bg-danger/10"
+                className="text-[var(--danger-soft-fg)] hover:bg-danger/10"
                 onClick={() => onDisconnect?.(integration.id)}
               >
                 <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Remove

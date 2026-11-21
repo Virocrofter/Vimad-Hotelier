@@ -130,7 +130,7 @@ export default function InvoicesPage() {
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ${
                         inv.type === 'receipt'
-                          ? 'bg-accent/10 text-accent'
+                          ? 'bg-accent/10 text-[var(--accent-soft-fg)]'
                           : 'bg-secondary/10 text-secondary'
                       }`}
                     >

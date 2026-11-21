@@ -381,7 +381,7 @@ export default function HousekeepingPage() {
                     <p className="text-xs text-text-muted">Requested {timeAgo(req.createdAt)}</p>
                   </div>
                 </div>
-                <span className="rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize bg-warning/10 text-warning">
+                <span className="rounded-full px-2.5 py-0.5 text-[10px] font-medium capitalize bg-warning/10 text-[var(--warning-soft-fg)]">
                   {req.status}
                 </span>
               </div>

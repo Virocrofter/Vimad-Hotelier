@@ -176,10 +176,10 @@ export default function RateCodes() {
                       className={cn(
                         'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-mono shrink-0',
                         isActive
-                          ? 'border-primary/30 bg-primary/10 text-primary'
+                          ? 'border-primary/30 bg-primary/10 text-[var(--foreground)]'
                           : p.status === 'inactive'
                             ? 'border-border bg-surface-elevated text-text-muted'
-                            : 'border-accent/30 bg-accent/10 text-accent'
+                            : 'border-accent/30 bg-accent/10 text-[var(--accent-soft-fg)]'
                       )}
                     >
                       {p.code}
@@ -222,7 +222,7 @@ export default function RateCodes() {
                         'inline-flex items-center rounded-full border px-2 py-0.5 text-xs',
                         selected.status === 'inactive'
                           ? 'border-border bg-surface-elevated text-text-muted'
-                          : 'border-accent/30 bg-accent/10 text-accent'
+                          : 'border-accent/30 bg-accent/10 text-[var(--accent-soft-fg)]'
                       )}
                     >
                       {selected.status === 'inactive' ? 'Inactive' : 'Active'}
@@ -233,7 +233,7 @@ export default function RateCodes() {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => handleDelete(selected)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-danger/10 text-danger border border-danger/20 rounded-lg text-sm hover:bg-danger/20"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-danger/10 text-[var(--danger-soft-fg)] border border-danger/20 rounded-lg text-sm hover:bg-danger/20"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete
@@ -278,12 +278,12 @@ export default function RateCodes() {
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {selected.closeToArrival && (
-                    <span className="inline-flex items-center rounded-full bg-warning/10 text-warning border border-warning/20 px-2.5 py-1 text-xs">
+                    <span className="inline-flex items-center rounded-full bg-warning/10 text-[var(--warning-soft-fg)] border border-warning/20 px-2.5 py-1 text-xs">
                       Closed to Arrival
                     </span>
                   )}
                   {selected.closeToDeparture && (
-                    <span className="inline-flex items-center rounded-full bg-warning/10 text-warning border border-warning/20 px-2.5 py-1 text-xs">
+                    <span className="inline-flex items-center rounded-full bg-warning/10 text-[var(--warning-soft-fg)] border border-warning/20 px-2.5 py-1 text-xs">
                       Closed to Departure
                     </span>
                   )}

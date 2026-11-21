@@ -119,13 +119,13 @@ const otaMeta = {
 const statusMeta = {
   active: {
     label: 'Active',
-    class: 'bg-accent/10 text-accent border-accent/20',
+    class: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
     dot: 'bg-accent',
     icon: CheckCircle2,
   },
   expired: {
     label: 'Expired',
-    class: 'bg-danger/10 text-danger border-danger/20',
+    class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
     dot: 'bg-danger',
     icon: AlertCircle,
   },
@@ -1072,8 +1072,8 @@ export default function VCCPage() {
           className={cn(
             'rounded-xl border px-4 py-3 text-sm flex items-start gap-2',
             notice.kind === 'ok'
-              ? 'border-accent/20 bg-accent/10 text-accent'
-              : 'border-danger/20 bg-danger/10 text-danger'
+              ? 'border-accent/20 bg-accent/10 text-[var(--accent-soft-fg)]'
+              : 'border-danger/20 bg-danger/10 text-[var(--danger-soft-fg)]'
           )}
         >
           {notice.kind === 'ok' ? (
@@ -1163,7 +1163,7 @@ export default function VCCPage() {
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
               showExpiringOnly
-                ? 'border-warning bg-warning/10 text-warning'
+                ? 'border-warning bg-warning/10 text-[var(--warning-soft-fg)]'
                 : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >
@@ -1174,7 +1174,7 @@ export default function VCCPage() {
             className={cn(
               'inline-flex h-10 items-center gap-2 rounded-md border px-4 text-sm font-medium transition-colors',
               showLowBalanceOnly
-                ? 'border-danger bg-danger/10 text-danger'
+                ? 'border-danger bg-danger/10 text-[var(--danger-soft-fg)]'
                 : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
             )}
           >

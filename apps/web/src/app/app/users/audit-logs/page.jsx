@@ -52,10 +52,10 @@ const CATEGORY_META = {
 };
 
 const SEVERITY_STYLES = {
-  critical: 'bg-danger/10 text-danger border-danger/20',
+  critical: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
   high: 'bg-danger/5 text-danger border-danger/10',
-  medium: 'bg-warning/10 text-warning border-warning/20',
-  low: 'bg-info/10 text-info border-info/20',
+  medium: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+  low: 'bg-info/10 text-[var(--info-soft-fg)] border-info/20',
   info: 'bg-surface-elevated text-text-secondary border-border',
 };
 

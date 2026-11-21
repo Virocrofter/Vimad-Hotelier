@@ -10,11 +10,11 @@ interface BadgeConfig {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  accent: 'bg-accent/10 text-accent border-accent/20',
+  accent: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
   secondary: 'bg-secondary/10 text-secondary border-secondary/20',
-  warning: 'bg-warning/10 text-warning border-warning/20',
-  danger: 'bg-danger/10 text-danger border-danger/20',
-  info: 'bg-info/10 text-info border-info/20',
+  warning: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+  danger: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+  info: 'bg-info/10 text-[var(--info-soft-fg)] border-info/20',
   neutral: 'bg-neutral/10 text-text-muted border-border',
 };
 

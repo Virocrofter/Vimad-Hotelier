@@ -9,8 +9,8 @@ import { formatDate } from '../../../lib/guest-utils';
 
 const kindMeta = {
   stay: { icon: BedDouble, color: 'text-secondary bg-secondary/10' },
-  loyalty: { icon: Star, color: 'text-accent bg-accent/10' },
-  ticket: { icon: Ticket, color: 'text-warning bg-warning/10' },
+  loyalty: { icon: Star, color: 'text-[var(--accent-soft-fg)] bg-accent/10' },
+  ticket: { icon: Ticket, color: 'text-[var(--warning-soft-fg)] bg-warning/10' },
 };
 
 export default function TimelinePage() {

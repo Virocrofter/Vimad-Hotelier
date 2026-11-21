@@ -73,7 +73,9 @@ export default function TransactionSheet({
               <span
                 className={cn(
                   'rounded-full px-2 py-0.5 text-[11px] font-medium',
-                  payment ? 'bg-accent/10 text-accent' : 'bg-info/10 text-info'
+                  payment
+                    ? 'bg-accent/10 text-[var(--accent-soft-fg)]'
+                    : 'bg-info/10 text-[var(--info-soft-fg)]'
                 )}
               >
                 {payment ? 'Payment' : 'Charge'}
@@ -149,7 +151,7 @@ export default function TransactionSheet({
             <Button
               variant="outline"
               size="sm"
-              className="text-danger border-danger/30 hover:bg-danger/10"
+              className="text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10"
               onClick={() => onReverse?.(tx)}
             >
               <RotateCcw className="mr-1.5 h-4 w-4" /> Reverse

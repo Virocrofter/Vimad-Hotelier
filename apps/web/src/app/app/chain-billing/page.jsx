@@ -194,7 +194,7 @@ function AccountRow({ account }) {
                   setInvoiceOpen(true);
                 }}
                 disabled={account.outstanding <= 0}
-                className="rounded-md bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-30"
+                className="rounded-md bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] hover:bg-primary/20 disabled:opacity-30"
               >
                 + Generate month-end invoice
               </button>
@@ -427,7 +427,7 @@ export default function ChainBillingPage() {
             onClick={() => setTab(t.key)}
             className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
               tab === t.key
-                ? 'bg-primary/10 text-primary'
+                ? 'bg-primary/10 text-[var(--foreground)]'
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >

@@ -11,17 +11,17 @@ import { useMyReview, useSubmitReview } from '../../../hooks/useGuestComms';
 const statusMeta = {
   pending: {
     label: 'Under review',
-    chip: 'bg-warning/10 text-warning border-warning/20',
+    chip: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
     icon: AlertTriangle,
   },
   approved: {
     label: 'Published — thank you',
-    chip: 'bg-accent/10 text-accent border-accent/20',
+    chip: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
     icon: CheckCircle2,
   },
   rejected: {
     label: 'Not published',
-    chip: 'bg-danger/10 text-danger border-danger/20',
+    chip: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
     icon: XCircle,
   },
 };

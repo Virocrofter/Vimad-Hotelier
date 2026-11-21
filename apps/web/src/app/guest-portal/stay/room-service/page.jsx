@@ -28,11 +28,20 @@ import {
 import { formatCurrency, formatDate } from '../../../../lib/guest-utils';
 
 const orderStatusMeta = {
-  received: { label: 'Received', chip: 'bg-warning/10 text-warning border-warning/20' },
+  received: {
+    label: 'Received',
+    chip: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+  },
   preparing: { label: 'Preparing', chip: 'bg-secondary/10 text-secondary border-secondary/20' },
-  ready: { label: 'Ready', chip: 'bg-accent/10 text-accent border-accent/20' },
-  delivered: { label: 'Delivered', chip: 'bg-accent/10 text-accent border-accent/20' },
-  cancelled: { label: 'Cancelled', chip: 'bg-danger/10 text-danger border-danger/20' },
+  ready: { label: 'Ready', chip: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20' },
+  delivered: {
+    label: 'Delivered',
+    chip: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    chip: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+  },
 };
 
 function newKey() {

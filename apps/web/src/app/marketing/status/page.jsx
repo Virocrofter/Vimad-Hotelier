@@ -72,9 +72,9 @@ export default function StatusPage() {
 
   const svcStyle = (s) =>
     s === 'operational'
-      ? { pill: 'bg-accent/10 text-accent', Icon: CheckCircle }
+      ? { pill: 'bg-accent/10 text-[var(--accent-soft-fg)]', Icon: CheckCircle }
       : s === 'degraded'
-        ? { pill: 'bg-warning/10 text-warning', Icon: AlertCircle }
+        ? { pill: 'bg-warning/10 text-[var(--warning-soft-fg)]', Icon: AlertCircle }
         : { pill: 'bg-red-500/10 text-red-500', Icon: XCircle };
 
   const timeline = (t) => {

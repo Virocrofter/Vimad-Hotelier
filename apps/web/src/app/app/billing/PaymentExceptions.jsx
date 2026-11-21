@@ -135,7 +135,9 @@ export default function PaymentExceptions() {
         <span
           className={cn(
             'rounded-full px-2 py-0.5 text-[11px] font-bold',
-            items.length ? 'bg-danger/10 text-danger' : 'bg-accent/10 text-accent-foreground'
+            items.length
+              ? 'bg-danger/10 text-[var(--danger-soft-fg)]'
+              : 'bg-accent/10 text-[var(--accent-soft-fg)]-foreground'
           )}
         >
           {items.length}
@@ -154,8 +156,8 @@ export default function PaymentExceptions() {
           className={cn(
             'rounded-md border px-3 py-2 text-xs',
             notice.kind === 'error'
-              ? 'border-danger/30 bg-danger/10 text-danger'
-              : 'border-accent/30 bg-accent/10 text-accent-foreground'
+              ? 'border-danger/30 bg-danger/10 text-[var(--danger-soft-fg)]'
+              : 'border-accent/30 bg-accent/10 text-[var(--accent-soft-fg)]-foreground'
           )}
         >
           {notice.text}
@@ -188,8 +190,8 @@ export default function PaymentExceptions() {
                       className={cn(
                         'flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold',
                         item.type === 'failed'
-                          ? 'border-danger/30 bg-danger/10 text-danger'
-                          : 'border-warning/40 bg-warning/10 text-warning'
+                          ? 'border-danger/30 bg-danger/10 text-[var(--danger-soft-fg)]'
+                          : 'border-warning/40 bg-warning/10 text-[var(--warning-soft-fg)]'
                       )}
                     >
                       {item.type === 'failed' ? (

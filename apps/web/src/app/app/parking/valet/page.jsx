@@ -103,7 +103,7 @@ export default function ParkingValetPage() {
                   </div>
                 </div>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${a.status === 'active' ? 'bg-primary/10 text-primary' : 'bg-warning/10 text-warning'}`}
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${a.status === 'active' ? 'bg-primary/10 text-[var(--foreground)]' : 'bg-warning/10 text-[var(--warning-soft-fg)]'}`}
                 >
                   {a.status}
                 </span>

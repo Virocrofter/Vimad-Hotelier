@@ -26,7 +26,9 @@ export function CheckoutSummaryCard({ stay }) {
         <span
           className={cn(
             'rounded-full px-2 py-0.5 text-[10px] font-medium',
-            folio.balance === 0 ? 'bg-accent/10 text-accent' : 'bg-warning/10 text-warning'
+            folio.balance === 0
+              ? 'bg-accent/10 text-[var(--accent-soft-fg)]'
+              : 'bg-warning/10 text-[var(--warning-soft-fg)]'
           )}
         >
           {folio.balance === 0 ? 'Paid in Full' : `Balance Due: ${formatCurrency(folio.balance)}`}

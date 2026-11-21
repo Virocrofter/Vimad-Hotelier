@@ -713,7 +713,7 @@ export function GuestCard({ guest, showBack = true }) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10 text-info">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-info/10 text-[var(--info-soft-fg)]">
               <Clock className="h-5 w-5" />
             </div>
             <div>
@@ -728,7 +728,7 @@ export function GuestCard({ guest, showBack = true }) {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 text-accent">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 text-[var(--accent-soft-fg)]">
               <Banknote className="h-5 w-5" />
             </div>
             <div>

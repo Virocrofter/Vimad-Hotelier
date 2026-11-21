@@ -273,7 +273,7 @@ export default function PricingPage() {
                     tier.popular
                       ? 'bg-secondary text-white hover:bg-secondary/90'
                       : tier.name === 'White-Label'
-                        ? 'border border-accent bg-accent/5 text-accent hover:bg-accent/10'
+                        ? 'border border-accent bg-accent/5 text-[var(--accent-soft-fg)] hover:bg-accent/10'
                         : 'border border-border bg-background text-text-primary hover:bg-surface-elevated'
                   )}
                 >

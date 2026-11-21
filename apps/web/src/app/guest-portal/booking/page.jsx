@@ -88,7 +88,7 @@ export default function GuestBookingPage() {
       icon: CheckCircle2,
       label: 'Pre-Check-In',
       description: 'Save time on arrival',
-      color: 'bg-accent/10 text-accent',
+      color: 'bg-accent/10 text-[var(--accent-soft-fg)]',
       onClick: () => navigate('/guest-portal/check-in'),
     },
     stay.checkedIn && {
@@ -109,7 +109,7 @@ export default function GuestBookingPage() {
       icon: Receipt,
       label: 'Billing & Folio',
       description: 'Charges and receipts',
-      color: 'bg-info/10 text-info',
+      color: 'bg-info/10 text-[var(--info-soft-fg)]',
       onClick: () => navigate('/guest-portal/billing'),
     },
   ].filter(Boolean);

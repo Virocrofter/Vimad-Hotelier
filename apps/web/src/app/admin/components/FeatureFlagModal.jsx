@@ -258,7 +258,7 @@ export default function FeatureFlagModal({ flag, onClose, onSave, tenants }) {
                     className={cn(
                       'inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
                       form.targeting.plans.includes(plan)
-                        ? 'bg-danger/10 text-danger border-danger/30'
+                        ? 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/30'
                         : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
                     )}
                   >
@@ -329,7 +329,7 @@ export default function FeatureFlagModal({ flag, onClose, onSave, tenants }) {
                     className={cn(
                       'inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
                       form.targeting.regions.includes(region)
-                        ? 'bg-danger/10 text-danger border-danger/30'
+                        ? 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/30'
                         : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
                     )}
                   >

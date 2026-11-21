@@ -377,7 +377,9 @@ function ExceptionsView({ data }) {
       key={key}
       onClick={() => setSev(key)}
       className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-        sev === key ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-surface-elevated'
+        sev === key
+          ? 'bg-primary/10 text-[var(--foreground)]'
+          : 'text-text-secondary hover:bg-surface-elevated'
       }`}
     >
       {label}
@@ -533,7 +535,7 @@ export default function ChainDashboardPage() {
                     onClick={() => setTab(t.key)}
                     className={`flex items-center gap-1.5 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors ${
                       tab === t.key
-                        ? 'bg-primary/10 text-primary'
+                        ? 'bg-primary/10 text-[var(--foreground)]'
                         : 'text-text-secondary hover:text-text-primary'
                     }`}
                   >
@@ -561,7 +563,7 @@ export default function ChainDashboardPage() {
                   onClick={() => setOffset(0)}
                   className={`rounded-md border border-border px-3 py-1.5 text-xs font-medium ${
                     offset === 0
-                      ? 'bg-primary/10 text-primary'
+                      ? 'bg-primary/10 text-[var(--foreground)]'
                       : 'bg-surface text-text-secondary hover:bg-surface-elevated'
                   }`}
                 >

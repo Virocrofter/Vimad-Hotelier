@@ -591,11 +591,11 @@ export function ActivityFeed({ items, loading }) {
 // ─── Recent reservations ──────────────────────────────────────────────────────
 
 const reservationStatusStyles = {
-  confirmed: 'bg-info/10 text-info',
-  checked_in: 'bg-accent/10 text-accent',
+  confirmed: 'bg-info/10 text-[var(--info-soft-fg)]',
+  checked_in: 'bg-accent/10 text-[var(--accent-soft-fg)]',
   checked_out: 'bg-muted text-text-secondary',
-  cancelled: 'bg-danger/10 text-danger',
-  no_show: 'bg-warning/10 text-warning',
+  cancelled: 'bg-danger/10 text-[var(--danger-soft-fg)]',
+  no_show: 'bg-warning/10 text-[var(--warning-soft-fg)]',
 };
 
 // D1.1 — rows open the reservation detail.
@@ -721,8 +721,8 @@ export function NightAuditChip({ nightAudit, businessDate }) {
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
         done
-          ? 'border-accent/30 bg-accent/10 text-accent hover:bg-accent/20'
-          : 'border-warning/30 bg-warning/10 text-warning hover:bg-warning/20'
+          ? 'border-accent/30 bg-accent/10 text-[var(--accent-soft-fg)] hover:bg-accent/20'
+          : 'border-warning/30 bg-warning/10 text-[var(--warning-soft-fg)] hover:bg-warning/20'
       )}
     >
       <MoonStar className="h-3.5 w-3.5" />

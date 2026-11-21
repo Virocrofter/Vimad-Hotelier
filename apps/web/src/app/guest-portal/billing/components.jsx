@@ -62,7 +62,7 @@ export function InvoiceRow({ invoice, onDownload, downloading, downloaded }) {
           className={cn(
             'inline-flex h-8 items-center gap-1 rounded-md border px-2.5 text-xs font-medium transition-colors',
             downloaded
-              ? 'border-accent bg-accent/10 text-accent'
+              ? 'border-accent bg-accent/10 text-[var(--accent-soft-fg)]'
               : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
           )}
         >

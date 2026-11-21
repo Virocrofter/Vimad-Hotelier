@@ -289,7 +289,7 @@ export default function RetentionModal({ policy, onClose, onSave }) {
                   className={cn(
                     'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
                     form.exceptions.includes(ex)
-                      ? 'bg-warning/10 text-warning border-warning/30'
+                      ? 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/30'
                       : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                   )}
                 >

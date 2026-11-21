@@ -12,7 +12,7 @@ function bucket(available) {
     return {
       key: 'overbooked',
       label: 'Overbooked',
-      chip: 'bg-danger/10 text-danger',
+      chip: 'bg-danger/10 text-[var(--danger-soft-fg)]',
       dot: 'bg-danger',
     };
   if (available === 0)
@@ -26,20 +26,20 @@ function bucket(available) {
     return {
       key: 'critical',
       label: 'Critical',
-      chip: 'bg-warning/10 text-warning',
+      chip: 'bg-warning/10 text-[var(--warning-soft-fg)]',
       dot: 'bg-warning',
     };
   if (available <= 5)
     return {
       key: 'low',
       label: 'Low',
-      chip: 'bg-primary/10 text-primary',
+      chip: 'bg-primary/10 text-[var(--foreground)]',
       dot: 'bg-primary',
     };
   return {
     key: 'available',
     label: 'Available',
-    chip: 'bg-accent/10 text-accent',
+    chip: 'bg-accent/10 text-[var(--accent-soft-fg)]',
     dot: 'bg-accent',
   };
 }

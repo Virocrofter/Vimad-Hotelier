@@ -37,12 +37,12 @@ export function OfflineBanner() {
   if (isOnline && pending === 0 && failed === 0 && !synced) return null;
 
   const tone = !isOnline
-    ? 'bg-danger/10 text-danger border-danger/20'
+    ? 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20'
     : failed > 0
-      ? 'bg-warning/10 text-warning border-warning/20'
+      ? 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20'
       : flushing || synced
         ? 'bg-success/10 text-success border-success/20'
-        : 'bg-info/10 text-info border-info/20';
+        : 'bg-info/10 text-[var(--info-soft-fg)] border-info/20';
 
   const label = !isOnline
     ? `Offline — ${pending} change${pending === 1 ? '' : 's'} queued`

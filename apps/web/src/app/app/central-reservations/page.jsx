@@ -174,7 +174,7 @@ function BookingModal({ search, target, onClose }) {
                 <button
                   key={t.key}
                   onClick={() => setMode(t.key)}
-                  className={`flex-1 rounded px-3 py-1.5 text-xs font-medium ${mode === t.key ? 'bg-primary/10 text-primary' : 'text-text-secondary'}`}
+                  className={`flex-1 rounded px-3 py-1.5 text-xs font-medium ${mode === t.key ? 'bg-primary/10 text-[var(--foreground)]' : 'text-text-secondary'}`}
                 >
                   {t.label}
                 </button>
@@ -499,7 +499,7 @@ export default function CentralReservationsPage() {
                     <button
                       onClick={() => setBookingTarget({ property: p, roomType: rt })}
                       disabled={!rt.available}
-                      className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary hover:bg-primary/20 disabled:opacity-30"
+                      className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] hover:bg-primary/20 disabled:opacity-30"
                     >
                       <Plus className="h-3.5 w-3.5" /> Book
                     </button>

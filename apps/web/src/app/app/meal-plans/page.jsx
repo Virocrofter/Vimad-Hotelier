@@ -521,9 +521,21 @@ function PlansTab({ plans, loading, restaurants, onRefresh, propertyId }) {
 
 /* ─── Posting log tab ─── */
 const postStatusMeta = {
-  posted: { label: 'Posted', cls: 'bg-accent/10 text-accent border-accent/20', icon: CheckCircle2 },
-  pending: { label: 'Pending', cls: 'bg-warning/10 text-warning border-warning/20', icon: Clock },
-  failed: { label: 'Failed', cls: 'bg-danger/10 text-danger border-danger/20', icon: AlertCircle },
+  posted: {
+    label: 'Posted',
+    cls: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+    icon: CheckCircle2,
+  },
+  pending: {
+    label: 'Pending',
+    cls: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+    icon: Clock,
+  },
+  failed: {
+    label: 'Failed',
+    cls: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+    icon: AlertCircle,
+  },
   skipped: { label: 'Skipped', cls: 'bg-surface-elevated text-text-muted border-border', icon: X },
 };
 

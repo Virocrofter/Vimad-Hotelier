@@ -148,7 +148,7 @@ export function GuestBookingCard({ stay, onAction }) {
             <>
               <Link
                 to="/guest-portal/check-in"
-                className="flex items-center justify-center gap-2 rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm font-medium text-accent hover:bg-accent/20 transition-colors"
+                className="flex items-center justify-center gap-2 rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm font-medium text-[var(--accent-soft-fg)] hover:bg-accent/20 transition-colors"
               >
                 <CheckCircle2 className="h-4 w-4" /> Check In
               </Link>
@@ -164,7 +164,7 @@ export function GuestBookingCard({ stay, onAction }) {
             <>
               <Link
                 to="/guest-portal/keys"
-                className="flex items-center justify-center gap-2 rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm font-medium text-accent hover:bg-accent/20 transition-colors"
+                className="flex items-center justify-center gap-2 rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm font-medium text-[var(--accent-soft-fg)] hover:bg-accent/20 transition-colors"
               >
                 <Key className="h-4 w-4" /> Digital Key
               </Link>
@@ -419,7 +419,7 @@ export function CartItemRow({ item, onUpdateQty, onRemove }) {
       </div>
       <button
         onClick={() => onRemove?.(item.cartId)}
-        className="h-8 w-8 rounded-full flex items-center justify-center text-danger hover:bg-danger/10"
+        className="h-8 w-8 rounded-full flex items-center justify-center text-[var(--danger-soft-fg)] hover:bg-danger/10"
       >
         <Trash2 className="h-4 w-4" />
       </button>
@@ -430,10 +430,10 @@ export function CartItemRow({ item, onUpdateQty, onRemove }) {
 // ─── Folio Line Item ───
 export function FolioLineItem({ charge }) {
   const categoryColors = {
-    room: 'bg-accent/10 text-accent',
+    room: 'bg-accent/10 text-[var(--accent-soft-fg)]',
     dining: 'bg-secondary/10 text-secondary',
     spa: 'bg-purple-500/10 text-purple-500',
-    minibar: 'bg-warning/10 text-warning',
+    minibar: 'bg-warning/10 text-[var(--warning-soft-fg)]',
     other: 'bg-neutral/10 text-text-muted',
   };
 
@@ -804,11 +804,11 @@ export function GuestAnnouncementCard({ announcement }) {
 // ─── Quick Action Button ───
 export function QuickAction({ icon: Icon, label, href, color = 'secondary' }) {
   const colorMap = {
-    accent: 'bg-accent/10 text-accent border-accent/20 hover:bg-accent/20',
+    accent: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20 hover:bg-accent/20',
     secondary: 'bg-secondary/10 text-secondary border-secondary/20 hover:bg-secondary/20',
-    info: 'bg-info/10 text-info border-info/20 hover:bg-info/20',
-    warning: 'bg-warning/10 text-warning border-warning/20 hover:bg-warning/20',
-    danger: 'bg-danger/10 text-danger border-danger/20 hover:bg-danger/20',
+    info: 'bg-info/10 text-[var(--info-soft-fg)] border-info/20 hover:bg-info/20',
+    warning: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20 hover:bg-warning/20',
+    danger: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20 hover:bg-danger/20',
     'purple-500': 'bg-purple-500/10 text-purple-500 border-purple-500/20 hover:bg-purple-500/20',
   };
 

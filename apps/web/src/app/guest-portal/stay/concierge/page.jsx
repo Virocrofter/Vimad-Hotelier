@@ -41,10 +41,10 @@ const REQUEST_TYPES = [
 ];
 
 const STATUS_LABEL = {
-  open: { text: 'Received', cls: 'bg-info/10 text-info' },
-  in_progress: { text: 'In progress', cls: 'bg-primary/10 text-primary' },
+  open: { text: 'Received', cls: 'bg-info/10 text-[var(--info-soft-fg)]' },
+  in_progress: { text: 'In progress', cls: 'bg-primary/10 text-[var(--foreground)]' },
   done: { text: 'Done', cls: 'bg-success/10 text-success' },
-  cancelled: { text: 'Cancelled', cls: 'bg-danger/10 text-danger' },
+  cancelled: { text: 'Cancelled', cls: 'bg-danger/10 text-[var(--danger-soft-fg)]' },
 };
 
 export default function GuestConciergePage() {
@@ -128,7 +128,7 @@ export default function GuestConciergePage() {
                 onClick={() => setForm((f) => ({ ...f, type: t.value }))}
                 className={`flex items-center gap-2 rounded-md border px-3 py-2.5 text-sm ${
                   active
-                    ? 'border-primary bg-primary/10 text-primary'
+                    ? 'border-primary bg-primary/10 text-[var(--foreground)]'
                     : 'border-border bg-surface text-text-secondary'
                 }`}
               >

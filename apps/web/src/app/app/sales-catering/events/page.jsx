@@ -61,10 +61,10 @@ const statuses = [
 ];
 const statusMeta = {
   lead: 'bg-neutral/10 text-text-muted',
-  quoted: 'bg-info/10 text-info',
-  contracted: 'bg-warning/10 text-warning',
+  quoted: 'bg-info/10 text-[var(--info-soft-fg)]',
+  contracted: 'bg-warning/10 text-[var(--warning-soft-fg)]',
   confirmed: 'bg-secondary/10 text-secondary',
-  in_progress: 'bg-accent/10 text-accent',
+  in_progress: 'bg-accent/10 text-[var(--accent-soft-fg)]',
   completed: 'bg-success/10 text-success',
   cancelled: 'bg-neutral/10 text-text-muted',
   lost: 'bg-error/10 text-error',
@@ -228,7 +228,7 @@ function EventDetail({ id, onBack }) {
                       : b.status === 'approved'
                         ? 'bg-secondary/10 text-secondary'
                         : b.status === 'pending_approval'
-                          ? 'bg-warning/10 text-warning'
+                          ? 'bg-warning/10 text-[var(--warning-soft-fg)]'
                           : b.status === 'changes_requested'
                             ? 'bg-error/10 text-error'
                             : 'bg-neutral/10 text-text-muted'

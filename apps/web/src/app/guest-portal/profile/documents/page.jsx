@@ -25,17 +25,17 @@ import { formatDate } from '../../../../lib/guest-utils';
 const verifyMeta = {
   pending: {
     label: 'Pending verification',
-    chip: 'bg-warning/10 text-warning border-warning/20',
+    chip: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
     icon: Clock,
   },
   verified: {
     label: 'Verified',
-    chip: 'bg-accent/10 text-accent border-accent/20',
+    chip: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
     icon: BadgeCheck,
   },
   rejected: {
     label: 'Rejected — see front desk',
-    chip: 'bg-danger/10 text-danger border-danger/20',
+    chip: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
     icon: XCircle,
   },
 };

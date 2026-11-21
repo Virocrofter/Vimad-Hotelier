@@ -287,7 +287,7 @@ function TenantDetailDrawer({ tenant, onClose, onUpdate }) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-warning border-warning/30 hover:bg-warning/10"
+                    className="text-[var(--warning-soft-fg)] border-warning/30 hover:bg-warning/10"
                     onClick={() => setShowSuspendConfirm(true)}
                   >
                     <Pause className="mr-1.5 h-3.5 w-3.5" /> Suspend
@@ -296,7 +296,7 @@ function TenantDetailDrawer({ tenant, onClose, onUpdate }) {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-accent border-accent/30 hover:bg-accent/10"
+                    className="text-[var(--accent-soft-fg)] border-accent/30 hover:bg-accent/10"
                     onClick={() => handleStatusChange('active')}
                   >
                     <Play className="mr-1.5 h-3.5 w-3.5" /> Reactivate
@@ -308,7 +308,7 @@ function TenantDetailDrawer({ tenant, onClose, onUpdate }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-danger border-danger/30 hover:bg-danger/10"
+                  className="text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10"
                   onClick={() => setShowDeleteConfirm(true)}
                 >
                   <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
@@ -496,7 +496,7 @@ function TenantDetailDrawer({ tenant, onClose, onUpdate }) {
               </Button>
               <Button
                 variant="outline"
-                className="text-warning border-warning/30 hover:bg-warning/10"
+                className="text-[var(--warning-soft-fg)] border-warning/30 hover:bg-warning/10"
                 onClick={() => handleStatusChange('suspended')}
               >
                 <Ban className="mr-1.5 h-4 w-4" /> Suspend Tenant
@@ -536,7 +536,10 @@ function TenantDetailDrawer({ tenant, onClose, onUpdate }) {
               <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
                 Cancel
               </Button>
-              <Button variant="outline" className="text-danger border-danger/30 hover:bg-danger/10">
+              <Button
+                variant="outline"
+                className="text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10"
+              >
                 <Trash2 className="mr-1.5 h-4 w-4" /> Delete Permanently
               </Button>
             </div>

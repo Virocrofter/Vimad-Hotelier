@@ -22,9 +22,9 @@ import { usePropertyScope } from '../../../hooks/usePropertyScope';
 import { Drawer } from '@/components/ui/drawer';
 
 const STATUS_STYLES = {
-  active: 'bg-accent/10 text-accent border-accent/20',
-  pending: 'bg-warning/10 text-warning border-warning/20',
-  error: 'bg-danger/10 text-danger border-danger/20',
+  active: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  pending: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+  error: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
   disconnected: 'bg-surface-elevated text-text-secondary border-border',
 };
 
@@ -365,7 +365,7 @@ export default function ChannelManagerPage() {
               </Button>
               <Button
                 variant="outline"
-                className="text-danger border-danger/30 hover:bg-danger/10"
+                className="text-[var(--danger-soft-fg)] border-danger/30 hover:bg-danger/10"
                 disabled={Boolean(busy)}
                 onClick={async () => {
                   const target = disconnectTarget;

@@ -100,7 +100,7 @@ export function TicketDetail({ ticket, onClose, onReply }) {
                 'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold',
                 msg.sender === 'guest'
                   ? 'bg-secondary/10 text-secondary'
-                  : 'bg-accent/10 text-accent'
+                  : 'bg-accent/10 text-[var(--accent-soft-fg)]'
               )}
             >
               {msg.sender === 'guest' ? 'You' : 'ST'}

@@ -166,7 +166,7 @@ export default function ContactPage() {
         </p>
         <Button
           variant="outline"
-          className="w-full border-danger/30 text-danger hover:bg-danger/10"
+          className="w-full border-danger/30 text-[var(--danger-soft-fg)] hover:bg-danger/10"
           onClick={() => window.open('tel:+16175550100', '_blank')}
         >
           <Phone className="mr-1.5 h-4 w-4" /> Call Front Desk

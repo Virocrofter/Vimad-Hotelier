@@ -105,8 +105,8 @@ export function PlanDistributionChart({ data }) {
 /* ─── InvoiceMiniCard ─── */
 const invoiceStatusStyles = {
   paid: 'bg-success/10 text-success',
-  pending: 'bg-warning/10 text-warning',
-  overdue: 'bg-danger/10 text-danger',
+  pending: 'bg-warning/10 text-[var(--warning-soft-fg)]',
+  overdue: 'bg-danger/10 text-[var(--danger-soft-fg)]',
   void: 'bg-text-muted/10 text-text-muted',
   cancelled: 'bg-text-muted/10 text-text-muted',
 };
@@ -143,10 +143,10 @@ export function InvoiceMiniCard({ invoice }) {
 /* ─── SubscriptionMiniCard ─── */
 const subStatusStyles = {
   active: 'bg-success/10 text-success',
-  trial: 'bg-info/10 text-info',
-  past_due: 'bg-warning/10 text-warning',
+  trial: 'bg-info/10 text-[var(--info-soft-fg)]',
+  past_due: 'bg-warning/10 text-[var(--warning-soft-fg)]',
   cancelled: 'bg-text-muted/10 text-text-muted',
-  expired: 'bg-danger/10 text-danger',
+  expired: 'bg-danger/10 text-[var(--danger-soft-fg)]',
 };
 
 export function SubscriptionMiniCard({ subscription }) {

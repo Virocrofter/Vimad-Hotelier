@@ -84,18 +84,22 @@ export function SlaBadge({ ticket }) {
   const configs = {
     met: {
       label: 'SLA Met',
-      class: 'bg-accent/10 text-accent border-accent/20',
+      class: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
       icon: CheckCircle2,
     },
-    on_track: { label: 'On Track', class: 'bg-info/10 text-info border-info/20', icon: Clock },
+    on_track: {
+      label: 'On Track',
+      class: 'bg-info/10 text-[var(--info-soft-fg)] border-info/20',
+      icon: Clock,
+    },
     at_risk: {
       label: 'At Risk',
-      class: 'bg-warning/10 text-warning border-warning/20',
+      class: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
       icon: AlertTriangle,
     },
     breached: {
       label: 'Breached',
-      class: 'bg-danger/10 text-danger border-danger/20',
+      class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
       icon: AlertTriangle,
     },
   };
@@ -221,7 +225,7 @@ export function MessageBubble({ message, isInternal }) {
             ? 'bg-secondary/10 text-secondary'
             : isSystem
               ? 'bg-surface-elevated text-text-muted border border-border'
-              : 'bg-accent/10 text-accent'
+              : 'bg-accent/10 text-[var(--accent-soft-fg)]'
         )}
       >
         {isAgent ? 'A' : isSystem ? 'T' : 'T'}
@@ -279,10 +283,10 @@ export function TeamMemberCard({ member, onClick, isSelected }) {
         className={cn(
           'rounded-full px-2 py-0.5 text-[10px] font-medium',
           member.activeTickets > 3
-            ? 'bg-danger/10 text-danger'
+            ? 'bg-danger/10 text-[var(--danger-soft-fg)]'
             : member.activeTickets > 1
-              ? 'bg-warning/10 text-warning'
-              : 'bg-accent/10 text-accent'
+              ? 'bg-warning/10 text-[var(--warning-soft-fg)]'
+              : 'bg-accent/10 text-[var(--accent-soft-fg)]'
         )}
       >
         {member.activeTickets}

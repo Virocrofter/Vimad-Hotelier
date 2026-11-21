@@ -14,11 +14,11 @@ export default function AutomationList({ workflows }) {
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
-        return 'bg-accent/10 text-accent';
+        return 'bg-accent/10 text-[var(--accent-soft-fg)]';
       case 'paused':
-        return 'bg-warning/10 text-warning';
+        return 'bg-warning/10 text-[var(--warning-soft-fg)]';
       case 'error':
-        return 'bg-danger/10 text-danger';
+        return 'bg-danger/10 text-[var(--danger-soft-fg)]';
       default:
         return 'bg-background-secondary text-text-secondary';
     }

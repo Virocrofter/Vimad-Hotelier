@@ -53,11 +53,20 @@ import PaymentRequestsPanel from '../components/PaymentRequestsPanel';
 import { communicationsApi } from '../../../../api/communications';
 
 const statusMeta = {
-  confirmed: { label: 'Confirmed', class: 'bg-accent/10 text-accent border-accent/20' },
+  confirmed: {
+    label: 'Confirmed',
+    class: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  },
   checked_in: { label: 'Checked In', class: 'bg-secondary/10 text-secondary border-secondary/20' },
   checked_out: { label: 'Checked Out', class: 'bg-neutral/10 text-text-muted border-border' },
-  cancelled: { label: 'Cancelled', class: 'bg-danger/10 text-danger border-danger/20' },
-  no_show: { label: 'No-Show', class: 'bg-danger/10 text-danger border-danger/20' },
+  cancelled: {
+    label: 'Cancelled',
+    class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+  },
+  no_show: {
+    label: 'No-Show',
+    class: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+  },
 };
 
 const tabs = [

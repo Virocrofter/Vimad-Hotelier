@@ -443,7 +443,7 @@ export default function EditTenantModal({ tenant, onClose, onSave }) {
                   className={cn(
                     'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
                     form.features.includes(feature)
-                      ? 'bg-accent/10 text-accent border-accent/30'
+                      ? 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/30'
                       : 'border-border bg-surface text-text-secondary hover:bg-surface-elevated'
                   )}
                 >

@@ -29,18 +29,18 @@ const TYPE_META = {
 
 const STATUS_STYLE = {
   open: 'bg-surface-elevated text-text-secondary',
-  in_progress: 'bg-primary/10 text-primary',
+  in_progress: 'bg-primary/10 text-[var(--foreground)]',
   done: 'bg-success/10 text-success',
-  cancelled: 'bg-danger/10 text-danger',
+  cancelled: 'bg-danger/10 text-[var(--danger-soft-fg)]',
 };
 
 const TRIP_STYLE = {
   requested: 'bg-surface-elevated text-text-secondary',
-  confirmed: 'bg-info/10 text-info',
-  assigned: 'bg-primary/10 text-primary',
-  en_route: 'bg-warning/10 text-warning',
+  confirmed: 'bg-info/10 text-[var(--info-soft-fg)]',
+  assigned: 'bg-primary/10 text-[var(--foreground)]',
+  en_route: 'bg-warning/10 text-[var(--warning-soft-fg)]',
   completed: 'bg-success/10 text-success',
-  cancelled: 'bg-danger/10 text-danger',
+  cancelled: 'bg-danger/10 text-[var(--danger-soft-fg)]',
 };
 
 const todayStr = () => new Date().toISOString().slice(0, 10);

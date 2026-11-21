@@ -33,16 +33,25 @@ import { transitionRoomStatus } from '../../../api/housekeeping';
 import { cn } from '../../../lib/utils';
 
 const HK = {
-  ready: { label: 'Ready', cls: 'bg-accent/10 text-accent-foreground border-accent/30' },
-  clean: { label: 'Clean', cls: 'bg-info/10 text-info border-info/30' },
+  ready: {
+    label: 'Ready',
+    cls: 'bg-accent/10 text-[var(--accent-soft-fg)]-foreground border-accent/30',
+  },
+  clean: { label: 'Clean', cls: 'bg-info/10 text-[var(--info-soft-fg)] border-info/30' },
   inspected: { label: 'Inspected', cls: 'bg-secondary/10 text-secondary border-secondary/30' },
-  dirty: { label: 'Dirty', cls: 'bg-warning/10 text-warning border-warning/30' },
-  in_progress: { label: 'In progress', cls: 'bg-warning/10 text-warning border-warning/30' },
+  dirty: { label: 'Dirty', cls: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/30' },
+  in_progress: {
+    label: 'In progress',
+    cls: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/30',
+  },
 };
 const SERVICE = {
   active: { label: 'In service', cls: 'bg-surface-elevated text-text-secondary' },
-  ooo: { label: 'Out of order', cls: 'bg-danger/10 text-danger border-danger/30' },
-  oos: { label: 'Out of service', cls: 'bg-danger/10 text-danger border-danger/30' },
+  ooo: { label: 'Out of order', cls: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/30' },
+  oos: {
+    label: 'Out of service',
+    cls: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/30',
+  },
 };
 const rel = (iso) => {
   if (!iso) return '—';
@@ -184,8 +193,8 @@ function RoomCard({ room, selected, onSelect, onTransition, busy }) {
               className={cn(
                 'rounded border px-1.5 py-0.5 text-[10px] font-medium disabled:opacity-40',
                 t.field === 'serviceStatus'
-                  ? 'border-danger/30 text-danger hover:bg-danger/10'
-                  : 'border-warning/40 text-warning hover:bg-warning/10'
+                  ? 'border-danger/30 text-[var(--danger-soft-fg)] hover:bg-danger/10'
+                  : 'border-warning/40 text-[var(--warning-soft-fg)] hover:bg-warning/10'
               )}
             >
               {t.label}
@@ -246,7 +255,7 @@ function Drawer({ roomId, onClose }) {
               className={cn(
                 'rounded-full px-2 py-0.5 text-[11px] font-medium',
                 q.data.assignable
-                  ? 'bg-accent/10 text-accent-foreground'
+                  ? 'bg-accent/10 text-[var(--accent-soft-fg)]-foreground'
                   : 'bg-surface-elevated text-text-muted'
               )}
             >

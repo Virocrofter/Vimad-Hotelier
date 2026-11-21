@@ -512,7 +512,7 @@ export default function GuestIdentityPage() {
             }}
             className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
               tab === t.key
-                ? 'bg-primary/10 text-primary'
+                ? 'bg-primary/10 text-[var(--foreground)]'
                 : 'text-text-secondary hover:text-text-primary'
             }`}
           >

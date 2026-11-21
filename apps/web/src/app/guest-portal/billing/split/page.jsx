@@ -19,11 +19,23 @@ import { useGuestSplits, useSplitCreate, newIdempotencyKey } from '../../../../h
 import { formatCurrency, formatDate, folioCategoryMeta } from '../../../../lib/guest-utils';
 
 const splitStatusMeta = {
-  pending: { label: 'Sent to front desk', chip: 'bg-warning/10 text-warning border-warning/20' },
-  accepted: { label: 'Accepted — being set up', chip: 'bg-accent/10 text-accent border-accent/20' },
-  declined: { label: 'Declined', chip: 'bg-danger/10 text-danger border-danger/20' },
-  applied: { label: 'Applied', chip: 'bg-accent/10 text-accent border-accent/20' },
-  cancelled: { label: 'Cancelled', chip: 'bg-danger/10 text-danger border-danger/20' },
+  pending: {
+    label: 'Sent to front desk',
+    chip: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+  },
+  accepted: {
+    label: 'Accepted — being set up',
+    chip: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  },
+  declined: {
+    label: 'Declined',
+    chip: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+  },
+  applied: { label: 'Applied', chip: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20' },
+  cancelled: {
+    label: 'Cancelled',
+    chip: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
+  },
 };
 
 function categoryForType(type) {

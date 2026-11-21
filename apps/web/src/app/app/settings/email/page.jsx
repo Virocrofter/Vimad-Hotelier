@@ -9,9 +9,9 @@ import { Input } from '../../../../components/ui/input';
 import { useEmailLogs, useEmailLogMutations } from '../../../../hooks/useEmailLogs';
 
 const STATUS_STYLE = {
-  queued: 'bg-warning/10 text-warning border-warning/20',
-  sent: 'bg-accent/10 text-accent border-accent/20',
-  failed: 'bg-danger/10 text-danger border-danger/20',
+  queued: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
+  sent: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
+  failed: 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20',
 };
 
 const STATUS_ICON = {

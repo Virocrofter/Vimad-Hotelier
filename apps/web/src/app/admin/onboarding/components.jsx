@@ -445,7 +445,7 @@ export function TenantProgressRow({ tenant, expanded, onToggle, onIntervene }) {
                   <Flag className="h-3.5 w-3.5" /> Add Intervention
                 </button>
                 {tenant.status === 'trial_expired' && (
-                  <button className="inline-flex items-center gap-1.5 rounded-md border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/20">
+                  <button className="inline-flex items-center gap-1.5 rounded-md border border-accent/30 bg-accent/10 px-3 py-1.5 text-xs font-medium text-[var(--accent-soft-fg)] hover:bg-accent/20">
                     <Clock className="h-3.5 w-3.5" /> Extend Trial
                   </button>
                 )}

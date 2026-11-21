@@ -194,7 +194,7 @@ export default function ApiKeyModal({ onClose, onGenerate, generating = false })
                           className={cn(
                             'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
                             form.scopes.includes(perm.key) || form.scopes.includes('*')
-                              ? 'bg-accent/10 text-accent border-accent/30'
+                              ? 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/30'
                               : 'border-border bg-background text-text-secondary hover:bg-surface-elevated'
                           )}
                         >

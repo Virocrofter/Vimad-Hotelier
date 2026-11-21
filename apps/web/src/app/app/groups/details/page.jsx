@@ -814,10 +814,10 @@ export default function GroupDetailPage() {
                           className={cn(
                             'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium border',
                             r.checkedIn
-                              ? 'bg-accent/10 text-accent border-accent/20'
+                              ? 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20'
                               : r.status === 'cancelled'
-                                ? 'bg-danger/10 text-danger border-danger/20'
-                                : 'bg-warning/10 text-warning border-warning/20'
+                                ? 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20'
+                                : 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20'
                           )}
                         >
                           {r.checkedIn
@@ -988,10 +988,10 @@ export default function GroupDetailPage() {
                             className={cn(
                               'rounded-full px-2 py-0.5 text-[10px] font-medium border',
                               evt.status === 'confirmed'
-                                ? 'bg-accent/10 text-accent border-accent/20'
+                                ? 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20'
                                 : evt.status === 'cancelled'
-                                  ? 'bg-danger/10 text-danger border-danger/20'
-                                  : 'bg-warning/10 text-warning border-warning/20'
+                                  ? 'bg-danger/10 text-[var(--danger-soft-fg)] border-danger/20'
+                                  : 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20'
                             )}
                           >
                             {evt.status.charAt(0).toUpperCase() + evt.status.slice(1)}

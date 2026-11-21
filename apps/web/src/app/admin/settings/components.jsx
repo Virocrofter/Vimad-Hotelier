@@ -457,7 +457,7 @@ export function TemplateEditor({ template, onChange, onPreview }) {
           className={cn(
             'inline-flex items-center gap-1 rounded-full border px-2 py-0.5',
             template.enabled
-              ? 'bg-accent/10 text-accent border-accent/20'
+              ? 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20'
               : 'bg-neutral/10 text-text-muted border-border'
           )}
         >

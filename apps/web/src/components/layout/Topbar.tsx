@@ -95,7 +95,7 @@ export function Topbar() {
               aria-haspopup="menu"
               className="flex items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-surface-elevated"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-foreground">
                 {initials}
               </span>
               <span className="hidden text-left sm:block">

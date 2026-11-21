@@ -67,10 +67,10 @@ const urgencyMap = {
 };
 
 const statusMeta = {
-  open: { label: 'Open', cls: 'bg-warning/10 text-warning' },
-  in_progress: { label: 'In Progress', cls: 'bg-info/10 text-info' },
+  open: { label: 'Open', cls: 'bg-warning/10 text-[var(--warning-soft-fg)]' },
+  in_progress: { label: 'In Progress', cls: 'bg-info/10 text-[var(--info-soft-fg)]' },
   waiting_guest: { label: 'Waiting on You', cls: 'bg-secondary/10 text-secondary' },
-  resolved: { label: 'Resolved', cls: 'bg-accent/10 text-accent' },
+  resolved: { label: 'Resolved', cls: 'bg-accent/10 text-[var(--accent-soft-fg)]' },
   closed: { label: 'Closed', cls: 'bg-neutral/10 text-text-muted' },
 };
 

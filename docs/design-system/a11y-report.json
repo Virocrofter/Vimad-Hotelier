@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T19:53:31.585Z",
+  "generatedAt": "2026-11-21T19:59:11.624Z",
   "pages": {
     "dashboard": {
       "url": "/app/dashboard",
@@ -8,9 +8,8 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 3,
+          "nodes": 2,
           "targets": [
-            ".w-8",
             ".hover\\:opacity-90",
             ".flex-wrap.items-start.gap-3 > .py-0\\.5.px-2.bg-surface-elevated"
           ]
@@ -18,7 +17,7 @@
       ],
       "counts": {
         "critical": 0,
-        "serious": 3,
+        "serious": 2,
         "moderate": 0,
         "minor": 0
       }
@@ -30,31 +29,23 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 2,
-          "targets": [".bg-primary\\/10", ".text-white"]
+          "nodes": 1,
+          "targets": [".text-white"]
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 2,
+        "serious": 1,
         "moderate": 0,
         "minor": 0
       }
     },
     "exceptions": {
       "url": "/app/exceptions",
-      "violations": [
-        {
-          "id": "color-contrast",
-          "impact": "serious",
-          "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 2,
-          "targets": [".w-8", ".bg-danger\\/10"]
-        }
-      ],
+      "violations": [],
       "counts": {
         "critical": 0,
-        "serious": 2,
+        "serious": 0,
         "moderate": 0,
         "minor": 0
       }
@@ -66,18 +57,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 4,
-          "targets": [
-            ".w-8",
-            ".p-4.rounded-xl.bg-surface:nth-child(2) > .text-accent.mt-1.text-xl",
-            ".text-danger.border-danger\\/30.hover\\:bg-danger\\/10:nth-child(7)",
-            ".p-4.rounded-xl.bg-surface:nth-child(3) > .text-accent.mt-1.text-xl"
-          ]
+          "nodes": 1,
+          "targets": [".text-accent.mt-1.text-xl"]
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 4,
+        "serious": 1,
         "moderate": 0,
         "minor": 0
       }
@@ -89,13 +75,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 2,
-          "targets": [".w-8", ".text-white"]
+          "nodes": 1,
+          "targets": [".text-white"]
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 2,
+        "serious": 1,
         "moderate": 0,
         "minor": 0
       }
@@ -103,7 +89,7 @@
   },
   "totals": {
     "critical": 0,
-    "serious": 13,
+    "serious": 5,
     "moderate": 0,
     "minor": 0
   }
