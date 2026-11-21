@@ -27,25 +27,55 @@ function mapAccount(prefixAccount: string, mappings: Record<string, string>): st
   );
 }
 
+// C6-prime-V: legs group under ONE journal number per (date, reference) and
+// every journal must balance — Xero rejects single-sided journals. A missing
+// guest-ledger leg is emitted automatically (mapped via config when present).
+function groupLegs(rows: Record<string, unknown>[]): Map<string, Record<string, unknown>[]> {
+  const groups = new Map<string, Record<string, unknown>[]>();
+  for (const row of rows) {
+    const key = String(row.date) + '|' + String(row.reference ?? '');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(row);
+  }
+  return groups;
+}
+
 export function toXeroCsv(
   rows: Record<string, unknown>[],
   mappings: Record<string, string>
 ): string {
   const lines = ['JournalDate,JournalNumber,Reference,AccountCode,Description,Debits,Credits'];
   let n = 0;
-  for (const r of rows) {
+  for (const [, legs] of groupLegs(rows)) {
     n++;
-    lines.push(
-      [
-        esc(r.date),
-        'VMD-' + n,
-        esc(r.reference),
-        esc(mapAccount(String(r.account), mappings)),
-        esc(r.description),
-        Number(r.debit).toFixed(2),
-        Number(r.credit).toFixed(2),
-      ].join(',')
-    );
+    let sum = 0;
+    for (const leg of legs) {
+      sum += Number(leg.debit) - Number(leg.credit);
+      lines.push(
+        [
+          esc(leg.date),
+          'VMD-' + n,
+          esc(leg.reference),
+          esc(mapAccount(String(leg.account), mappings)),
+          esc(leg.description),
+          Number(leg.debit).toFixed(2),
+          Number(leg.credit).toFixed(2),
+        ].join(',')
+      );
+    }
+    if (Math.abs(sum) > 0.005) {
+      lines.push(
+        [
+          esc(legs[0].date),
+          'VMD-' + n,
+          esc(legs[0].reference),
+          esc(mappings['DEB:guest'] ?? 'DEB:guest'),
+          'Guest ledger balancing leg',
+          sum > 0 ? '0.00' : Math.abs(sum).toFixed(2),
+          sum > 0 ? Math.abs(sum).toFixed(2) : '0.00',
+        ].join(',')
+      );
+    }
   }
   return lines.join('\n');
 }
@@ -55,20 +85,37 @@ export function toPastelCsv(
   mappings: Record<string, string>
 ): string {
   const lines = ['Date,Account,Reference,Description,Debit,Credit,VatIndicator'];
-  for (const r of rows) {
-    const acct = mapAccount(String(r.account), mappings);
-    const vat = String(r.account).startsWith('REV:') ? 'Y' : 'N';
-    lines.push(
-      [
-        esc(r.date),
-        esc(acct),
-        esc(r.reference),
-        esc(r.description),
-        Number(r.debit).toFixed(2),
-        Number(r.credit).toFixed(2),
-        vat,
-      ].join(',')
-    );
+  for (const [, legs] of groupLegs(rows)) {
+    let sum = 0;
+    for (const leg of legs) {
+      sum += Number(leg.debit) - Number(leg.credit);
+      const acct = mapAccount(String(leg.account), mappings);
+      const vat = String(leg.account).startsWith('REV:') ? 'Y' : 'N';
+      lines.push(
+        [
+          esc(leg.date),
+          esc(acct),
+          esc(leg.reference),
+          esc(leg.description),
+          Number(leg.debit).toFixed(2),
+          Number(leg.credit).toFixed(2),
+          vat,
+        ].join(',')
+      );
+    }
+    if (Math.abs(sum) > 0.005) {
+      lines.push(
+        [
+          esc(legs[0].date),
+          esc(mappings['DEB:guest'] ?? 'DEB:guest'),
+          esc(legs[0].reference),
+          'Guest ledger balancing leg',
+          sum > 0 ? '0.00' : Math.abs(sum).toFixed(2),
+          sum > 0 ? Math.abs(sum).toFixed(2) : '0.00',
+          'N',
+        ].join(',')
+      );
+    }
   }
   return lines.join('\n');
 }
