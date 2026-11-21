@@ -205,7 +205,7 @@ export default function ReservationWorkspace({ reservationId }) {
   return (
     <div className="space-y-4 p-6">
       {/* Header: identity, stay facts, balance/settlement, lifecycle-valid actions */}
-      <header className="glass rounded-xl px-5 py-4">
+      <header className="glass sticky top-14 z-20 rounded-xl px-5 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -247,7 +247,12 @@ export default function ReservationWorkspace({ reservationId }) {
           {d.validActions.map((a) => (
             <button
               key={a.action}
-              disabled={busy === a.action}
+              disabled={busy === a.action || (a.action === 'check-out' && Number(h.balance) > 0)}
+              title={
+                a.action === 'check-out' && Number(h.balance) > 0
+                  ? 'Settle the balance before check-out'
+                  : undefined
+              }
               onClick={() => run(a.action)}
               className={cn(
                 'rounded-md px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50',
@@ -265,6 +270,28 @@ export default function ReservationWorkspace({ reservationId }) {
             <span className="text-xs text-text-muted">No actions available in this state.</span>
           )}
           {actionErr && <span className="text-xs text-danger">{actionErr}</span>}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-border/60 pt-3">
+          {[
+            ['Billing', '/app/billing'],
+            ['Tape chart', '/app/rooms'],
+            ['Keys', '/app/keys'],
+            ['Task', '/app/tasks'],
+          ].map(([label, to]) => (
+            <a
+              key={label}
+              href={to}
+              className="rounded border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-elevated"
+            >
+              {label}
+            </a>
+          ))}
+          <button
+            onClick={() => window.print()}
+            className="rounded border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-elevated"
+          >
+            Print
+          </button>
         </div>
       </header>
 
