@@ -14,7 +14,10 @@
     "test:e2e": "playwright test",
     "tokens:build": "node design-tokens/sd.config.mjs",
     "lint:tokens": "stylelint \"src/index.css\" \"src/styles/**/*.css\"",
-    "a11y": "node ../../scripts/a11y-scan.mjs"
+    "a11y": "node ../../scripts/a11y-scan.mjs",
+    "vrt": "playwright test -c ../../scripts/playwright.vrt.config.ts",
+    "vrt:update": "playwright test -c ../../scripts/playwright.vrt.config.ts --update-snapshots",
+    "vrt:docker": "docker build -f Dockerfile.vrt -t vimad-vrt . && docker run --rm -v $(pwd)/.vimad-vrt:/app/.vimad-vrt vimad-vrt"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",
@@ -46,6 +49,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.65.1",
     "@sentry/vite-plugin": "^5.4.0",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",

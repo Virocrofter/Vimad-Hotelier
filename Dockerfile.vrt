@@ -1,0 +1,9 @@
+# DS-06: VRT baselines generated AND compared in this ONE image (CI == local pixels).
+# The image tag MUST match `npx playwright --version` — sync it when the runner updates.
+FROM mcr.microsoft.com/playwright:v1.55.0-noble
+WORKDIR /app
+COPY . .
+RUN npm ci
+ENV VRT_BASE_URL=http://localhost:4173
+RUN npm run build --workspace @unified-pms/web
+CMD ["sh", "-c", "npx vite preview --config apps/web/vite.config.js --host 127.0.0.1 --port 4173 & sleep 6 && npx playwright test -c scripts/playwright.vrt.config.ts"]
