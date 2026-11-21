@@ -27,7 +27,8 @@ import {
 } from 'lucide-react';
 import { useTodayDashboard } from '../../../hooks/useTodayDashboard';
 import { usePropertyScope } from '../../../hooks/usePropertyScope';
-import { checkInReservation, checkOutReservation } from '../../../api/api-reservations';
+import { checkOutReservation } from '../../../api/api-reservations';
+import { requestCheckIn } from '../../../components/reservations/CheckInDialog';
 import { LINKS } from '../../../lib/dashLinks';
 import { cn } from '../../../lib/utils';
 import { formatMoney } from '../../../lib/money';
@@ -249,8 +250,10 @@ export default function TodayCockpit({ propertyId, onMutated }) {
     setBusyId(item.id);
     setActionError(null);
     try {
-      if (action === 'check-in') await checkInReservation(item.id);
-      else if (action === 'check-out') await checkOutReservation(item.id);
+      if (action === 'check-in') {
+        requestCheckIn(item.id, item.assignedRoom ?? null);
+        return;
+      } else if (action === 'check-out') await checkOutReservation(item.id);
       await queryClient.invalidateQueries({ queryKey: ['dashboard', 'today'] });
       onMutated?.();
     } catch (e) {

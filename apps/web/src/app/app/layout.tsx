@@ -20,6 +20,8 @@ function ShellCommandPalette() {
   return <CommandPalette open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)} />;
 }
 
+import { CheckInHost } from '../../components/reservations/CheckInDialog';
+
 export default function AppLayout() {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -28,6 +30,7 @@ export default function AppLayout() {
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
+        <CheckInHost />
         <div className="min-[1200px]:hidden">
           <RibbonNav />
         </div>

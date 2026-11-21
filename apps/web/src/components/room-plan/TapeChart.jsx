@@ -571,7 +571,7 @@ export default function TapeChart({
                     <button
                       className={menuItem}
                       onClick={() => {
-                        mCheckIn.mutate(r.id);
+                        requestCheckIn(r.id, r.assignedRoom ?? null);
                         setMenu(null);
                       }}
                     >

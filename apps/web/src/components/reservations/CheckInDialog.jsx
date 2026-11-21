@@ -97,3 +97,30 @@ export default function CheckInDialog({ reservationId, room, onClose, onCheckedI
     </div>
   );
 }
+
+/* CheckInHost — ONE mount in the app shell; every check-in trigger dispatches
+ * window 'vimad:check-in' with { reservationId, room? } and the shared
+ * guardrail dialog handles it. */
+export function CheckInHost() {
+  const [target, setTarget] = useState(null);
+  useEffect(() => {
+    const handler = (e) => setTarget(e.detail ?? null);
+    window.addEventListener('vimad:check-in', handler);
+    return () => window.removeEventListener('vimad:check-in', handler);
+  }, []);
+  if (!target) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <CheckInDialog
+        reservationId={target.reservationId}
+        room={target.room ?? null}
+        onClose={() => setTarget(null)}
+        onCheckedIn={() => window.dispatchEvent(new CustomEvent('vimad:checked-in'))}
+      />
+    </div>
+  );
+}
+
+export function requestCheckIn(reservationId, room = null) {
+  window.dispatchEvent(new CustomEvent('vimad:check-in', { detail: { reservationId, room } }));
+}
