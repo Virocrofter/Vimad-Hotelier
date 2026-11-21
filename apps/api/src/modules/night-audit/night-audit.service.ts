@@ -96,8 +96,10 @@ export async function getPreAuditChecks(tenantId: string, propertyId: string) {
           tenantId,
           propertyId,
           status: { in: ['confirmed', 'checked_in'] },
-          folio: {
-            items: { none: { postedAt: { gte: today, lte: endOfDay }, type: 'room_charge' } },
+          folios: {
+            some: {
+              items: { none: { postedAt: { gte: today, lte: endOfDay }, type: 'room_charge' } },
+            },
           },
         },
       },
@@ -569,7 +571,7 @@ async function processNoShows(tenantId: string, propertyId: string, auditDate: D
       status: 'confirmed',
       arrivalDate: { lte: endOfDay },
     },
-    include: { guest: true, folio: true },
+    include: { guest: true, folios: { orderBy: { createdAt: 'asc' }, take: 1 } },
   });
 
   let processed = 0;
@@ -583,11 +585,11 @@ async function processNoShows(tenantId: string, propertyId: string, auditDate: D
     });
 
     // Post no-show fee if folio exists
-    if (reservation.folio) {
+    if (reservation.folios?.[0]) {
       const noShowFee = Math.min(Number(reservation.totalAmount) * 0.1, 100); // 10% or max $100
       await prisma.folioItem.create({
         data: {
-          folioId: reservation.folio.id,
+          folioId: reservation.folios?.[0].id,
           type: 'no_show_fee',
           description: `No-show fee - ${reservation.confirmationNumber}`,
           amount: noShowFee,
@@ -597,7 +599,7 @@ async function processNoShows(tenantId: string, propertyId: string, auditDate: D
       });
 
       await prisma.folio.update({
-        where: { id: reservation.folio.id },
+        where: { id: reservation.folios?.[0].id },
         data: {
           totalCharges: { increment: noShowFee },
           balance: { increment: noShowFee },
@@ -634,7 +636,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
     },
     include: {
       reservation: {
-        include: { folio: true },
+        include: { folios: { orderBy: { createdAt: 'asc' }, take: 1 } },
       },
       room: true,
     },
@@ -645,7 +647,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
   const details: { folioId: string; room: string; amount: number }[] = [];
 
   for (const stay of activeStays) {
-    if (!stay.reservation!.folio) {
+    if (!stay.reservation!.folios?.[0]) {
       skipped++;
       continue;
     }
@@ -653,7 +655,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
     // Check if already posted
     const existingCharge = await prisma.folioItem.findFirst({
       where: {
-        folioId: stay.reservation!.folio.id,
+        folioId: stay.reservation!.folios?.[0].id,
         type: 'room_charge',
         postedAt: { gte: startOfDay, lte: endOfDay },
       },
@@ -666,7 +668,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
 
     await prisma.folioItem.create({
       data: {
-        folioId: stay.reservation!.folio.id,
+        folioId: stay.reservation!.folios?.[0].id,
         type: 'room_charge',
         description: `Room charge - ${stay.room.number} - Night of ${auditDate.toISOString().split('T')[0]}`,
         amount: stay.rate,
@@ -676,7 +678,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
     });
 
     await prisma.folio.update({
-      where: { id: stay.reservation!.folio.id },
+      where: { id: stay.reservation!.folios?.[0].id },
       data: {
         totalCharges: { increment: stay.rate },
         balance: { increment: stay.rate },
@@ -684,7 +686,7 @@ async function autoPostRoomCharges(tenantId: string, propertyId: string, auditDa
     });
 
     details.push({
-      folioId: stay.reservation!.folio.id,
+      folioId: stay.reservation!.folios?.[0].id,
       room: stay.room.number,
       amount: Number(stay.rate),
     });

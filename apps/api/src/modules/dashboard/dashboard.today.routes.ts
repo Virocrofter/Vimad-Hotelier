@@ -90,7 +90,10 @@ todayDashboardRouter.get('/today', async (req: Request, res: Response) => {
     }),
     prisma.reservation.findMany({
       where: { tenantId, propertyId, status: 'checked_in', departureDate: { gte: start, lt: end } },
-      include: { guest: { select: { firstName: true, lastName: true } }, folio: true },
+      include: {
+        guest: { select: { firstName: true, lastName: true } },
+        folios: { orderBy: { createdAt: 'asc' }, take: 1 },
+      },
       orderBy: { confirmationNumber: 'asc' },
       take: 100,
     }),
@@ -111,8 +114,10 @@ todayDashboardRouter.get('/today', async (req: Request, res: Response) => {
     confirmationNumber: r.confirmationNumber,
     guestName: r.guest.firstName + ' ' + r.guest.lastName,
     status: r.status,
-    balance: r.folio ? Number(r.folio.balance) : Number(r.balance),
-    flags: [r.folio && Number(r.folio.balance) > 0 ? 'unsettled_balance' : null].filter(Boolean),
+    balance: r.folios?.[0] ? Number(r.folios?.[0].balance) : Number(r.balance),
+    flags: [r.folios?.[0] && Number(r.folios?.[0].balance) > 0 ? 'unsettled_balance' : null].filter(
+      Boolean
+    ),
     validActions: validActionsFor(r.status),
     link: '/app/reservations/' + r.id,
   }));

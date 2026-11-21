@@ -528,7 +528,7 @@ model Reservation {
   updatedAt          DateTime          @updatedAt
 
   stays                ReservationStay[]
-  folio                Folio?
+  folios                Folio[]
   payments             Payment[]
   paymentRequests      PaymentRequest[]
   taxInvoices          TaxInvoice[]
@@ -651,7 +651,7 @@ model ReservationRoom {
 
 model Folio {
   id            String       @id @default(cuid())
-  reservationId String?      @unique
+  reservationId String?     
   reservation   Reservation? @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   tenantId      String
   status        String       @default("open")
@@ -684,6 +684,8 @@ model FolioItem {
   amount           Decimal   @db.Decimal(10, 2)
   quantity         Int       @default(1)
   postedAt         DateTime  @default(now())
+  consumedAt       DateTime?
+  rebateOfId       String?
   createdAt        DateTime  @default(now())
   movedFromFolioId String?
   movedAt          DateTime?

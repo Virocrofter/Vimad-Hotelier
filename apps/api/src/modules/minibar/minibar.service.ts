@@ -58,7 +58,7 @@ async function findInHouseReservation(tenantId: string, roomId: string) {
       status: 'checked_in',
       stays: { some: { roomId, date: { gte: today, lt: tomorrow } } },
     },
-    include: { folio: true, guest: true },
+    include: { folios: { orderBy: { createdAt: 'asc' }, take: 1 }, guest: true },
   });
 }
 
@@ -111,10 +111,10 @@ export async function logMinibarConsumption(
 
   // 4. Auto-post the folio charge — transactional + idempotent
   let posted = false;
-  if (reservation?.folio) {
+  if (reservation?.folios?.[0]) {
     posted = await postChargeToFolio(
       check.id,
-      reservation.folio.id,
+      reservation.folios?.[0].id,
       reservation.id,
       input.items,
       totalMinor,
@@ -218,7 +218,10 @@ export async function settleMinibarCheck(
     // Reverse the folio charge on waive (never on dispute — dispute holds it)
     if (action === 'waived' && check.status === 'posted' && check.folioItemId) {
       const folio = check.reservationId
-        ? await tx.folio.findUnique({ where: { reservationId: check.reservationId } })
+        ? await tx.folio.findFirst({
+            where: { reservationId: check.reservationId },
+            orderBy: { createdAt: 'asc' },
+          })
         : null;
       if (folio) {
         const amount = check.totalMinor / 100;

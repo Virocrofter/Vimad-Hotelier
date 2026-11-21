@@ -58,15 +58,16 @@ export async function sellProduct(
   const quantity = Math.max(1, Math.min(20, Number(input.quantity ?? 1)));
   const reservation = await prisma.reservation.findFirst({
     where: { id: String(input.reservationId), tenantId, propertyId: product.propertyId },
-    include: { folio: true },
+    include: { folios: { orderBy: { createdAt: 'asc' }, take: 1 } },
   });
   if (!reservation) throw new AppError(404, 'Reservation not found', 'NOT_FOUND');
-  if (!reservation.folio) throw new AppError(400, 'Reservation has no folio', 'VALIDATION_ERROR');
+  if (!(reservation.folios ?? [])[0])
+    throw new AppError(400, 'Reservation has no folio', 'VALIDATION_ERROR');
   const unitPrice = Number(product.price);
   const total = r2(unitPrice * quantity);
   const item = await prisma.folioItem.create({
     data: {
-      folioId: reservation.folio.id,
+      folioId: (reservation.folios ?? [])[0].id,
       type: 'upsell',
       description: 'Upsell: ' + product.name,
       amount: total,
@@ -86,7 +87,7 @@ export async function sellProduct(
       soldById: actorId,
     },
   });
-  await recomputeFolio(reservation.folio.id);
+  await recomputeFolio((reservation.folios ?? [])[0].id);
   return { saleId: sale.id, folioItemId: item.id, total };
 }
 

@@ -90,8 +90,9 @@ export async function createFolio(tenantId: string, input: FolioCreateInput) {
     throw new AppError(404, 'Reservation not found', 'NOT_FOUND');
   }
 
-  const _existing = await prisma.folio.findUnique({
+  const _existing = await prisma.folio.findFirst({
     where: { reservationId: input.reservationId },
+    orderBy: { createdAt: 'asc' },
   });
   if (_existing) {
     throw new AppError(409, 'Folio already exists for this reservation', 'CONFLICT');

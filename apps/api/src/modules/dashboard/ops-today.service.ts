@@ -120,11 +120,11 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
         propertyId: pid,
         departureDate: { gte: bd, lt: next },
         status: { in: ['checked_in', 'checked_out'] },
-        folio: { balance: { gt: 0 } },
+        folios: { some: { balance: { gt: 0 } } },
       },
       include: {
         guest: { select: { firstName: true, lastName: true } },
-        folio: { select: { balance: true } },
+        folios: { orderBy: { createdAt: 'asc' }, take: 1, select: { balance: true } },
         stays: {
           where: { date: { gte: bd, lt: next } },
           include: { room: { select: { number: true } } },
@@ -191,7 +191,7 @@ export async function getOpsToday(tenantId: string, propertyId?: string) {
       confirmationNumber: r.confirmationNumber,
       guestName: `${r.guest.firstName} ${r.guest.lastName}`,
       roomNumber: r.stays[0]?.room.number ?? null,
-      balance: Number(r.folio?.balance ?? 0),
+      balance: Number(r.folios?.[0]?.balance ?? 0),
     }))
     .sort((a, b) => b.balance - a.balance);
 

@@ -246,7 +246,7 @@ export async function postToFolio(
 ): Promise<{ folioItemId: string; alreadyPosted: boolean }> {
   const item = await prisma.conciergeItem.findFirst({
     where: { id, tenantId },
-    include: { reservation: { include: { folio: true } } },
+    include: { reservation: { include: { folios: { orderBy: { createdAt: 'asc' }, take: 1 } } } },
   });
   if (!item) throw new AppError(404, 'Concierge item not found', 'NOT_FOUND');
   if (item.postedToFolio && item.folioItemId) {
@@ -263,7 +263,7 @@ export async function postToFolio(
     );
   }
 
-  const folio = item.reservation.folio;
+  const folio = item.reservation.folios?.[0];
   if (!folio) throw new AppError(404, 'No folio exists for this reservation', 'NO_FOLIO');
 
   const amount = item.priceMinor / 100;

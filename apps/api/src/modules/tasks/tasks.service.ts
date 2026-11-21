@@ -324,9 +324,13 @@ const RULE_PROVIDERS: Record<string, (rule: RuleRow) => Promise<TaskCandidate[]>
         ...ruleScope(rule),
         status: 'checked_out',
         updatedAt: { gte: startOfDay() },
-        folio: { balance: { gt: 0 } },
+        folios: { some: { balance: { gt: 0 } } },
       },
-      include: { guest: true, folio: true, stays: { include: { room: true }, take: 1 } },
+      include: {
+        guest: true,
+        folios: { orderBy: { createdAt: 'asc' }, take: 1 },
+        stays: { include: { room: true }, take: 1 },
+      },
       take: 100,
     });
     return rsvs.map((r) => ({
@@ -338,7 +342,7 @@ const RULE_PROVIDERS: Record<string, (rule: RuleRow) => Promise<TaskCandidate[]>
       ctx: {
         confirmationNumber: r.confirmationNumber,
         guestName: `${r.guest.firstName} ${r.guest.lastName}`,
-        folioBalance: Number(r.folio?.balance ?? 0).toFixed(2),
+        folioBalance: Number(r.folios?.[0]?.balance ?? 0).toFixed(2),
       },
     }));
   },
@@ -548,8 +552,10 @@ const RULE_PROVIDERS: Record<string, (rule: RuleRow) => Promise<TaskCandidate[]>
         ...ruleScope(rule),
         status: 'checked_out',
         departureDate: addDays(startOfDay(), -1),
-        folio: {
-          items: { some: { description: { contains: 'complaint', mode: 'insensitive' } } },
+        folios: {
+          some: {
+            items: { some: { description: { contains: 'complaint', mode: 'insensitive' } } },
+          },
         },
       },
       include: { guest: true },

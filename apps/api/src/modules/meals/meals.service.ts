@@ -624,7 +624,7 @@ async function postOne(postingId: string): Promise<'posted' | 'failed' | 'skippe
       assignment: {
         include: {
           mealPlan: true,
-          reservation: { include: { folio: true } },
+          reservation: { include: { folios: { orderBy: { createdAt: 'asc' }, take: 1 } } },
         },
       },
     },
@@ -643,7 +643,7 @@ async function postOne(postingId: string): Promise<'posted' | 'failed' | 'skippe
     return 'skipped';
   }
 
-  if (!reservation.folio || reservation.folio.status !== 'open') {
+  if (!reservation.folios?.[0] || reservation.folios?.[0].status !== 'open') {
     await prisma.mealPlanPosting.update({
       where: { id: postingId },
       data: {
@@ -656,7 +656,7 @@ async function postOne(postingId: string): Promise<'posted' | 'failed' | 'skippe
   }
 
   try {
-    const item = await postCharge(assignment.tenantId, reservation.folio.id, {
+    const item = await postCharge(assignment.tenantId, reservation.folios?.[0].id, {
       type: 'service',
       description: `Meal plan — ${mealPlan.name} (${dayOnly(posting.date).toISOString().slice(0, 10)})`,
       amount: Number(posting.amount),

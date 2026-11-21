@@ -52,7 +52,11 @@ reservationWorkspaceRouter.get('/:id', async (req: Request, res: Response) => {
       guest: true,
       roomType: true,
       ratePlan: true,
-      folio: { include: { items: { orderBy: { postedAt: 'desc' }, take: 50 } } },
+      folios: {
+        orderBy: { createdAt: 'asc' },
+        take: 1,
+        include: { items: { orderBy: { postedAt: 'desc' }, take: 50 } },
+      },
       stays: { include: { room: true }, orderBy: { date: 'desc' }, take: 14 },
       companions: { orderBy: { createdAt: 'asc' } },
       traces: { orderBy: { createdAt: 'desc' }, take: 20 },
@@ -116,8 +120,8 @@ reservationWorkspaceRouter.get('/:id', async (req: Request, res: Response) => {
     'reservation',
     reservation.status
   ).map((s) => ACTION_LABELS[s] ?? { action: s, label: s });
-  const folioBalance = reservation.folio
-    ? Number(reservation.folio.balance)
+  const folioBalance = reservation.folios?.[0]
+    ? Number(reservation.folios?.[0].balance)
     : Number(reservation.balance);
   if (['confirmed', 'checked_in'].includes(reservation.status) && folioBalance > 0) {
     validActions.push({ action: 'take-payment', label: 'Take payment' });
@@ -164,7 +168,7 @@ reservationWorkspaceRouter.get('/:id', async (req: Request, res: Response) => {
       validActions,
       companions: reservation.companions,
       stays: reservation.stays,
-      folio: reservation.folio,
+      folio: reservation.folios?.[0],
       payments: reservation.payments,
       tasks: reservation.tasks,
       traces: reservation.traces,

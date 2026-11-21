@@ -27,7 +27,9 @@ export async function getGroupBillingView(tenantId: string, groupId: string) {
       confirmationNumber: true,
       status: true,
       guest: { select: { firstName: true, lastName: true } },
-      folio: {
+      folios: {
+        orderBy: { createdAt: 'asc' },
+        take: 1,
         include: { items: { orderBy: { postedAt: 'asc' } } },
       },
     },
@@ -50,7 +52,7 @@ export async function getGroupBillingView(tenantId: string, groupId: string) {
       confirmationNumber: r.confirmationNumber,
       reservationStatus: r.status,
       guestName: `${r.guest.firstName} ${r.guest.lastName}`,
-      folio: r.folio,
+      folio: r.folios?.[0],
     })),
   };
 }
@@ -217,22 +219,27 @@ export async function setBillRules(
 export async function runAutoSend(windowMinutes = 60): Promise<{ processed: number }> {
   const since = new Date(Date.now() - windowMinutes * 60_000);
   const reservations = await prisma.reservation.findMany({
-    where: { checkedOutAt: { gte: since }, groupId: { not: null }, folio: { status: 'open' } },
+    where: {
+      checkedOutAt: { gte: since },
+      groupId: { not: null },
+      folios: { some: { status: 'open' } },
+    },
     select: {
       id: true,
       tenantId: true,
       guestId: true,
       confirmationNumber: true,
-      folio: { select: { id: true, balance: true } },
+      folios: { orderBy: { createdAt: 'asc' }, take: 1, select: { id: true, balance: true } },
       guest: { select: { email: true, firstName: true } },
     },
     take: 100,
   });
   let processed = 0;
   for (const r of reservations) {
-    if (!r.folio) continue;
+    const rf = (r.folios ?? [])[0];
+    if (!rf) continue;
     try {
-      await closeBill(r.tenantId, 'system:auto-send', r.folio.id);
+      await closeBill(r.tenantId, 'system:auto-send', rf.id);
       if (r.guest.email) {
         await prisma.emailLog.create({
           data: {
@@ -242,7 +249,7 @@ export async function runAutoSend(windowMinutes = 60): Promise<{ processed: numb
             template: 'bill_closed',
             status: 'queued',
             relatedType: 'folio',
-            relatedId: r.folio.id,
+            relatedId: rf.id,
           },
         });
       }

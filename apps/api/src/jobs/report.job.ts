@@ -180,7 +180,11 @@ async function fetchReportRows(
               },
             }),
         },
-        include: { property: true, guest: true, folio: { include: { items: true } } },
+        include: {
+          property: true,
+          guest: true,
+          folios: { orderBy: { createdAt: 'asc' }, take: 1, include: { items: true } },
+        },
       });
 
       return {

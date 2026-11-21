@@ -197,8 +197,9 @@ async function resolveFolio(
   }
   if (!reservationId) return null;
 
-  const existing = await prisma.folio.findUnique({
+  const existing = await prisma.folio.findFirst({
     where: { reservationId },
+    orderBy: { createdAt: 'asc' },
   });
   if (existing) return existing;
 

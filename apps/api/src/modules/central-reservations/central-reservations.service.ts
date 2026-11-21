@@ -282,7 +282,7 @@ export async function createBooking(
           totalAmount: total,
           balance: total,
           stays: { create: dayList.map((date) => ({ roomId: room.id, date, rate })) },
-          folio: {
+          folios: {
             create: {
               tenantId,
               totalCharges: total,

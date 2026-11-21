@@ -64,7 +64,12 @@ async function handleExport(
     const guest = await prisma.guest.findFirst({
       where: { id: targetId, tenantId },
       include: {
-        reservations: { include: { stays: true, folio: { include: { items: true } } } },
+        reservations: {
+          include: {
+            stays: true,
+            folios: { orderBy: { createdAt: 'asc' }, take: 1, include: { items: true } },
+          },
+        },
         preferences: true,
         documents: true,
       },

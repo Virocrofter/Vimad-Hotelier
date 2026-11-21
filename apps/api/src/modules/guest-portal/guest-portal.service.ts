@@ -543,8 +543,9 @@ export async function getCancelQuote(token: string) {
     );
   }
 
-  const folio = await prisma.folio.findUnique({
+  const folio = await prisma.folio.findFirst({
     where: { reservationId: reservation.id },
+    orderBy: { createdAt: 'asc' },
     select: { totalPayments: true },
   });
   const paid = folio ? Number(folio.totalPayments) : 0;
@@ -685,8 +686,9 @@ export async function cancelBooking(input: CancelBookingInput) {
 export async function getGuestFolio(token: string) {
   const reservation = await resolveToken(token);
 
-  const folio = await prisma.folio.findUnique({
+  const folio = await prisma.folio.findFirst({
     where: { reservationId: reservation.id },
+    orderBy: { createdAt: 'asc' },
     include: {
       items: { orderBy: { postedAt: 'desc' } },
       payments: { orderBy: { createdAt: 'desc' } },

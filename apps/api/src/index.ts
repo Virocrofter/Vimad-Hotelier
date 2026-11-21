@@ -198,6 +198,7 @@ import {
 import { publicStatusRouter } from './modules/health/public.status.routes.js';
 import { adminJobsRouter } from './modules/admin/admin.jobs.routes.js';
 import { adminReportsRouter } from './modules/admin/admin.reports.routes.js';
+import { upsellRouter } from './modules/upsell/upsell.routes.js';
 import { backupsDrRouter, startBackupsDrSchedulers } from './modules/admin/backups.dr.routes.js';
 
 const app = express();
@@ -520,6 +521,7 @@ async function bootstrap() {
   app.use('/v1/accounting', accountingRouter);
   app.use('/v1/flags', flagsEvalRouter);
   app.use('/v1/reports', reportsRouter);
+  app.use('/v1/upsell', upsellRouter);
 
   // ─── Admin (legacy platform admin: KPIs, health, alerts, reports, jobs, billing) ───
 

@@ -53,7 +53,7 @@ export async function sendReservationConfirmation(
     include: {
       guest: true,
       property: { select: { name: true, checkInTime: true, checkOutTime: true } },
-      folio: { select: { balance: true } },
+      folios: { orderBy: { createdAt: 'asc' }, take: 1, select: { balance: true } },
       stays: {
         include: { room: { select: { number: true, roomType: { select: { name: true } } } } },
         take: 1,
@@ -97,7 +97,7 @@ export async function sendReservationConfirmation(
       roomLabel,
       partyLabel,
       balanceLabel: money(
-        Math.round(Number(reservation.folio?.balance ?? reservation.totalAmount) * 100),
+        Math.round(Number(reservation.folios?.[0]?.balance ?? reservation.totalAmount) * 100),
         'ZAR'
       ),
       cancelUrl: `${process.env.WEB_URL}/booking/cancel?c=${reservation.confirmationNumber}`,
@@ -119,7 +119,7 @@ export async function sendPreArrival(tenantId: string, reservationId: string) {
     include: {
       guest: true,
       property: { select: { name: true, checkInTime: true, checkOutTime: true } },
-      folio: { select: { balance: true } },
+      folios: { orderBy: { createdAt: 'asc' }, take: 1, select: { balance: true } },
     },
   });
   if (!reservation) throw new AppError(404, 'Reservation not found', 'NOT_FOUND');
@@ -141,7 +141,7 @@ export async function sendPreArrival(tenantId: string, reservationId: string) {
       checkOutTime: reservation.property?.checkOutTime ?? '10:00',
       confirmationNumber: reservation.confirmationNumber,
       arrivalDate: day(reservation.arrivalDate),
-      balanceLabel: money(Math.round(Number(reservation.folio?.balance ?? 0) * 100), 'ZAR'),
+      balanceLabel: money(Math.round(Number(reservation.folios?.[0]?.balance ?? 0) * 100), 'ZAR'),
     },
     tenantId,
     relatedType: 'reservation',
@@ -218,7 +218,9 @@ export async function sendFolioEmail(tenantId: string, reservationId: string, to
     include: {
       guest: true,
       property: { select: { name: true, checkInTime: true, checkOutTime: true } },
-      folio: {
+      folios: {
+        orderBy: { createdAt: 'asc' },
+        take: 1,
         include: {
           items: { orderBy: { postedAt: 'asc' }, take: 100 },
         },
@@ -226,13 +228,13 @@ export async function sendFolioEmail(tenantId: string, reservationId: string, to
     },
   });
   if (!reservation) throw new AppError(404, 'Reservation not found', 'NOT_FOUND');
-  if (!reservation.folio) throw new AppError(409, 'Reservation has no folio yet', 'NO_FOLIO');
+  if (!reservation.folios?.[0]) throw new AppError(409, 'Reservation has no folio yet', 'NO_FOLIO');
 
   const to = toOverride || reservation.guest.email;
   if (!to) throw new AppError(400, 'No recipient email — guest has none on file', 'EMAIL_REQUIRED');
 
   const currency = 'ZAR';
-  const itemsHtml = reservation.folio.items
+  const itemsHtml = reservation.folios?.[0].items
     .map(
       (item) => `
         <tr>
@@ -254,7 +256,7 @@ export async function sendFolioEmail(tenantId: string, reservationId: string, to
       checkOutTime: reservation.property?.checkOutTime ?? '10:00',
       confirmationNumber: reservation.confirmationNumber,
       itemsHtml,
-      balanceLabel: money(Math.round(Number(reservation.folio.balance) * 100), currency),
+      balanceLabel: money(Math.round(Number(reservation.folios?.[0].balance) * 100), currency),
     },
     tenantId,
     relatedType: 'reservation',

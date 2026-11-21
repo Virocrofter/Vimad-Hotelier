@@ -144,7 +144,11 @@ export async function createPaymentRequest(
 ) {
   const reservation = await prisma.reservation.findFirst({
     where: { id: input.reservationId, tenantId },
-    include: { guest: true, folio: true, property: { select: { name: true, currency: true } } },
+    include: {
+      guest: true,
+      folios: { orderBy: { createdAt: 'asc' }, take: 1 },
+      property: { select: { name: true, currency: true } },
+    },
   });
   if (!reservation) throw new AppError(404, 'Reservation not found', 'NOT_FOUND');
   if (reservation.status !== 'confirmed') {
@@ -162,8 +166,8 @@ export async function createPaymentRequest(
     );
   }
 
-  const baseMinor = reservation.folio
-    ? Math.round(Number(reservation.folio.balance) * 100)
+  const baseMinor = (reservation.folios ?? [])[0]
+    ? Math.round(Number((reservation.folios ?? [])[0].balance) * 100)
     : Math.round(Number(reservation.totalAmount) * 100);
   const depositPercent = input.depositPercent ?? DEFAULT_DEPOSIT_PERCENT;
   const computed = Math.round((baseMinor * depositPercent) / 100);
@@ -196,7 +200,7 @@ export async function createPaymentRequest(
       tenantId,
       reservationId: reservation.id,
       guestId: reservation.guestId,
-      folioId: reservation.folio?.id,
+      folioId: (reservation.folios ?? [])[0]?.id,
       reference,
       amountMinor,
       currency: reservation.property.currency ?? 'ZAR',
@@ -212,7 +216,7 @@ export async function createPaymentRequest(
       tenantId,
       reservationId: reservation.id,
       guestId: reservation.guestId,
-      folioId: reservation.folio?.id,
+      folioId: (reservation.folios ?? [])[0]?.id,
       paymentId: payment.id,
       reference,
       amountMinor,

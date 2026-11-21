@@ -242,7 +242,7 @@ export async function listReservations(tenantId: string, query: ReservationListQ
             room: { select: { id: true, number: true, roomType: { select: { name: true } } } },
           },
         },
-        folio: true,
+        folios: { orderBy: { createdAt: 'asc' }, take: 1 },
       },
       orderBy: { createdAt: 'desc' },
       ...skipTake(pagination),
@@ -262,7 +262,7 @@ export async function listReservations(tenantId: string, query: ReservationListQ
       roomNumber: firstStay?.room.number ?? null,
       roomTypeName: firstStay?.room.roomType.name ?? null,
       rate: Math.round(avgRate * 100) / 100,
-      balance: r.folio ? Number(r.folio.balance) : Number(r.balance),
+      balance: r.folios?.[0] ? Number(r.folios?.[0].balance) : Number(r.balance),
     };
   });
 
@@ -285,7 +285,11 @@ export async function getReservation(
           room: { include: { roomType: { select: { id: true, name: true, code: true } } } },
         },
       },
-      folio: { include: { items: { orderBy: { postedAt: 'desc' } } } },
+      folios: {
+        orderBy: { createdAt: 'asc' },
+        take: 1,
+        include: { items: { orderBy: { postedAt: 'desc' } } },
+      },
       traces: { orderBy: { createdAt: 'desc' } },
       companions: { orderBy: { createdAt: 'asc' } },
     },
@@ -439,13 +443,13 @@ async function syncReservationTotals(
 ) {
   const reservation = await client.reservation.findUniqueOrThrow({
     where: { id: reservationId },
-    include: { stays: true, folio: true },
+    include: { stays: true, folios: { orderBy: { createdAt: 'asc' }, take: 1 } },
   });
   const staysTotal =
     Math.round(reservation.stays.reduce((sum, s) => sum + Number(s.rate), 0) * 100) / 100;
   const fallback = Math.round(Number(reservation.totalAmount) * 100) / 100;
   const totalAmount = reservation.stays.length > 0 ? staysTotal : fallback;
-  const totalPayments = reservation.folio ? Number(reservation.folio.totalPayments) : 0;
+  const totalPayments = reservation.folios?.[0] ? Number(reservation.folios?.[0].totalPayments) : 0;
   const balance = Math.round((totalAmount - totalPayments) * 100) / 100;
 
   if (client === prisma) {
@@ -454,8 +458,8 @@ async function syncReservationTotals(
         where: { id: reservationId },
         data: { totalAmount, balance },
       }),
-      ...(reservation.folio
-        ? [prisma.folio.update({ where: { reservationId }, data: { balance } })]
+      ...(reservation.folios?.[0]
+        ? [prisma.folio.updateMany({ where: { reservationId }, data: { balance } })]
         : []),
     ]);
   } else {
@@ -463,7 +467,7 @@ async function syncReservationTotals(
       where: { id: reservationId },
       data: { totalAmount, balance },
     });
-    if (reservation.folio) {
+    if (reservation.folios?.[0]) {
       await client.folio.update({ where: { reservationId }, data: { balance } });
     }
   }

@@ -129,7 +129,7 @@ export async function intakeBooking(provider: string, body: Record<string, unkno
       totalAmount: total,
       balance: total,
       stays: { create: assigned.map((a) => ({ roomId: a.roomId, date: a.date, rate: nightly })) },
-      folio: {
+      folios: {
         create: {
           tenantId: connection.tenantId,
           totalCharges: total,
