@@ -1,0 +1,129 @@
+{
+  "generatedAt": "2026-11-21T18:36:59.285Z",
+  "pages": {
+    "dashboard": {
+      "url": "/app/dashboard",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 7,
+          "firstTarget": "li > .bg-\\[var\\(--hq-accent-soft\\)\\].text-\\[var\\(--primary\\)\\][href$=\"dashboard\"]"
+        },
+        {
+          "id": "scrollable-region-focusable",
+          "impact": "serious",
+          "help": "Scrollable region must have keyboard access",
+          "nodes": 1,
+          "firstTarget": ".max-h-72.space-y-1.pr-1"
+        }
+      ],
+      "counts": {
+        "critical": 0,
+        "serious": 8,
+        "moderate": 0,
+        "minor": 0
+      }
+    },
+    "reservations": {
+      "url": "/app/reservations",
+      "violations": [
+        {
+          "id": "button-name",
+          "impact": "critical",
+          "help": "Buttons must have discernible text",
+          "nodes": 1,
+          "firstTarget": "th:nth-child(1) > .hover\\:text-text-primary.text-text-muted"
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 6,
+          "firstTarget": "li:nth-child(2) > .bg-\\[var\\(--hq-accent-soft\\)\\].text-\\[var\\(--primary\\)\\][href$=\"reservations\"]"
+        }
+      ],
+      "counts": {
+        "critical": 1,
+        "serious": 6,
+        "moderate": 0,
+        "minor": 0
+      }
+    },
+    "exceptions": {
+      "url": "/app/exceptions",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 5,
+          "firstTarget": ".md\\:flex"
+        }
+      ],
+      "counts": {
+        "critical": 0,
+        "serious": 5,
+        "moderate": 0,
+        "minor": 0
+      }
+    },
+    "billing": {
+      "url": "/app/billing",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 8,
+          "firstTarget": "li:nth-child(1) > .bg-\\[var\\(--hq-accent-soft\\)\\].text-\\[var\\(--primary\\)\\][href$=\"billing\"]"
+        },
+        {
+          "id": "select-name",
+          "impact": "critical",
+          "help": "Select element must have an accessible name",
+          "nodes": 1,
+          "firstTarget": "select"
+        }
+      ],
+      "counts": {
+        "critical": 1,
+        "serious": 8,
+        "moderate": 0,
+        "minor": 0
+      }
+    },
+    "ar": {
+      "url": "/app/ar",
+      "violations": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "nodes": 15,
+          "firstTarget": "li:nth-child(4) > .bg-\\[var\\(--hq-accent-soft\\)\\].text-\\[var\\(--primary\\)\\][href=\"/app/ar\"]"
+        },
+        {
+          "id": "select-name",
+          "impact": "critical",
+          "help": "Select element must have an accessible name",
+          "nodes": 2,
+          "firstTarget": "select:nth-child(3)"
+        }
+      ],
+      "counts": {
+        "critical": 2,
+        "serious": 15,
+        "moderate": 0,
+        "minor": 0
+      }
+    }
+  },
+  "totals": {
+    "critical": 4,
+    "serious": 42,
+    "moderate": 0,
+    "minor": 0
+  }
+}
