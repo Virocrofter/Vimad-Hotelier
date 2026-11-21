@@ -37,7 +37,11 @@ export function ReceiptCard({ folio, currency = 'ZAR' }) {
           </p>
         </div>
         <Badge
-          className={balance > 0 ? 'bg-warning/25 text-warning' : 'bg-success/15 text-success'}
+          className={
+            balance > 0
+              ? 'bg-warning/25 text-[var(--warning-soft-fg)]'
+              : 'bg-success/15 text-success'
+          }
         >
           {status}
         </Badge>

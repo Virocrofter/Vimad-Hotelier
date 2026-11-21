@@ -47,9 +47,9 @@ const fmtDate = (d) => (d ? new Date(d).toISOString().slice(0, 10) : '—');
 
 const STATUS_STYLE = {
   draft: 'bg-[var(--hq-surface-2)] text-text-secondary',
-  sent: 'bg-accent/15 text-accent',
-  partially_paid: 'bg-warning/25 text-warning',
-  overdue: 'bg-danger/25 text-danger',
+  sent: 'bg-accent/15 text-[var(--accent-soft-fg)]',
+  partially_paid: 'bg-warning/25 text-[var(--warning-soft-fg)]',
+  overdue: 'bg-danger/25 text-[var(--danger-soft-fg)]',
   paid: 'bg-success/15 text-success',
   cancelled: 'bg-[var(--hq-surface-2)] text-text-muted line-through',
 };
@@ -86,7 +86,7 @@ function InvoiceStatusBar({ invoices }) {
 
 const inputCls =
   'w-full rounded-md border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300';
-const thCls = 'px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-text-muted';
+const thCls = 'px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-text-primary';
 const tdCls = 'px-4 py-2.5 text-sm text-text-secondary';
 
 // ─── Small building blocks ───

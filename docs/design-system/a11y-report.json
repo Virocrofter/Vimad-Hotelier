@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T19:43:19.395Z",
+  "generatedAt": "2026-11-21T19:53:31.585Z",
   "pages": {
     "dashboard": {
       "url": "/app/dashboard",
@@ -89,25 +89,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 11,
-          "targets": [
-            ".w-8",
-            ".text-white",
-            ".bg-accent\\/15",
-            ".bg-danger\\/25",
-            "th:nth-child(1)",
-            "th:nth-child(2)",
-            "th:nth-child(3)",
-            "th:nth-child(4)",
-            "th:nth-child(5)",
-            ".text-right:nth-child(6)",
-            ".text-right:nth-child(7)"
-          ]
+          "nodes": 2,
+          "targets": [".w-8", ".text-white"]
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 11,
+        "serious": 2,
         "moderate": 0,
         "minor": 0
       }
@@ -115,7 +103,7 @@
   },
   "totals": {
     "critical": 0,
-    "serious": 22,
+    "serious": 13,
     "moderate": 0,
     "minor": 0
   }

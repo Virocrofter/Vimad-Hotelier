@@ -86,6 +86,10 @@ export const designTokens = {
     'hq-control-md': '36px',
     'hq-control-lg': '40px',
     'hq-density-pad-x': '12px',
+    'warning-soft-fg': '#92400e',
+    'danger-soft-fg': '#991b1b',
+    'info-soft-fg': '#20566f',
+    'accent-soft-fg': '#5842c2',
   },
   dark: {
     background: '#0f1a22',
@@ -139,6 +143,10 @@ export const designTokens = {
     'hq-z-cmdk': '70',
     'hq-focus-halo': '#0f1a22',
     'hq-focus-ring': '#8b74e8',
+    'warning-soft-fg': '#e2ac4a',
+    'danger-soft-fg': '#f26d5f',
+    'info-soft-fg': '#6fb0d4',
+    'accent-soft-fg': '#a994f2',
   },
   density: {
     'hq-control-sm': '28px',

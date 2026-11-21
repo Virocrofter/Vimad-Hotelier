@@ -70,7 +70,7 @@ const severityConfig = {
 const statusConfig = {
   in_progress: {
     label: 'In Progress',
-    color: 'bg-accent/15 text-accent',
+    color: 'bg-accent/15 text-[var(--accent-soft-fg)]',
   },
   completed: {
     label: 'Completed',
@@ -78,11 +78,11 @@ const statusConfig = {
   },
   failed: {
     label: 'Failed',
-    color: 'bg-danger/25 text-danger',
+    color: 'bg-danger/25 text-[var(--danger-soft-fg)]',
   },
   rolled_back: {
     label: 'Rolled Back',
-    color: 'bg-warning/25 text-warning',
+    color: 'bg-warning/25 text-[var(--warning-soft-fg)]',
   },
 };
 

@@ -471,9 +471,9 @@ export function AttentionStrip({ exceptions, loading }) {
 // then urgent tasks, then remaining departures, then arrivals.
 
 const kindMeta = {
-  Departure: { icon: CalendarX, chip: 'bg-info/25 text-info' },
+  Departure: { icon: CalendarX, chip: 'bg-info/25 text-[var(--info-soft-fg)]' },
   Arrival: { icon: CalendarCheck, chip: 'bg-accent/10 text-accent' },
-  Task: { icon: AlertTriangle, chip: 'bg-warning/25 text-warning' },
+  Task: { icon: AlertTriangle, chip: 'bg-warning/25 text-[var(--warning-soft-fg)]' },
 };
 
 export function PriorityWorklist({ arrivals, departures, tasksTop, currency, loading, viewAllTo }) {
