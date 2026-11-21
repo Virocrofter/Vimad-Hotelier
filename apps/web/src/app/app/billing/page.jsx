@@ -298,7 +298,10 @@ export default function BillingPage() {
     ? `${folio.reservation.guest.firstName} ${folio.reservation.guest.lastName}`
     : null;
 
-  if (flags.paymentExceptions) return <PaymentExceptions />;
+  if (flags.paymentExceptions) {
+    window.location.assign('/app/exceptions');
+    return null;
+  }
 
   return (
     <div className="space-y-6">
