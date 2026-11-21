@@ -1,0 +1,25 @@
+{
+  "results": {
+    "queueRendered": true,
+    "reasonGateVisible": true,
+    "auditTrailRows": 7,
+    "acknowledged": true,
+    "ownerRecorded": true,
+    "dismissed": true,
+    "dismissReasonAudited": true,
+    "resolved": true,
+    "allGreen": true
+  },
+  "before": {
+    "open": 284,
+    "acknowledged": 0,
+    "resolved": 7,
+    "dismissed": 8
+  },
+  "after": {
+    "open": 281,
+    "acknowledged": 1,
+    "resolved": 8,
+    "dismissed": 9
+  }
+}
