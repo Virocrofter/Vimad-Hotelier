@@ -141,7 +141,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
                   className={cn(
                     'block rounded-md px-3 py-2 text-[13px]',
                     isActive(item.to)
-                      ? 'bg-[var(--hq-accent-soft)] font-medium text-[var(--primary)]'
+                      ? 'bg-[var(--hq-accent-soft)] font-medium text-[var(--accent-foreground)]'
                       : 'hover:bg-[var(--hq-surface-2)]'
                   )}
                   style={!isActive(item.to) ? { color: 'var(--text-secondary)' } : undefined}

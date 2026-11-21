@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T18:36:59.285Z",
+  "generatedAt": "2026-11-21T19:06:37.526Z",
   "pages": {
     "dashboard": {
       "url": "/app/dashboard",
@@ -8,8 +8,8 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 7,
-          "firstTarget": "li > .bg-\\[var\\(--hq-accent-soft\\)\\].text-\\[var\\(--primary\\)\\][href$=\"dashboard\"]"
+          "nodes": 6,
+          "firstTarget": "button[aria-label=\"Search (Cmd+K)\"]"
         },
         {
           "id": "scrollable-region-focusable",
@@ -21,7 +21,7 @@
       ],
       "counts": {
         "critical": 0,
-        "serious": 8,
+        "serious": 7,
         "moderate": 0,
         "minor": 0
       }
@@ -40,13 +40,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 6,
-          "firstTarget": "li:nth-child(2) > .bg-\\[var\\(--hq-accent-soft\\)\\].text-\\[var\\(--primary\\)\\][href$=\"reservations\"]"
+          "nodes": 5,
+          "firstTarget": ".md\\:flex"
         }
       ],
       "counts": {
         "critical": 1,
-        "serious": 6,
+        "serious": 5,
         "moderate": 0,
         "minor": 0
       }
@@ -76,8 +76,8 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 8,
-          "firstTarget": "li:nth-child(1) > .bg-\\[var\\(--hq-accent-soft\\)\\].text-\\[var\\(--primary\\)\\][href$=\"billing\"]"
+          "nodes": 7,
+          "firstTarget": ".md\\:flex"
         },
         {
           "id": "select-name",
@@ -89,7 +89,7 @@
       ],
       "counts": {
         "critical": 1,
-        "serious": 8,
+        "serious": 7,
         "moderate": 0,
         "minor": 0
       }
@@ -101,20 +101,20 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 15,
-          "firstTarget": "li:nth-child(4) > .bg-\\[var\\(--hq-accent-soft\\)\\].text-\\[var\\(--primary\\)\\][href=\"/app/ar\"]"
+          "nodes": 14,
+          "firstTarget": ".md\\:flex"
         },
         {
           "id": "select-name",
           "impact": "critical",
           "help": "Select element must have an accessible name",
           "nodes": 2,
-          "firstTarget": "select:nth-child(3)"
+          "firstTarget": "#sel-1135"
         }
       ],
       "counts": {
         "critical": 2,
-        "serious": 15,
+        "serious": 14,
         "moderate": 0,
         "minor": 0
       }
@@ -122,7 +122,7 @@
   },
   "totals": {
     "critical": 4,
-    "serious": 42,
+    "serious": 38,
     "moderate": 0,
     "minor": 0
   }

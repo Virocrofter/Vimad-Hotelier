@@ -357,9 +357,10 @@ function NewInvoiceModal({ accounts, onClose }) {
     <Modal title="New AR invoice" onClose={onClose} wide>
       <form onSubmit={submit} className="space-y-4">
         <div className="grid grid-cols-3 gap-3">
-          <label className="col-span-2 text-xs font-medium text-text-secondary">
+          <label htmlFor="sel-361" className="col-span-2 text-xs font-medium text-text-secondary">
             Corporate account *
             <select
+              id="sel-361"
               className={inputCls}
               value={form.corporateAccountId}
               onChange={(e) => setForm((f) => ({ ...f, corporateAccountId: e.target.value }))}
@@ -514,9 +515,10 @@ function PaymentModal({ accounts, preselected, onClose }) {
   return (
     <Modal title="Record payment" onClose={onClose}>
       <form onSubmit={submit} className="grid grid-cols-2 gap-3">
-        <label className="col-span-2 text-xs font-medium text-text-secondary">
+        <label htmlFor="sel-518" className="col-span-2 text-xs font-medium text-text-secondary">
           Corporate account *
           <select
+            id="sel-518"
             className={inputCls}
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
@@ -530,9 +532,10 @@ function PaymentModal({ accounts, preselected, onClose }) {
             ))}
           </select>
         </label>
-        <label className="col-span-2 text-xs font-medium text-text-secondary">
+        <label htmlFor="sel-534" className="col-span-2 text-xs font-medium text-text-secondary">
           Apply to invoice (blank = on-account)
           <select
+            id="sel-534"
             className={inputCls}
             value={form.invoiceId}
             onChange={(e) => setForm((f) => ({ ...f, invoiceId: e.target.value }))}
@@ -558,9 +561,10 @@ function PaymentModal({ accounts, preselected, onClose }) {
             required
           />
         </label>
-        <label className="text-xs font-medium text-text-secondary">
+        <label htmlFor="sel-562" className="text-xs font-medium text-text-secondary">
           Method
           <select
+            id="sel-562"
             className={inputCls}
             value={form.method}
             onChange={(e) => setForm((f) => ({ ...f, method: e.target.value }))}
@@ -1134,6 +1138,7 @@ export default function ArPage() {
         {tab === 'invoices' && (
           <>
             <select
+              id="sel-1135"
               className={`${inputCls} w-36`}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -1148,6 +1153,7 @@ export default function ArPage() {
               <option value="cancelled">Cancelled</option>
             </select>
             <select
+              id="sel-1149"
               className={`${inputCls} w-36`}
               value={agingFilter}
               onChange={(e) => setAgingFilter(e.target.value)}
