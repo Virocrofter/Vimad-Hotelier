@@ -1,41 +1,22 @@
 {
-  "generatedAt": "2026-11-21T19:59:11.624Z",
+  "generatedAt": "2026-11-21T20:17:09.189Z",
   "pages": {
     "dashboard": {
       "url": "/app/dashboard",
-      "violations": [
-        {
-          "id": "color-contrast",
-          "impact": "serious",
-          "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 2,
-          "targets": [
-            ".hover\\:opacity-90",
-            ".flex-wrap.items-start.gap-3 > .py-0\\.5.px-2.bg-surface-elevated"
-          ]
-        }
-      ],
+      "violations": [],
       "counts": {
         "critical": 0,
-        "serious": 2,
+        "serious": 0,
         "moderate": 0,
         "minor": 0
       }
     },
     "reservations": {
       "url": "/app/reservations",
-      "violations": [
-        {
-          "id": "color-contrast",
-          "impact": "serious",
-          "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 1,
-          "targets": [".text-white"]
-        }
-      ],
+      "violations": [],
       "counts": {
         "critical": 0,
-        "serious": 1,
+        "serious": 0,
         "moderate": 0,
         "minor": 0
       }
@@ -52,36 +33,20 @@
     },
     "billing": {
       "url": "/app/billing",
-      "violations": [
-        {
-          "id": "color-contrast",
-          "impact": "serious",
-          "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 1,
-          "targets": [".text-accent.mt-1.text-xl"]
-        }
-      ],
+      "violations": [],
       "counts": {
         "critical": 0,
-        "serious": 1,
+        "serious": 0,
         "moderate": 0,
         "minor": 0
       }
     },
     "ar": {
       "url": "/app/ar",
-      "violations": [
-        {
-          "id": "color-contrast",
-          "impact": "serious",
-          "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 1,
-          "targets": [".text-white"]
-        }
-      ],
+      "violations": [],
       "counts": {
         "critical": 0,
-        "serious": 1,
+        "serious": 0,
         "moderate": 0,
         "minor": 0
       }
@@ -89,7 +54,7 @@
   },
   "totals": {
     "critical": 0,
-    "serious": 5,
+    "serious": 0,
     "moderate": 0,
     "minor": 0
   }

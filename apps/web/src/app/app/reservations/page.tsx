@@ -379,7 +379,7 @@ export default function ReservationsPage() {
         </div>
         <Link
           to="/app/reservations/new"
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-secondary px-4 text-sm font-medium text-white hover:bg-secondary/90"
+          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-secondary px-4 text-sm font-medium text-secondary-foreground hover:bg-secondary/90"
         >
           <Plus className="h-4 w-4" /> New Reservation
         </Link>
@@ -818,7 +818,7 @@ export default function ReservationsPage() {
                     className={cn(
                       'h-8 min-w-8 rounded-md px-2 text-sm font-medium',
                       p === page
-                        ? 'bg-secondary text-white'
+                        ? 'bg-secondary text-secondary-foreground'
                         : 'text-text-secondary hover:bg-surface-elevated'
                     )}
                   >

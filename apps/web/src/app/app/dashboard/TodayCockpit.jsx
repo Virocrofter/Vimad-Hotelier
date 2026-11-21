@@ -205,7 +205,7 @@ function WorklistColumn({ title, icon: Icon, items, busyId, actionError, onActio
                   {(r.flags ?? []).map((f) => (
                     <span
                       key={f}
-                      className="rounded-full bg-surface-elevated px-1.5 py-0.5 text-text-muted"
+                      className="rounded-full bg-surface-elevated px-1.5 py-0.5 text-text-secondary"
                     >
                       {f.replace(/_/g, ' ')}
                     </span>
@@ -385,7 +385,7 @@ export default function TodayCockpit({ propertyId, onMutated }) {
               occupancy {d.revenue.occupancyPct}%
             </p>
           </div>
-          <span className="rounded-full bg-surface-elevated px-2 py-0.5 text-[11px] text-text-muted">
+          <span className="rounded-full bg-surface-elevated px-2 py-0.5 text-[11px] text-text-secondary">
             updated {revenueFresh}
           </span>
         </div>

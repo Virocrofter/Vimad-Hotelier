@@ -96,7 +96,7 @@ export default function InvoicesPage() {
         <button
           onClick={issue}
           disabled={issuing || !issueFolio.trim()}
-          className="inline-flex h-10 items-center gap-2 rounded-lg bg-secondary px-5 text-sm font-semibold text-white disabled:opacity-50"
+          className="inline-flex h-10 items-center gap-2 rounded-lg bg-secondary px-5 text-sm font-semibold text-secondary-foreground disabled:opacity-50"
         >
           <Plus className="h-4 w-4" /> {issuing ? 'Issuing…' : 'Issue & send'}
         </button>

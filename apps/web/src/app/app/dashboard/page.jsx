@@ -230,7 +230,7 @@ function AppDashboardV1() {
           <div className="hidden items-center gap-2 md:flex">
             <Link
               to={LINKS.newReservation}
-              className="inline-flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground transition-opacity hover:opacity-90"
             >
               <Plus className="h-3.5 w-3.5" />
               New reservation

@@ -17,7 +17,7 @@ export function FilterBar({ children, activeCount, className }: FilterBarProps) 
     >
       {children}
       {typeof activeCount === 'number' && activeCount > 0 && (
-        <span className="hq-text-caption rounded-full bg-secondary px-2 py-0.5 font-medium text-white hq-tnum">
+        <span className="hq-text-caption rounded-full bg-secondary px-2 py-0.5 font-medium text-secondary-foreground hq-tnum">
           {activeCount} active
         </span>
       )}

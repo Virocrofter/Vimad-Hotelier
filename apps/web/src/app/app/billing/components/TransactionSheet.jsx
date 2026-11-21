@@ -102,7 +102,7 @@ export default function TransactionSheet({
           <p
             className={cn(
               'text-3xl font-bold font-mono tabular-nums',
-              payment ? 'text-accent' : 'text-text-primary'
+              payment ? 'text-[var(--accent-soft-fg)]' : 'text-text-primary'
             )}
           >
             {payment ? '−' : '+'}

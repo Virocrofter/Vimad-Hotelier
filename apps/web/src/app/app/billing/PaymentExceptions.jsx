@@ -39,7 +39,7 @@ function DismissPrompt({ item, onConfirm, onCancel, busy }) {
         <button
           disabled={busy || !reason.trim()}
           onClick={() => onConfirm(reason.trim())}
-          className="rounded bg-danger px-2 py-0.5 text-[11px] font-medium text-white disabled:opacity-40"
+          className="rounded bg-[#c93a30] px-2 py-0.5 text-[11px] font-medium text-white disabled:opacity-40"
         >
           {busy ? '…' : 'Confirm'}
         </button>

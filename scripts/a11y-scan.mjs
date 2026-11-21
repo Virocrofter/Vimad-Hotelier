@@ -65,4 +65,4 @@ console.log(
     : '=== a11y gate green ==='
 );
 await browser.close();
-process.exit(0); // report-only this run; the gate arms once violations are cleared or baselined
+process.exit(blocked > 0 ? 1 : 0); // DS-07 gate armed: build fails on critical/serious

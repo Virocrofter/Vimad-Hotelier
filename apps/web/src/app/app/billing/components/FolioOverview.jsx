@@ -82,7 +82,7 @@ export default function FolioOverview() {
           <p
             className={cn(
               'mt-1 text-xl font-bold font-mono',
-              outstanding > 0 ? 'text-danger' : 'text-accent'
+              outstanding > 0 ? 'text-danger' : 'text-[var(--accent-soft-fg)]'
             )}
           >
             {fmt(outstanding, currency)}

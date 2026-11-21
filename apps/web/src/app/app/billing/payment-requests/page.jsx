@@ -148,7 +148,7 @@ export default function PaymentRequestsPage() {
               className={cn(
                 'rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors',
                 status === s
-                  ? 'bg-secondary text-white'
+                  ? 'bg-secondary text-secondary-foreground'
                   : 'text-text-secondary hover:bg-surface-elevated'
               )}
             >
