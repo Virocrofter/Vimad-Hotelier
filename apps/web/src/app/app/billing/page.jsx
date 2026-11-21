@@ -378,6 +378,7 @@ export default function BillingPage() {
           />
         </div>
         <select
+          aria-label="Filter transactions"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="h-10 rounded-md border border-border bg-surface px-3 text-sm text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

@@ -66,6 +66,7 @@ function InlineActions({ status, disabled, onView, onCheckIn, onCancel }: Inline
   return (
     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
       <button
+        aria-label="View reservation"
         onClick={onView}
         className="inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary hover:bg-surface-elevated hover:text-text-primary"
         title="View"

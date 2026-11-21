@@ -1400,7 +1400,7 @@ function AssignRoomModal({
           {r.arrivalDate} → {r.departureDate} ·{' '}
           {roomTypes.find((t) => t.id === r.roomTypeId)?.name ?? 'Any type'}
         </div>
-        <div className="max-h-72 overflow-y-auto rounded-md border">
+        <div className="max-h-72 overflow-y-auto rounded-md border" tabIndex={0}>
           {candidates.map((room) => {
             const conflict = nights.some((d) => {
               const ids = stayMap.get(`${room.id}|${d}`);

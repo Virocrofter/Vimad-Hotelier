@@ -343,7 +343,7 @@ export function MovementsPanel({ title, icon: Icon, items, type, currency, loadi
           <p className="text-sm text-text-muted">None scheduled today</p>
         </div>
       ) : (
-        <div className="max-h-72 space-y-2 overflow-auto pr-1">
+        <div className="max-h-72 space-y-2 overflow-auto pr-1" tabIndex={0}>
           {items.map((item) => (
             <GuestMovementRow key={item.id} item={item} type={type} currency={currency} />
           ))}
@@ -454,7 +454,7 @@ export function RoomBoard({ rooms, loading }) {
         ))}
       </div>
 
-      <div className="max-h-72 space-y-4 overflow-auto pr-1">
+      <div className="max-h-72 space-y-4 overflow-auto pr-1" tabIndex={0}>
         {floors.map(([floor, floorRooms]) => {
           const visible = floorRooms.filter((r) => filter === 'all' || roomState(r) === filter);
           if (visible.length === 0) return null;
@@ -540,7 +540,7 @@ export function ActivityFeed({ items, loading }) {
       ) : items.length === 0 ? (
         <p className="py-8 text-center text-sm text-text-muted">No activity yet today</p>
       ) : (
-        <div className="max-h-72 space-y-1 overflow-auto pr-1">
+        <div className="max-h-72 space-y-1 overflow-auto pr-1" tabIndex={0}>
           {items.map((item) => {
             const Icon = entityIcons[item.entity] ?? Info;
             const to = activityTarget(item);

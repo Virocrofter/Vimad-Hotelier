@@ -69,7 +69,7 @@ export function Topbar() {
         <button
           type="button"
           onClick={() => window.dispatchEvent(new CustomEvent('vimad:open-palette'))}
-          className="hidden items-center gap-2 rounded-md border border-border bg-surface-elevated px-3 py-1.5 text-xs text-text-muted transition-colors hover:text-text-primary md:flex"
+          className="hidden items-center gap-2 rounded-md border border-border bg-surface-elevated px-3 py-1.5 text-xs text-text-secondary transition-colors hover:text-text-primary md:flex"
           aria-label="Search (Cmd+K)"
         >
           <Search className="h-3.5 w-3.5" />

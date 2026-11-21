@@ -1138,6 +1138,7 @@ export default function ArPage() {
         {tab === 'invoices' && (
           <>
             <select
+              aria-label="Filter by status"
               id="sel-1135"
               className={`${inputCls} w-36`}
               value={statusFilter}
@@ -1153,6 +1154,7 @@ export default function ArPage() {
               <option value="cancelled">Cancelled</option>
             </select>
             <select
+              aria-label="Filter by aging"
               id="sel-1149"
               className={`${inputCls} w-36`}
               value={agingFilter}

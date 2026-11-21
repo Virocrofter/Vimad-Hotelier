@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-21T19:06:37.526Z",
+  "generatedAt": "2026-11-21T19:14:02.045Z",
   "pages": {
     "dashboard": {
       "url": "/app/dashboard",
@@ -8,20 +8,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 6,
-          "firstTarget": "button[aria-label=\"Search (Cmd+K)\"]"
-        },
-        {
-          "id": "scrollable-region-focusable",
-          "impact": "serious",
-          "help": "Scrollable region must have keyboard access",
-          "nodes": 1,
-          "firstTarget": ".max-h-72.space-y-1.pr-1"
+          "nodes": 4,
+          "firstTarget": "a[title=\"Needs Attention queue\"] > .font-semibold.text-xs"
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 7,
+        "serious": 4,
         "moderate": 0,
         "minor": 0
       }
@@ -40,13 +33,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 5,
-          "firstTarget": ".md\\:flex"
+          "nodes": 3,
+          "firstTarget": ".font-semibold.text-xs"
         }
       ],
       "counts": {
         "critical": 1,
-        "serious": 5,
+        "serious": 3,
         "moderate": 0,
         "minor": 0
       }
@@ -58,13 +51,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 5,
-          "firstTarget": ".md\\:flex"
+          "nodes": 3,
+          "firstTarget": ".font-semibold.text-xs"
         }
       ],
       "counts": {
         "critical": 0,
-        "serious": 5,
+        "serious": 3,
         "moderate": 0,
         "minor": 0
       }
@@ -76,20 +69,13 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 7,
-          "firstTarget": ".md\\:flex"
-        },
-        {
-          "id": "select-name",
-          "impact": "critical",
-          "help": "Select element must have an accessible name",
-          "nodes": 1,
-          "firstTarget": "select"
+          "nodes": 5,
+          "firstTarget": "a[title=\"Needs Attention queue\"] > .font-semibold"
         }
       ],
       "counts": {
-        "critical": 1,
-        "serious": 7,
+        "critical": 0,
+        "serious": 5,
         "moderate": 0,
         "minor": 0
       }
@@ -101,28 +87,21 @@
           "id": "color-contrast",
           "impact": "serious",
           "help": "Elements must meet minimum color contrast ratio thresholds",
-          "nodes": 14,
-          "firstTarget": ".md\\:flex"
-        },
-        {
-          "id": "select-name",
-          "impact": "critical",
-          "help": "Select element must have an accessible name",
-          "nodes": 2,
-          "firstTarget": "#sel-1135"
+          "nodes": 12,
+          "firstTarget": "a[title=\"Needs Attention queue\"] > .font-semibold.text-xs"
         }
       ],
       "counts": {
-        "critical": 2,
-        "serious": 14,
+        "critical": 0,
+        "serious": 12,
         "moderate": 0,
         "minor": 0
       }
     }
   },
   "totals": {
-    "critical": 4,
-    "serious": 38,
+    "critical": 1,
+    "serious": 27,
     "moderate": 0,
     "minor": 0
   }
