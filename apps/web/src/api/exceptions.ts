@@ -34,8 +34,8 @@ export async function listExceptions(status = 'active'): Promise<ExceptionsData>
 export async function ackException(id: string): Promise<void> {
   await apiClient.post(`/v1/exceptions/${id}/ack`, {});
 }
-export async function assignException(id: string): Promise<void> {
-  await apiClient.post(`/v1/exceptions/${id}/assign`, {});
+export async function assignException(id: string, assigneeId?: string): Promise<void> {
+  return apiClient.post(`/exceptions/${id}/assign`, assigneeId ? { assigneeId } : {});
 }
 export async function resolveException(id: string, note?: string): Promise<void> {
   await apiClient.post(`/v1/exceptions/${id}/resolve`, { note });

@@ -27,6 +27,7 @@ import {
 } from '../../../api/exceptions';
 import { flags } from '../../../lib/flags';
 import PaymentExceptions from '../billing/PaymentExceptions';
+import { useTenantUsers } from '../../../hooks/useTenantUsers';
 import { cn } from '../../../lib/utils';
 
 const SEV = {
@@ -78,6 +79,8 @@ const TABS = [
 function ExceptionsPage() {
   const [tab, setTab] = useState('active');
   const [selected, setSelected] = useState([]);
+  const usersQ = useTenantUsers();
+  const usersList = usersQ.data ?? [];
   const [prompt, setPrompt] = useState(null); // {kind, item}
   const [busyId, setBusyId] = useState(null);
   const [err, setErr] = useState(null);
@@ -349,6 +352,32 @@ function ExceptionsPage() {
                           <UserPlus className="mr-1 inline h-3 w-3" />
                           Take
                         </button>
+                      )}
+                      {usersList.length > 0 && (
+                        <select
+                          aria-label={'Assign ' + item.title}
+                          disabled={!!busyId}
+                          value={item.assigneeId ?? ''}
+                          onChange={(e) => {
+                            if (!e.target.value) return;
+                            setBusyId(item.id + 'assign');
+                            setErr(null);
+                            assignException(item.id, e.target.value)
+                              .then(() => q.invalidate())
+                              .catch((err) =>
+                                setErr(err?.response?.data?.error?.message ?? String(err))
+                              )
+                              .finally(() => setBusyId(null));
+                          }}
+                          className="rounded border border-border bg-surface px-1 py-1 text-[11px] text-text-secondary"
+                        >
+                          <option value="">Assign…</option>
+                          {usersList.map((u) => (
+                            <option key={u.id} value={u.id}>
+                              {u.name}
+                            </option>
+                          ))}
+                        </select>
                       )}
                       {['open', 'acknowledged', 'in_progress'].includes(item.status) && (
                         <>
