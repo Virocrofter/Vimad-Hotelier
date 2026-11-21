@@ -1,5 +1,6 @@
 /* apps/api/src/modules/ar/ar.routes.ts */
 import { Router, type Request, type Response } from 'express';
+import { prisma } from '../../common/prisma.js';
 import { z } from '../../common/zod.js';
 import {
   authMiddleware,
@@ -237,5 +238,34 @@ arRouter.post(
     res.json(
       await arService.reversePayment(tenantOf(req), userOf(req), req.params.id as string, reason)
     );
+  }
+);
+
+// ─── Consolidated corporate statement: all open invoices for an account. ───
+arRouter.post(
+  '/accounts/:id/consolidated-statement',
+  requirePermission('ar', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const account = await prisma.arAccount.findFirst({
+        where: { id: String((req.params as { id: string }).id), tenantId: req.tenantId },
+      });
+      if (!account) {
+        return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Account not found' } });
+      }
+      const invoices = await prisma.arInvoice.findMany({
+        where: {
+          corporateAccountId: account.id,
+          status: { in: ['sent', 'partially_paid', 'overdue'] },
+        },
+        orderBy: { dueDate: 'asc' },
+      });
+      const totalOutstanding = invoices.reduce((sum, i) => sum + Number(i.balance ?? 0), 0);
+      return res.json({
+        data: { account, invoices, totalOutstanding, generatedAt: new Date().toISOString() },
+      });
+    } catch (err) {
+      return next(err);
+    }
   }
 );

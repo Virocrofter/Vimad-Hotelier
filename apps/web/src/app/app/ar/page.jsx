@@ -863,6 +863,12 @@ function AccountDrawer({ accountId, onClose }) {
       <div className="flex items-center justify-between border-b border-border px-5 py-4">
         <div>
           <h3 className="text-base font-semibold text-text-primary">{account.name}</h3>
+          <button
+            onClick={() => (window.location.href = '/app/ar/statement?account=' + account.id)}
+            className="rounded border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-elevated"
+          >
+            Consolidated statement
+          </button>
           <div className="text-xs text-text-muted">
             Terms {account.paymentTermsDays ?? 30} days
             {account.taxNumber ? ` · VAT ${account.taxNumber}` : ''}
