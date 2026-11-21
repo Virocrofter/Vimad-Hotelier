@@ -22,6 +22,13 @@ for (const target of TARGETS) {
     await page.goto(BASE + '/app/dev-vrt');
     await page.waitForSelector(`[data-vrt="${target}"]`);
     const el = page.locator(`[data-vrt="${target}"]`);
-    await expect(el).toHaveScreenshot(`${target}.png`, { maxDiffPixelRatio: 0.01 });
+    // DS-11: fonts awaited before capture; DS-10: animations frozen.
+    await page.evaluate(() => (document as any).fonts?.ready ?? Promise.resolve());
+    await page.waitForTimeout(250);
+    await expect(el).toHaveScreenshot(`${target}.png`, {
+      maxDiffPixelRatio: 0.01,
+      animations: 'disabled',
+      caret: 'hide',
+    });
   });
 }
