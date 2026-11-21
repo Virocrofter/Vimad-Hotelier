@@ -2,6 +2,7 @@
  * Log minibar consumption with camera photo proof. The API auto-posts the
  * folio charge for the in-house reservation in the selected room.
  */
+import { formatMoneyMinor } from '../../../lib/money';
 import { useEffect, useState } from 'react';
 import {
   Dialog,
@@ -33,7 +34,7 @@ const CATALOG = [
   { name: 'Chocolate bar', priceMinor: 3500 },
 ];
 
-const fmt = (minor) => `R${(minor / 100).toFixed(2)}`;
+const fmt = (minor) => formatMoneyMinor(minor);
 
 export default function MinibarModal({ open, onClose, onLogged }) {
   const [rooms, setRooms] = useState([]);

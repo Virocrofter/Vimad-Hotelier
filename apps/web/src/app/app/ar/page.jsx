@@ -795,7 +795,7 @@ function InvoiceModal({ invoiceId, onClose }) {
               type="number"
               min="0.01"
               step="0.01"
-              placeholder={`Max ${inv.balance.toFixed(2)}`}
+              placeholder={`Max ${formatMoney(inv.balance)}`}
               value={payAmount}
               onChange={(e) => setPayAmount(e.target.value)}
             />
@@ -998,9 +998,9 @@ export default function ArPage() {
           fmtDate(i.issueDate),
           fmtDate(i.dueDate),
           i.status,
-          i.total.toFixed(2),
-          i.amountPaid.toFixed(2),
-          i.balance.toFixed(2),
+          formatMoney(i.total),
+          formatMoney(i.amountPaid),
+          formatMoney(i.balance),
         ].join(',')
       ),
     ];

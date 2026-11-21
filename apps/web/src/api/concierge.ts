@@ -1,6 +1,6 @@
 /* apps/web/src/api/concierge.ts — T3 concierge board client */
 import { apiGet, apiPost, apiPatch } from './client';
-import { formatMoney } from '../lib/money';
+import { formatMoneyMinor, formatMoney } from '../lib/money';
 
 // House client (api/client.ts) already attaches the JWT, refreshes expired
 // tokens, sends x-property-id, and normalizes /v1. The local getToken() probe
@@ -41,4 +41,4 @@ export const CONCIERGE_TYPES = [
 
 export const TRIP_FLOW = ['requested', 'confirmed', 'assigned', 'en_route', 'completed'] as const;
 
-export const fmtRand = (minor: number) => formatMoney(minor / 100);
+export const fmtRand = (minor: number) => formatMoneyMinor(minor);

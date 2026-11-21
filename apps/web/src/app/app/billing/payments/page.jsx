@@ -524,7 +524,7 @@ function ChargeCardModal({ onSubmit, onClose }) {
 }
 
 function RefundModal({ row, onSubmit, onClose }) {
-  const max = (row.amountMinor - row.refundedMinor) / 100;
+  const max = formatMoneyMinor(Number(row.amountMinor) - Number(row.refundedMinor ?? 0));
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
   return (
@@ -533,11 +533,11 @@ function RefundModal({ row, onSubmit, onClose }) {
         <p className="text-sm text-gray-400">
           Outstanding:{' '}
           <span className="text-gray-200 font-medium">
-            {max.toFixed(2)} {row.currency}
+            {max} {row.currency}
           </span>
           {row.cardBrand && ` — ${row.cardBrand} •••• ${row.cardLast4}`}
         </p>
-        <Field label={`Amount (leave empty for full refund, max ${max.toFixed(2)})`}>
+        <Field label={`Amount (leave empty for full refund, max ${max})`}>
           <input
             className={inputCls}
             inputMode="decimal"
