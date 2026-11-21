@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import {
+  FileText,
   BedDouble,
   CalendarDays,
   CreditCard,
@@ -30,6 +31,7 @@ import {
 import { useReservationWorkspace } from '../../../../hooks/useReservations';
 import CheckInDialog from '../../../../components/reservations/CheckInDialog';
 import { listUpsellProducts, sellUpsell } from '../../../../api/upsell-api';
+import { apiClient } from '../../../../api/client';
 import {
   checkInReservation,
   checkOutReservation,
@@ -152,6 +154,156 @@ function DateChangePreview({ d, onSaved }) {
       )}
       {err && <p className="mt-1 text-[11px] text-danger">{err}</p>}
     </div>
+  );
+}
+
+// 4.4 — reservation document repository: list, upload (base64 -> putFile),
+// and the signature workflow (pending -> signed, with deadlines).
+function DocumentsSection({ reservationId }) {
+  const [docs, setDocs] = useState(null);
+  const [err, setErr] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('other');
+  const [sig, setSig] = useState('n_a');
+  const [file, setFile] = useState(null);
+
+  const load = useCallback(() => {
+    apiClient
+      .get('/files/documents', { params: { reservationId } })
+      .then((r) => {
+        const d = r?.data?.data ?? r?.data ?? [];
+        setDocs(Array.isArray(d) ? d : (d.documents ?? []));
+      })
+      .catch((e) => setErr(e?.response?.data?.error?.message ?? 'Failed to load documents'));
+  }, [reservationId]);
+  useEffect(load, [load]);
+
+  const upload = async () => {
+    if (!file || !name.trim()) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      const contentBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      await apiClient.post('/files/documents', {
+        reservationId,
+        name: name.trim(),
+        category,
+        signatureStatus: sig,
+        contentBase64,
+      });
+      setName('');
+      setFile(null);
+      setSig('n_a');
+      load();
+    } catch (e) {
+      setErr(e?.response?.data?.error?.message ?? 'Upload failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const markSigned = (doc) => {
+    apiClient
+      .patch(`/files/documents/${doc.id}`, {
+        signatureStatus: 'signed',
+        signedAt: new Date().toISOString(),
+      })
+      .then(load)
+      .catch((e) => setErr(e?.response?.data?.error?.message ?? 'Update failed'));
+  };
+
+  const fmtDate = (x) => (x ? new Date(x).toISOString().slice(0, 10) : '—');
+
+  return (
+    <Section
+      icon={FileText}
+      title="Documents"
+      right={<span className="text-xs text-text-muted">{docs?.length ?? 0} files</span>}
+    >
+      <ul className="max-h-40 space-y-1 overflow-y-auto">
+        {(docs ?? []).map((doc) => (
+          <li key={doc.id} className="flex items-center justify-between gap-2 text-xs">
+            <span className="truncate text-text-secondary">
+              {doc.name} <span className="text-text-muted">({doc.category})</span>
+            </span>
+            <span className="flex shrink-0 items-center gap-2">
+              <span
+                className={
+                  doc.signatureStatus === 'signed' ? 'text-accent-foreground' : 'text-text-muted'
+                }
+              >
+                {doc.signatureStatus === 'signed'
+                  ? `signed ${fmtDate(doc.signedAt)}`
+                  : doc.signatureStatus === 'pending'
+                    ? 'signature pending'
+                    : 'no signature'}
+              </span>
+              {doc.signatureStatus === 'pending' && (
+                <button
+                  onClick={() => markSigned(doc)}
+                  className="rounded border border-border px-1.5 py-0.5 text-[10px] text-text-secondary hover:bg-surface-elevated"
+                >
+                  Mark signed
+                </button>
+              )}
+              {doc.deadline && <span className="text-text-muted">due {fmtDate(doc.deadline)}</span>}
+            </span>
+          </li>
+        ))}
+        {docs && docs.length === 0 && (
+          <li className="text-xs text-text-muted">No documents on this stay.</li>
+        )}
+      </ul>
+      <div className="mt-2 space-y-1.5 border-t border-border pt-2">
+        <div className="flex gap-1.5">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Document name (e.g. registration-card.pdf)"
+            className="flex-1 rounded border border-border bg-surface px-2 py-1 text-[11px]"
+          />
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="rounded border border-border bg-surface px-2 py-1 text-[11px]"
+          >
+            <option value="other">Other</option>
+            <option value="registration">Registration</option>
+            <option value="waiver">Waiver</option>
+            <option value="contract">Contract</option>
+          </select>
+          <select
+            value={sig}
+            onChange={(e) => setSig(e.target.value)}
+            className="rounded border border-border bg-surface px-2 py-1 text-[11px]"
+          >
+            <option value="n_a">No signature</option>
+            <option value="pending">Signature pending</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="flex-1 text-[11px] text-text-secondary"
+          />
+          <button
+            onClick={upload}
+            disabled={busy || !file || !name.trim()}
+            className="rounded bg-primary px-2 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
+          >
+            {busy ? '…' : 'Upload'}
+          </button>
+        </div>
+        {err && <p className="text-[11px] text-danger">{err}</p>}
+      </div>
+    </Section>
   );
 }
 
@@ -557,6 +709,8 @@ export default function ReservationWorkspace({ reservationId }) {
             ))
           )}
         </Section>
+        <DocumentsSection reservationId={reservationId} />
+
         <Section icon={History} title="Timeline / audit">
           {d.timeline.length === 0 ? (
             <p className="text-xs text-text-muted">No recorded changes.</p>

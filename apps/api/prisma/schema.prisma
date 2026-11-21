@@ -558,6 +558,7 @@ model Reservation {
   @@index([ratePlanId])
   @@index([tenantId, arrivalDate])
   @@map("reservations")
+  documents         ReservationDocument[]
 }
 
 model ReservationStay {
@@ -3785,4 +3786,23 @@ model SchedulerHeartbeat {
 
   @@index([ranAt], map: "scheduler_heartbeats_ranAt_idx")
   @@map("scheduler_heartbeats")
+}
+
+model ReservationDocument {
+  id              String        @id @default(cuid())
+  tenantId        String
+  reservationId   String
+  reservation     Reservation   @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  key             String
+  name            String
+  category        String        @default("other")
+  signatureStatus String        @default("n_a")
+  signedAt        DateTime?
+  deadline        DateTime?
+  uploadedBy      String?
+  createdAt       DateTime      @default(now())
+
+  @@index([reservationId])
+  @@index([tenantId])
+  @@map("reservation_documents")
 }
