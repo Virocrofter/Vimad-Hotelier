@@ -10,7 +10,7 @@
  * already-tested reservation endpoints.
  */
 import { formatMoneyMinor, formatMoney } from '../../../../lib/money';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useReservationWorkspace } from '../../../../hooks/useReservations';
 import CheckInDialog from '../../../../components/reservations/CheckInDialog';
+import { listUpsellProducts, sellUpsell } from '../../../../api/upsell-api';
 import {
   checkInReservation,
   checkOutReservation,
@@ -153,12 +154,73 @@ function DateChangePreview({ d, onSaved }) {
   );
 }
 
+// 4.2 — attach an upsell product to the stay through the sellProduct
+// chokepoint (sellUpsell). ≤3 clicks: open → pick → Add.
+function AddItemPanel({ reservationId, currency, onDone }) {
+  const [products, setProducts] = useState(null);
+  const [productId, setProductId] = useState('');
+  const [qty, setQty] = useState(1);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(null);
+  useEffect(() => {
+    listUpsellProducts()
+      .then(setProducts)
+      .catch(() => setProducts([]));
+  }, []);
+  const submit = async () => {
+    if (!productId) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      await sellUpsell({ productId, reservationId, quantity: Number(qty) || 1 });
+      onDone();
+    } catch (e) {
+      setErr(e?.response?.data?.error?.message ?? 'Could not add the item');
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="mb-2 space-y-1.5 rounded-lg border border-border bg-surface-elevated/40 p-2">
+      <div className="flex gap-1.5">
+        <select
+          value={productId}
+          onChange={(e) => setProductId(e.target.value)}
+          className="flex-1 rounded border border-border bg-surface px-2 py-1 text-[11px]"
+        >
+          <option value="">Pick an upsell product…</option>
+          {(products ?? []).map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name} — {money(p.price, currency)}
+            </option>
+          ))}
+        </select>
+        <input
+          type="number"
+          min="1"
+          value={qty}
+          onChange={(e) => setQty(e.target.value)}
+          className="w-14 rounded border border-border bg-surface px-2 py-1 text-[11px]"
+        />
+        <button
+          onClick={submit}
+          disabled={busy || !productId}
+          className="rounded bg-primary px-2 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
+        >
+          {busy ? '…' : 'Add'}
+        </button>
+      </div>
+      {err && <p className="text-[11px] text-danger">{err}</p>}
+    </div>
+  );
+}
+
 export default function ReservationWorkspace({ reservationId }) {
   const q = useReservationWorkspace(reservationId);
   const qc = useQueryClient();
   const [busy, setBusy] = useState(null);
   const [actionErr, setActionErr] = useState(null);
   const [checkInOpen, setCheckInOpen] = useState(false);
+  const [addItemOpen, setAddItemOpen] = useState(false);
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: ['reservations', 'workspace', reservationId] });
 
@@ -371,9 +433,35 @@ export default function ReservationWorkspace({ reservationId }) {
           icon={CreditCard}
           title="Folio & payments"
           right={
-            <span className="text-xs text-text-muted">{money(h.balance, d.preview.currency)}</span>
+            <span className="flex items-center gap-2">
+              <button
+                onClick={() => setAddItemOpen((v) => !v)}
+                className="rounded border border-border px-2 py-0.5 text-[11px] text-text-secondary hover:bg-surface-elevated"
+              >
+                Add item
+              </button>
+              <a
+                href={'/app/split-bill?reservation=' + reservationId}
+                className="rounded border border-border px-2 py-0.5 text-[11px] text-text-secondary hover:bg-surface-elevated"
+              >
+                Split bills
+              </a>
+              <span className="text-xs text-text-muted">
+                {money(h.balance, d.preview.currency)}
+              </span>
+            </span>
           }
         >
+          {addItemOpen && (
+            <AddItemPanel
+              reservationId={reservationId}
+              currency={d.preview.currency}
+              onDone={() => {
+                setAddItemOpen(false);
+                invalidate();
+              }}
+            />
+          )}
           {d.folio ? (
             <>
               <ul className="max-h-48 space-y-1 overflow-y-auto">
