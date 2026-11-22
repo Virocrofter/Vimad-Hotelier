@@ -54,6 +54,8 @@ beforeAll(async () => {
         arrivalDate: new Date(monthsAgo(departedMonthsAgo).getTime() - 3 * 86400_000),
         departureDate: monthsAgo(departedMonthsAgo),
         nights: 3,
+        totalAmount: 3000,
+        balance: 0,
       },
     });
     return g;
@@ -129,6 +131,8 @@ describe('H3-V win-back outcomes', () => {
         arrivalDate: new Date(Date.now() + 20 * 86400_000),
         departureDate: new Date(Date.now() + 22 * 86400_000),
         nights: 2,
+        totalAmount: 2000,
+        balance: 2000,
       },
     });
     const attributed = (await runs()).find((r) => r.id === ctx.sentRow.id);
