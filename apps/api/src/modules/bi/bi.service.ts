@@ -301,10 +301,10 @@ export async function biLedgers(tenantId: string, propertyId: string) {
     generatedAt: new Date().toISOString(),
     guest: folios.map((f) => ({
       folioId: f.id,
-      guest: f.reservation.guest
+      guest: f.reservation?.guest
         ? `${f.reservation.guest.firstName} ${f.reservation.guest.lastName}`
         : '—',
-      confirmationNumber: f.reservation.confirmationNumber,
+      confirmationNumber: f.reservation?.confirmationNumber ?? null,
       balance: Number(f.balance),
     })),
     deposit: {
