@@ -1,4 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
+import { prisma } from '../../common/prisma.js';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 import {
@@ -217,6 +218,30 @@ registry.registerPath({
     404: notFound,
   },
 });
+
+// C8′ — direct-booking attribution: bookings grouped by source.
+reservationsRouter.get(
+  '/attribution',
+  requirePermission('reservation', 'read'),
+  async (req, res, next) => {
+    try {
+      const q = req.query as Record<string, string>;
+      const rows = await prisma.reservation.groupBy({
+        by: ['source'],
+        where: {
+          tenantId: req.tenantId!,
+          ...(q.from ? { arrivalDate: { gte: new Date(q.from) } } : {}),
+          ...(q.to ? { arrivalDate: { lte: new Date(q.to) } } : {}),
+        },
+        _count: { id: true },
+        _sum: { totalAmount: true },
+      });
+      res.json({ data: rows });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 reservationsRouter.get(
   '/:id',

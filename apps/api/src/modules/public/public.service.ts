@@ -20,6 +20,17 @@ import { sendEmail } from '../../jobs/email.queue.js';
 
 // ─── Validation ───
 
+// C8′: Google Hotel Ads free-booking-links attribution. Only the
+// hotel-ads mapping is a first-class source today; everything else stays
+// 'direct' until its channel justifies an enum member.
+export function attributionSource(a?: {
+  utmSource?: string;
+  utmMedium?: string;
+}): 'direct' | 'google_hotel_ads' {
+  if (a?.utmSource === 'google' && a?.utmMedium === 'hotel_ads') return 'google_hotel_ads';
+  return 'direct';
+}
+
 export const availabilityQuerySchema = z.object({
   checkIn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'checkIn must be YYYY-MM-DD'),
   checkOut: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'checkOut must be YYYY-MM-DD'),
@@ -40,6 +51,13 @@ export const publicBookingSchema = z.object({
     phone: z.string().min(7).max(32),
   }),
   notes: z.string().max(1000).optional(),
+  attribution: z
+    .object({
+      utmSource: z.string().max(120).optional(),
+      utmMedium: z.string().max(120).optional(),
+      utmCampaign: z.string().max(120).optional(),
+    })
+    .optional(),
   website: z.string().max(0).optional(), // honeypot — bots fill it, humans never see it
 });
 
@@ -405,7 +423,7 @@ export async function createPublicBooking(
               ? `[WEB] ${input.notes.trim()}`
               : '[WEB] Booked via the website booking engine',
             roomId: roomNow.id,
-            source: 'direct',
+            source: attributionSource(input.attribution),
           },
           { id: 'system', name: 'System', role: 'system' },
           tx

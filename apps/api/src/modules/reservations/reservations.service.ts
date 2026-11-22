@@ -29,7 +29,9 @@ export const reservationCreateSchema = z.object({
   roomTypeId: z.string().optional(),
   roomId: z.string().optional(),
   rate: z.number().min(0).optional(),
-  source: z.enum(['direct', 'bookingcom', 'expedia', 'walkin', 'phone', 'email']).default('direct'),
+  source: z
+    .enum(['direct', 'bookingcom', 'expedia', 'walkin', 'phone', 'email', 'google_hotel_ads'])
+    .default('direct'),
   // R1 completeness fields
   ratePlanId: z.string().optional(),
   eta: z.string().optional(),
@@ -45,7 +47,9 @@ export const reservationUpdateSchema = z.object({
   adults: z.number().int().min(1).optional(),
   children: z.number().int().min(0).optional(),
   notes: z.string().optional(),
-  source: z.enum(['direct', 'bookingcom', 'expedia', 'walkin', 'phone', 'email']).optional(),
+  source: z
+    .enum(['direct', 'bookingcom', 'expedia', 'walkin', 'phone', 'email', 'google_hotel_ads'])
+    .optional(),
   roomId: z.string().optional(),
   rate: z.number().min(0).optional(),
   ratePlanId: z.string().optional(),
