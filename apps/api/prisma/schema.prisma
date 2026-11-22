@@ -428,6 +428,7 @@ model Guest {
   @@index([tenantId])
   @@index([email])
   @@map("guests")
+  idScans           GuestIdScan[]
 }
 
 model GuestPreference {
@@ -3807,4 +3808,21 @@ model ReservationDocument {
   @@index([reservationId])
   @@index([tenantId])
   @@map("reservation_documents")
+}
+
+model GuestIdScan {
+  id         String   @id @default(cuid())
+  tenantId   String
+  guestId    String
+  guest      Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  key        String
+  extracted  Json?
+  status     String   @default("processed")
+  capturedAt DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([tenantId])
+  @@index([guestId])
+  @@index([expiresAt])
+  @@map("guest_id_scans")
 }

@@ -1,5 +1,7 @@
 /* apps/api/src/modules/guest-identity/guest-identity.routes.ts — C3 */
 import { Router } from 'express';
+import { AppError } from '../../common/errors.js';
+import { listScans, scanId, sweepExpiredScans } from './guest-identity.ocr.js';
 import { z } from 'zod';
 import { authMiddleware, requirePermission } from '../auth/auth.middleware.js';
 import { validateBody, validateParams } from '../../common/validate.js';
@@ -92,3 +94,51 @@ guestIdentityRouter.get('/dedupe', requirePermission('guest', 'read'), async (re
     next(err);
   }
 });
+
+// C4′a — Digital-ID OCR endpoints (POPIA retention on every scan).
+guestIdentityRouter.post('/scans', requirePermission('guest', 'update'), async (req, res, next) => {
+  try {
+    const { guestId, imageBase64, retentionDays } = (req.body ?? {}) as any;
+    if (!guestId || !imageBase64) {
+      throw new AppError(400, 'guestId and imageBase64 are required', 'VALIDATION_ERROR');
+    }
+    const buf = Buffer.from(String(imageBase64), 'base64');
+    if (!buf.length || buf.length > 10 * 1024 * 1024) {
+      throw new AppError(400, 'image must be non-empty and under 10MB', 'VALIDATION_ERROR');
+    }
+    const data = await scanId(
+      tenantOf(req),
+      String(guestId),
+      buf,
+      Number(retentionDays) || undefined
+    );
+    res.json({ data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+guestIdentityRouter.get('/scans', requirePermission('guest', 'read'), async (req, res, next) => {
+  try {
+    const guestId = String((req.query as any).guestId ?? '');
+    if (!guestId) {
+      throw new AppError(400, 'guestId is required', 'VALIDATION_ERROR');
+    }
+    res.json({ data: await listScans(tenantOf(req), guestId) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+guestIdentityRouter.post(
+  '/scans/sweep',
+  requirePermission('guest', 'update'),
+  async (req, res, next) => {
+    try {
+      const deleted = await sweepExpiredScans(tenantOf(req));
+      res.json({ data: { deleted } });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
