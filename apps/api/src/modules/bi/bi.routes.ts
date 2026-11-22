@@ -2,7 +2,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { prisma } from '../../common/prisma.js';
 import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
-import { biBriefing, biFamilies, bookingCurve } from './bi.service.js';
+import { biBriefing, biFamilies, biLedgers, bookingCurve } from './bi.service.js';
 
 export const biRouter = Router();
 biRouter.use(authMiddleware, tenantScope);
@@ -120,6 +120,25 @@ biRouter.delete(
         where: { id: String((req.params as { id: string }).id), tenantId: req.tenantId! },
       });
       res.json({ data: { deleted: true } });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+biRouter.get(
+  '/ledgers',
+  requirePermission('report', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const propertyId = String((req.query as any).propertyId ?? '');
+      if (!propertyId) {
+        return res
+          .status(400)
+          .json({ error: { code: 'VALIDATION_ERROR', message: 'propertyId is required' } });
+      }
+      const data = await biLedgers(req.tenantId!, propertyId);
+      res.json({ data });
     } catch (err) {
       return next(err);
     }

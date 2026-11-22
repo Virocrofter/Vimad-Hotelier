@@ -257,3 +257,62 @@ export async function bookingCurve(tenantId: string, propertyId: string, days = 
     },
   };
 }
+
+/* 6.3 — ledgers: guest/deposit/city + trial balance with the tie-out.
+ * balanced === (sum of folio balances) equals (charges - payments) within a
+ * cent — the C6′-V discipline made queryable. */
+export async function biLedgers(tenantId: string, propertyId: string) {
+  const resWhere = { tenantId, propertyId, reservation: { propertyId } };
+  const folios = await prisma.folio.findMany({
+    where: { tenantId, reservation: { propertyId }, status: 'open' },
+    include: {
+      reservation: {
+        select: {
+          confirmationNumber: true,
+          guest: { select: { firstName: true, lastName: true } },
+        },
+      },
+    },
+  });
+
+  const [charges, payments] = await Promise.all([
+    prisma.folioItem.aggregate({
+      where: { folio: { tenantId, reservation: { propertyId } } },
+      _sum: { amount: true },
+    }),
+    prisma.payment.aggregate({
+      where: { tenantId, propertyId, status: 'success', postedToFolio: true },
+      _sum: { amountMinor: true },
+    }),
+  ]);
+  const deposits = await prisma.payment.aggregate({
+    where: { tenantId, propertyId, status: 'success', type: 'deposit' },
+    _sum: { amountMinor: true },
+    _count: { id: true },
+  });
+
+  const balances = folios.map((f) => Number(f.balance));
+  const balanceTotal = balances.reduce((a, b) => a + b, 0);
+  const chargeTotal = Number(charges._sum.amount ?? 0);
+  const paymentTotal = Number(payments._sum.amountMinor ?? 0) / 100;
+  const difference = Math.round((balanceTotal - (chargeTotal - paymentTotal)) * 100) / 100;
+
+  return {
+    generatedAt: new Date().toISOString(),
+    guest: folios.map((f) => ({
+      folioId: f.id,
+      guest: f.reservation.guest
+        ? `${f.reservation.guest.firstName} ${f.reservation.guest.lastName}`
+        : '—',
+      confirmationNumber: f.reservation.confirmationNumber,
+      balance: Number(f.balance),
+    })),
+    deposit: {
+      count: deposits._count?.id ?? 0,
+      heldMinor: Number(deposits._sum?.amountMinor ?? 0),
+    },
+    city: [], // city-ledger transfers land with the ledger-tab drill-down pass
+    trialBalance: { charges: chargeTotal, payments: paymentTotal, balanceTotal, difference },
+    balanced: Math.abs(difference) < 0.01,
+  };
+}
