@@ -3826,3 +3826,17 @@ model GuestIdScan {
   @@index([expiresAt])
   @@map("guest_id_scans")
 }
+
+model ImportRun {
+  id         String   @id @default(cuid())
+  tenantId   String
+  propertyId String?
+  format     String
+  mode       String
+  report     Json?
+  actorId    String?
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@map("import_runs")
+}
