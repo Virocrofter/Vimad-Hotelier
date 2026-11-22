@@ -5,6 +5,7 @@ import { apiClient } from '../../../api/client';
 export default function BiHubPage() {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
+  const [briefing, setBriefing] = useState(null);
 
   useEffect(() => {
     apiClient
@@ -16,6 +17,8 @@ export default function BiHubPage() {
         if (!first) throw new Error('no property');
         const fam = await apiClient.get('/bi/families', { params: { propertyId: first.id } });
         setData(fam?.data?.data ?? fam?.data);
+        const br = await apiClient.get('/bi/briefing', { params: { propertyId: first.id } });
+        setBriefing(br?.data?.data ?? br?.data);
       })
       .catch((e) => setErr(e?.response?.data?.error?.message ?? e.message));
   }, []);
@@ -34,6 +37,32 @@ export default function BiHubPage() {
           C2′ BI hub — generated {new Date(data.generatedAt).toLocaleString()}
         </p>
       </div>
+      {briefing && (
+        <div
+          className="flex flex-wrap gap-2 rounded-xl border border-border bg-surface p-3"
+          aria-label="Daily briefing"
+        >
+          {briefing.sentences.map((s) => (
+            <span
+              key={s.rule}
+              title={JSON.stringify(s.data)}
+              className={
+                'rounded-full px-2.5 py-1 text-[11px] font-medium ' +
+                (s.kind === 'positive'
+                  ? 'bg-success/15 text-[var(--success)]'
+                  : s.kind === 'warning'
+                    ? 'bg-warning/25 text-[var(--warning-soft-fg)]'
+                    : s.kind === 'action'
+                      ? 'bg-accent/15 text-[var(--accent-soft-fg)]'
+                      : 'bg-[var(--hq-surface-2)] text-text-secondary')
+              }
+            >
+              {s.text}
+            </span>
+          ))}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <div className={card}>
           <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">

@@ -96,3 +96,108 @@ export async function biFamilies(tenantId: string, propertyId: string) {
     pickup: { next7dArrivals: upcoming, last7dArrivals: recent, delta: upcoming - recent },
   };
 }
+
+/* 6.4 — Daily Briefing: rules-generated template sentences over live data.
+ * Every sentence names its rule + carries the numbers it cites — legible,
+ * and zero hallucination by construction (no generative model). */
+export async function biBriefing(tenantId: string, propertyId: string) {
+  const scope = { tenantId, propertyId };
+  const today = day(new Date());
+
+  const [arrivals, departures, unpaid, pickupRow, occ, blockedCount, overdueAr] = await Promise.all(
+    [
+      prisma.reservation.count({
+        where: { ...scope, arrivalDate: new Date(today), status: { in: ACTIVE } },
+      }),
+      prisma.reservation.count({
+        where: { ...scope, departureDate: new Date(today), status: 'checked_in' },
+      }),
+      prisma.reservation.count({ where: { ...scope, status: 'checked_in', balance: { gt: 0 } } }),
+      prisma.reservation.count({
+        where: {
+          ...scope,
+          arrivalDate: { gte: new Date(today), lte: daysAhead(7) },
+          status: { in: ACTIVE },
+        },
+      }),
+      (async () => {
+        const [rooms, inHouse] = await Promise.all([
+          prisma.room.count({ where: scope }),
+          prisma.reservation.count({ where: { ...scope, status: 'checked_in' } }),
+        ]);
+        return rooms > 0 ? Math.round((inHouse / rooms) * 100) : 0;
+      })(),
+      prisma.room.count({ where: { ...scope, serviceStatus: { not: 'active' } } }),
+      prisma.arInvoice.count({ where: { tenantId, status: 'overdue' } }),
+    ]
+  );
+  const lastWeek = await prisma.reservation.count({
+    where: {
+      ...scope,
+      arrivalDate: { gte: daysAgo(7), lt: new Date(today) },
+      status: { in: ACTIVE },
+    },
+  });
+  const delta = pickupRow - lastWeek;
+
+  const sentences = [
+    {
+      rule: 'pickup',
+      text: `Pickup ${delta >= 0 ? '+' : ''}${delta} arrivals vs last week (${pickupRow} next 7d)`,
+      kind: delta >= 0 ? 'positive' : 'warning',
+      data: { next7d: pickupRow, last7d: lastWeek, delta },
+    },
+    {
+      rule: 'arrivals',
+      text:
+        arrivals > 0
+          ? `${arrivals} arrival${arrivals === 1 ? '' : 's'} today`
+          : 'No arrivals today',
+      kind: 'info',
+      data: { arrivalsToday: arrivals },
+    },
+    {
+      rule: 'departures',
+      text:
+        departures > 0
+          ? `${departures} departure${departures === 1 ? '' : 's'} today — check folios at checkout`
+          : 'No departures today',
+      kind: departures > 0 ? 'action' : 'info',
+      data: { departuresToday: departures },
+    },
+    {
+      rule: 'unpaid',
+      text:
+        unpaid > 0
+          ? `${unpaid} in-house folio${unpaid === 1 ? '' : 's'} carry a balance`
+          : 'All in-house folios settled',
+      kind: unpaid > 0 ? 'warning' : 'positive',
+      data: { unpaidInHouse: unpaid },
+    },
+    {
+      rule: 'occupancy',
+      text: `Occupancy ${occ}% tonight`,
+      kind: 'info',
+      data: { occupancyPct: occ },
+    },
+    {
+      rule: 'blocked',
+      text:
+        blockedCount > 0
+          ? `${blockedCount} room${blockedCount === 1 ? '' : 's'} out of service`
+          : 'No rooms blocked',
+      kind: blockedCount > 0 ? 'warning' : 'positive',
+      data: { blocked: blockedCount },
+    },
+    {
+      rule: 'ar_overdue',
+      text:
+        overdueAr > 0
+          ? `${overdueAr} AR invoice${overdueAr === 1 ? '' : 's'} overdue`
+          : 'AR clean — nothing overdue',
+      kind: overdueAr > 0 ? 'warning' : 'positive',
+      data: { overdueAr },
+    },
+  ];
+  return { generatedAt: new Date().toISOString(), propertyId, sentences };
+}
