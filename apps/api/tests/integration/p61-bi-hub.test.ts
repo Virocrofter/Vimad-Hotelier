@@ -120,7 +120,7 @@ describe('Phase 6.1 BI hub', () => {
     expect(d.occupancyRevenue.rooms).toBe(2);
     expect(d.blockedRooms.find((b: any) => b.serviceStatus === 'oos')?.count).toBe(1);
     expect(d.paymentsMix.find((p: any) => p.channel === 'card')?.totalMinor).toBe(50000);
-    expect(d.pickup.next7dArrivals).toBe(1);
+    expect(d.pickup.next7dArrivals).toBe(2); // today's arrival + the +4d confirmed
     console.log('6.1 S1 OK — six families, property-scoped');
   }, 60000);
 
