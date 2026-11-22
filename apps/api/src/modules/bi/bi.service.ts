@@ -201,3 +201,59 @@ export async function biBriefing(tenantId: string, propertyId: string) {
   ];
   return { generatedAt: new Date().toISOString(), propertyId, sentences };
 }
+
+/* 6.6 — booking curve vs baseline: cumulative arrivals this period against
+ * the same calendar window one year ago. Not a forecast — a comparison. */
+export async function bookingCurve(tenantId: string, propertyId: string, days = 30) {
+  const scope = { tenantId, propertyId, status: { in: ACTIVE } };
+  const today = new Date();
+  const periodStart = daysAgo(days);
+  const baselineEnd = new Date(today.getTime() - 365 * 86400_000);
+  const baselineStart = new Date(periodStart.getTime() - 365 * 86400_000);
+
+  const [current, baseline] = await Promise.all([
+    prisma.reservation.findMany({
+      where: { ...scope, arrivalDate: { gte: periodStart, lte: today } },
+      select: { arrivalDate: true },
+    }),
+    prisma.reservation.findMany({
+      where: { ...scope, arrivalDate: { gte: baselineStart, lte: baselineEnd } },
+      select: { arrivalDate: true },
+    }),
+  ]);
+
+  const perDay = (rows: { arrivalDate: Date }[], start: Date, n: number) => {
+    const counts = new Map<string, number>();
+    for (const r of rows) {
+      const k = day(new Date(r.arrivalDate));
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    let cum = 0;
+    const out: { offset: number; date: string; cumulative: number }[] = [];
+    for (let i = 0; i < n; i++) {
+      const d = new Date(start.getTime() + i * 86400_000);
+      const k = day(d);
+      cum += counts.get(k) ?? 0;
+      out.push({ offset: i, date: k, cumulative: cum });
+    }
+    return out;
+  };
+
+  const cur = perDay(current, periodStart, days + 1);
+  const base = perDay(baseline, baselineStart, days + 1);
+  return {
+    generatedAt: new Date().toISOString(),
+    days,
+    series: cur.map((c, i) => ({
+      offset: c.offset,
+      date: c.date,
+      cumulative: c.cumulative,
+      baseline: base[i]?.cumulative ?? 0,
+    })),
+    totals: {
+      current: cur[cur.length - 1]?.cumulative ?? 0,
+      baseline: base[base.length - 1]?.cumulative ?? 0,
+      delta: (cur[cur.length - 1]?.cumulative ?? 0) - (base[base.length - 1]?.cumulative ?? 0),
+    },
+  };
+}

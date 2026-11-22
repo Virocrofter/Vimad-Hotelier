@@ -1,11 +1,13 @@
 /* /app/bi — C2′ BI hub: the six curated families as cards (Phase 6.1). */
 import { useEffect, useState } from 'react';
+import { LineChart, Line, XAxis, YAxis } from 'recharts';
 import { apiClient } from '../../../api/client';
 
 export default function BiHubPage() {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
   const [briefing, setBriefing] = useState(null);
+  const [curve, setCurve] = useState(null);
 
   useEffect(() => {
     apiClient
@@ -19,6 +21,10 @@ export default function BiHubPage() {
         setData(fam?.data?.data ?? fam?.data);
         const br = await apiClient.get('/bi/briefing', { params: { propertyId: first.id } });
         setBriefing(br?.data?.data ?? br?.data);
+        const cv = await apiClient.get('/bi/booking-curve', {
+          params: { propertyId: first.id, days: 30 },
+        });
+        setCurve(cv?.data?.data ?? cv?.data);
       })
       .catch((e) => setErr(e?.response?.data?.error?.message ?? e.message));
   }, []);
@@ -130,6 +136,49 @@ export default function BiHubPage() {
             ))}
           </ul>
         </div>
+        <div className={card}>
+          <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+            Booking curve vs last year
+          </p>
+          {curve ? (
+            <>
+              <LineChart
+                width={320}
+                height={120}
+                data={curve.series}
+                margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
+              >
+                <XAxis dataKey="offset" hide />
+                <YAxis hide />
+                <Line
+                  type="monotone"
+                  dataKey="cumulative"
+                  stroke="var(--primary)"
+                  strokeWidth={2}
+                  dot={false}
+                  isAnimationActive={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="baseline"
+                  stroke="var(--text-muted)"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 3"
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+              <p className="hq-tnum text-xs text-text-secondary">
+                {curve.totals.current} vs {curve.totals.baseline} last year (
+                {curve.totals.delta >= 0 ? '+' : ''}
+                {curve.totals.delta})
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-text-muted">Loading curve…</p>
+          )}
+        </div>
+
         <div className={card}>
           <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Pickup</p>
           <p className="hq-tnum mt-2 text-2xl font-bold">
