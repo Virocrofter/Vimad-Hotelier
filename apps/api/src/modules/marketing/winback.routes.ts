@@ -153,3 +153,57 @@ winbackRouter.post('/winback/run', async (req: Request, res: Response) => {
     },
   });
 });
+
+// H3-V: record an open (ESP callback / tracking hit). First event wins.
+winbackRouter.post('/winback/record-open', async (req: Request, res: Response) => {
+  const tenantId = tenantOf(req)!;
+  const { emailLogId } = (req.body ?? {}) as any;
+  if (!emailLogId)
+    return res
+      .status(400)
+      .json({ error: { code: 'VALIDATION_ERROR', message: 'emailLogId is required' } });
+  await prisma.emailLog.updateMany({
+    where: { id: String(emailLogId), tenantId, template: 'win-back', openedAt: null },
+    data: { openedAt: new Date() },
+  });
+  return res.json({ data: { recorded: true } });
+});
+
+// H3-V: the run log with outcomes — each win-back send with its open timestamp
+// and rebook attribution (guest's next non-cancelled reservation after send).
+winbackRouter.get('/winback/runs', async (req: Request, res: Response) => {
+  const tenantId = tenantOf(req)!;
+  const rows = await prisma.emailLog.findMany({
+    where: { tenantId, template: 'win-back' },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  });
+  const out = [];
+  for (const row of rows) {
+    const guestId = (row.payload as any)?.guestId ?? row.relatedId;
+    let rebooked: { at: Date; reservationId: string } | null = null;
+    if (guestId) {
+      const r = await prisma.reservation.findFirst({
+        where: {
+          tenantId,
+          guestId: String(guestId),
+          createdAt: { gt: row.createdAt },
+          status: { not: 'cancelled' },
+        },
+        orderBy: { createdAt: 'asc' },
+      });
+      if (r) rebooked = { at: r.createdAt, reservationId: r.id };
+    }
+    out.push({
+      id: row.id,
+      to: row.to,
+      guestId,
+      sentAt: row.createdAt,
+      openedAt: row.openedAt,
+      rebookedAt: rebooked?.at ?? null,
+      rebookedReservationId: rebooked?.reservationId ?? null,
+      status: row.status,
+    });
+  }
+  return res.json({ data: out });
+});

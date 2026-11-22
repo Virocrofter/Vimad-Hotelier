@@ -1310,7 +1310,9 @@ model EmailLog {
   @@index([tenantId, createdAt])
   @@index([status])
   @@index([relatedType, relatedId])
-  @@map("email_logs")
+    openedAt      DateTime?
+
+@@map("email_logs")
 }
 
 // [A5] SARS-compliant tax invoices & receipts
