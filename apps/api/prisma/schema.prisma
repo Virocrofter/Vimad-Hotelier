@@ -3840,3 +3840,16 @@ model ImportRun {
   @@index([tenantId, createdAt])
   @@map("import_runs")
 }
+
+model SavedView {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String?
+  propertyId String?
+  name       String
+  config     Json     @default("{}")
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId])
+  @@map("saved_views")
+}

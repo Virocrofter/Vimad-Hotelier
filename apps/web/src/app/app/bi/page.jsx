@@ -43,6 +43,52 @@ export default function BiHubPage() {
           C2′ BI hub — generated {new Date(data.generatedAt).toLocaleString()}
         </p>
       </div>
+      <div className="flex flex-wrap items-center gap-2" aria-label="Filter rail">
+        <select
+          aria-label="Property"
+          value={propId ?? ''}
+          onChange={(e) => load(e.target.value)}
+          className="rounded border border-border bg-surface px-2 py-1 text-[11px]"
+        >
+          {props.map((pr) => (
+            <option key={pr.id} value={pr.id}>
+              {pr.name}
+            </option>
+          ))}
+        </select>
+        <select
+          aria-label="Saved views"
+          value=""
+          onChange={(e) => {
+            const v = views.find((x) => x.id === e.target.value);
+            if (v?.propertyId) load(v.propertyId);
+          }}
+          className="rounded border border-border bg-surface px-2 py-1 text-[11px]"
+        >
+          <option value="">Saved views…</option>
+          {views.map((v) => (
+            <option key={v.id} value={v.id}>
+              {v.name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={async () => {
+            const name = window.prompt('Name this view');
+            if (!name?.trim()) return;
+            await apiClient.post('/bi/views', {
+              name,
+              propertyId: propId,
+              config: { propertyId: propId },
+            });
+            await refreshViews();
+          }}
+          className="rounded border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-elevated"
+        >
+          Save view
+        </button>
+      </div>
+
       {briefing && (
         <div
           className="flex flex-wrap gap-2 rounded-xl border border-border bg-surface p-3"
