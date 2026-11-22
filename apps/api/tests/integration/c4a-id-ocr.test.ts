@@ -20,12 +20,15 @@ const ID_NUMBER = '8001015009087'; // YYMMDD 800101 -> 1980-01-01
 
 async function renderIdImage(): Promise<Buffer> {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 900, height: 320 } });
+  const page = await browser.newPage({ viewport: { width: 980, height: 560 } });
   await page.setContent(
     `<body style="margin:0;background:#fff;display:flex;align-items:center;justify-content:center;height:100vh;">
        <div style="font-family:monospace;font-size:64px;letter-spacing:6px;color:#000;text-align:center;">
          <div>IDENTITY DOCUMENT</div>
          <div style="font-size:72px;margin-top:18px;">${ID_NUMBER}</div>
+           <div style="font-size:44px;margin-top:14px;letter-spacing:1px;">P&lt;ZAFTEST&lt;&lt;C4A&lt;OCR&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+           <div style="font-size:44px;letter-spacing:1px;">L898902C&lt;3ZAF6908061F2606223ZE184226B&lt;&lt;&lt;&lt;&lt;&lt;&lt;14</div>
+           <div style="font-size:32px;margin-top:14px;">DATE OF BIRTH 06 AUG 1969</div>
        </div>
      </body>`
   );
@@ -58,12 +61,14 @@ describe('C4′a digital-ID OCR', () => {
       .send({ guestId: ctx.guest.id, imageBase64: ctx.imageBase64, retentionDays: 30 });
     expect(r.status).toBe(200);
     expect(r.body.data.idNumber).toBe(ID_NUMBER);
-    expect(r.body.data.dateOfBirth).toBe('1980-01-01');
+    expect(r.body.data.dateOfBirth).toBe('1969-08-06'); /* MRZ-stated, not number-derived */
     expect(r.body.data.status).toBe('processed');
 
     const guest = await prisma.guest.findFirst({ where: { id: ctx.guest.id } });
     expect(guest.passportNumber).toBe(ID_NUMBER);
-    expect(guest.dateOfBirth?.toISOString().slice(0, 10)).toBe('1980-01-01');
+    expect(guest.dateOfBirth?.toISOString().slice(0, 10)).toBe(
+      '1969-08-06'
+    ); /* MRZ-stated, not number-derived */
 
     const list = await request(app)
       .get('/v1/guest-identity/scans?guestId=' + ctx.guest.id)
