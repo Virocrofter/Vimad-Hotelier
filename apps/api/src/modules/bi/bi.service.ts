@@ -262,7 +262,6 @@ export async function bookingCurve(tenantId: string, propertyId: string, days = 
  * balanced === (sum of folio balances) equals (charges - payments) within a
  * cent — the C6′-V discipline made queryable. */
 export async function biLedgers(tenantId: string, propertyId: string) {
-  const resWhere = { tenantId, propertyId, reservation: { propertyId } };
   const folios = await prisma.folio.findMany({
     where: { tenantId, reservation: { propertyId }, status: 'open' },
     include: {
