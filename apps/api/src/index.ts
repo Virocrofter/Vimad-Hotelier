@@ -200,6 +200,7 @@ import { adminJobsRouter } from './modules/admin/admin.jobs.routes.js';
 import { adminReportsRouter } from './modules/admin/admin.reports.routes.js';
 import { upsellRouter } from './modules/upsell/upsell.routes.js';
 import { importersRouter } from './modules/importers/importers.routes.js';
+import { biRouter } from './modules/bi/bi.routes.js';
 import { backupsDrRouter, startBackupsDrSchedulers } from './modules/admin/backups.dr.routes.js';
 
 const app = express();
@@ -524,6 +525,7 @@ async function bootstrap() {
   app.use('/v1/reports', reportsRouter);
   app.use('/v1/upsell', upsellRouter);
   app.use('/v1/importers', importersRouter);
+  app.use('/v1/bi', biRouter);
 
   // ─── Admin (legacy platform admin: KPIs, health, alerts, reports, jobs, billing) ───
 

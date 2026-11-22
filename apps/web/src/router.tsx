@@ -254,6 +254,7 @@ export const router = createBrowserRouter([
       { path: 'split-bill', ...page(() => import('./app/app/split-bill/page')) },
       { path: 'ar/statement', ...page(() => import('./app/app/ar/statement/page')) },
       { path: 'dev-vrt', ...page(() => import('./app/app/dev-vrt/page')) },
+      { path: 'bi', ...page(() => import('./app/app/bi/page')) },
       { path: 'logbook', ...page(() => import('./app/app/logbook/page')) },
       { path: 'keys', ...page(() => import('./app/app/keys/page')) },
       // [T3] Concierge board — transfers, wake-up calls, bookings, upsells

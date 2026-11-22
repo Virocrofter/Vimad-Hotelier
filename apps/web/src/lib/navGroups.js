@@ -82,6 +82,7 @@ export const NAV_GROUPS = [
       { label: 'Payments', to: '/app/billing/payments' },
       { label: 'Invoices', to: '/app/billing/invoices' },
       { label: 'AR', to: '/app/ar' },
+      { label: 'Insights', to: '/app/bi' },
     ],
   },
   {
