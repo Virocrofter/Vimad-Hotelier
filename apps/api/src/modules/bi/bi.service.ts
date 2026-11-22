@@ -46,7 +46,7 @@ export async function biFamilies(tenantId: string, propertyId: string) {
     }),
     prisma.arInvoice.groupBy({
       by: ['status'],
-      where: { tenantId, corporateAccount: { propertyId } },
+      where: { tenantId }, // AR is tenant-scoped (accounts span properties)
       _count: { id: true },
       _sum: { total: true, amountPaid: true },
     }),
@@ -88,9 +88,9 @@ export async function biFamilies(tenantId: string, propertyId: string) {
     })),
     arAging: arAgg.map((a) => ({
       status: a.status,
-      count: a._count.id,
-      total: Number(a._sum.total ?? 0),
-      amountPaid: Number(a._sum.amountPaid ?? 0),
+      count: (a._count as any)?.id ?? 0,
+      total: Number((a._sum as any)?.total ?? 0),
+      amountPaid: Number((a._sum as any)?.amountPaid ?? 0),
     })),
     blockedRooms: blocked.map((b) => ({ serviceStatus: b.serviceStatus, count: b._count.id })),
     pickup: { next7dArrivals: upcoming, last7dArrivals: recent, delta: upcoming - recent },
