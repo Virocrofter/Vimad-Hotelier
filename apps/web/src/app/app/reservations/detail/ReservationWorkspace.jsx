@@ -29,6 +29,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useReservationWorkspace } from '../../../../hooks/useReservations';
+import RegistrationCard from './RegistrationCard';
 import CheckInDialog from '../../../../components/reservations/CheckInDialog';
 import { listUpsellProducts, sellUpsell } from '../../../../api/upsell-api';
 import { apiClient } from '../../../../api/client';
@@ -427,6 +428,7 @@ export default function ReservationWorkspace({ reservationId }) {
   const [busy, setBusy] = useState(null);
   const [actionErr, setActionErr] = useState(null);
   const [checkInOpen, setCheckInOpen] = useState(false);
+  const [cardOpen, setCardOpen] = useState(false);
   const [addItemOpen, setAddItemOpen] = useState(false);
   const invalidate = () =>
     qc.invalidateQueries({ queryKey: ['reservations', 'workspace', reservationId] });
@@ -562,6 +564,12 @@ export default function ReservationWorkspace({ reservationId }) {
             </a>
           ))}
           <button
+            onClick={() => setCardOpen(true)}
+            className="rounded border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-elevated"
+          >
+            Reg. card
+          </button>
+          <button
             onClick={() => window.print()}
             className="rounded border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-elevated"
           >
@@ -569,6 +577,28 @@ export default function ReservationWorkspace({ reservationId }) {
           </button>
         </div>
       </header>
+
+      {cardOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-xl bg-background p-4">
+            <RegistrationCard h={h} currency={d.preview.currency} />
+            <div className="mt-4 flex justify-end gap-2 print:hidden">
+              <button
+                onClick={() => setCardOpen(false)}
+                className="rounded-md border border-border px-3 py-1.5 text-xs"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground"
+              >
+                Print card
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {checkInOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
