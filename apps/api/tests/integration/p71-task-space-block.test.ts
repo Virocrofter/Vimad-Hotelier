@@ -64,8 +64,8 @@ describe('7.1 task space-blocking', () => {
   it('S1: API create passes blocksSpaceStatus through; room flips OOO with reason', async () => {
     const r = await createBlocking('Water leak — urgent');
     expect(r.status).toBe(201);
-    expect(r.body.data.blocksSpaceStatus).toBe(true);
     ctx.taskId = r.body.data.id;
+    expect(r.body.data.blocksSpaceStatus).toBe(true);
     const room = await prisma.room.findFirst({ where: { id: ctx.roomId } });
     expect(room.serviceStatus).toBe('oos');
     expect(room.serviceReason).toContain('Water leak');
