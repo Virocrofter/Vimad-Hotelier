@@ -17,6 +17,7 @@ beforeAll(async () => {
   app = mod.buildTestApp?.() ?? mod.app;
   agent = await mod.registerTestAgent(app);
   svc = await import('../../src/modules/reservations/reservations.service.js');
+  ctx.folioSvc = await import('../../src/modules/folios/folios.service.js');
   const t = agent.tenantId;
   const prop = await prisma.property.create({
     data: {
@@ -74,6 +75,15 @@ beforeAll(async () => {
       balance: 0,
     },
   });
+  ctx.folioB = await prisma.folio.create({
+    data: {
+      tenantId: t,
+      reservationId: ctx.resB.id,
+      totalCharges: 0,
+      totalPayments: 0,
+      balance: 0,
+    },
+  });
   for (const r of [ctx.resA, ctx.resB]) {
     const stay = await prisma.reservationStay.create({
       data: { reservationId: r.id, roomId: room.id, date: new Date(), rate: 500 },
@@ -99,7 +109,7 @@ describe('P36 undo check-in (4.1b)', () => {
 
   it('S2: blocked once charges were posted during the stay', async () => {
     await svc.checkInReservation(ctx.t, ctx.resB.id);
-    await svc.postCharge(ctx.t, ctx.folioA.id, {
+    await ctx.folioSvc.postCharge(ctx.t, ctx.folioB.id, {
       type: 'service',
       description: 'Late minibar',
       amount: 120,
