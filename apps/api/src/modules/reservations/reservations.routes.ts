@@ -640,3 +640,19 @@ reservationsRouter.post(
     }
   }
 );
+
+// 4.1b — undo check-out: guarded revert (blocked on post-checkout folio activity)
+import { undoCheckOut } from './reservations.service.js';
+
+reservationsRouter.post(
+  '/:id/undo-check-out',
+  requirePermission('reservation', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await undoCheckOut(req.tenantId, String(req.params.id), actorOf(req));
+      res.json({ data });
+    } catch (err) {
+      next(err);
+    }
+  }
+);

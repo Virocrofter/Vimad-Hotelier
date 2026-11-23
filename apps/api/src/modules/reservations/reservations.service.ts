@@ -1416,3 +1416,102 @@ export async function deleteReservation(
 
   return { success: true };
 }
+
+/* 4.1b — undo check-in: guarded revert to 'confirmed'. Blocked once charges
+ * were posted during the stay (reverse them first — P33 rebates). Atomic
+ * transition guard per P1-C1; audited. */
+export async function undoCheckIn(tenantId: string, id: string, actor: AuditActor = SYSTEM_ACTOR) {
+  const reservation = await getReservation(tenantId, id);
+  if (reservation.status !== 'checked_in') {
+    throw new AppError(409, `Cannot undo check-in for status "${reservation.status}"`, 'CONFLICT');
+  }
+  if (reservation.checkedInAt) {
+    const postedSince = await prisma.folioItem.count({
+      where: { folio: { reservationId: id }, postedAt: { gt: reservation.checkedInAt } },
+    });
+    if (postedSince > 0) {
+      throw new AppError(
+        409,
+        'Cannot undo check-in: charges were posted during the stay — reverse them first',
+        'CHARGES_POSTED'
+      );
+    }
+  }
+  const guard = await prisma.reservation.updateMany({
+    where: { id, tenantId, status: 'checked_in' },
+    data: { status: 'confirmed', checkedInAt: null, checkedInBy: null },
+  });
+  if (guard.count === 0) {
+    throw new AppError(409, 'Reservation state changed concurrently', 'CONFLICT');
+  }
+  await prisma.reservationRoom.updateMany({
+    where: { reservationId: id },
+    data: { status: 'upcoming', checkedInAt: null },
+  });
+  await audit(
+    `audit-res-undo-checkin-${id}`,
+    'undo_checkin',
+    'Check-in Undone',
+    `Check-in undone for ${reservation.confirmationNumber}`,
+    id,
+    reservation.confirmationNumber,
+    tenantId,
+    'medium',
+    undefined,
+    actor
+  );
+  return prisma.reservation.findUniqueOrThrow({ where: { id } });
+}
+
+/* 4.1b — undo check-out: guarded revert to 'checked_in'. Blocked once any
+ * folio item was posted after checkout (money moved while the folio was
+ * closed). Reopens the reservation's closed folios; the room stays dirty —
+ * the departure physically happened. Atomic guard per P1-C1; audited. */
+export async function undoCheckOut(tenantId: string, id: string, actor: AuditActor = SYSTEM_ACTOR) {
+  const reservation = await getReservation(tenantId, id);
+  if (reservation.status !== 'checked_out') {
+    throw new AppError(409, `Cannot undo check-out for status "${reservation.status}"`, 'CONFLICT');
+  }
+  if (reservation.checkedOutAt) {
+    const postedSince = await prisma.folioItem.count({
+      where: { folio: { reservationId: id }, postedAt: { gt: reservation.checkedOutAt } },
+    });
+    if (postedSince > 0) {
+      throw new AppError(
+        409,
+        'Cannot undo check-out: folio activity after check-out — settle or reverse it first',
+        'POSTED_SINCE_CHECKOUT'
+      );
+    }
+  }
+  const guard = await prisma.reservation.updateMany({
+    where: { id, tenantId, status: 'checked_out' },
+    data: { status: 'checked_in', checkedOutAt: null, checkedOutBy: null },
+  });
+  if (guard.count === 0) {
+    throw new AppError(409, 'Reservation state changed concurrently', 'CONFLICT');
+  }
+  await prisma.$transaction([
+    prisma.reservationRoom.updateMany({
+      where: { reservationId: id },
+      data: { status: 'checked_in', checkedOutAt: null },
+    }),
+    prisma.folio.updateMany({
+      where: { reservationId: id, status: 'closed' },
+      data: { status: 'open' },
+    }),
+  ]);
+  await audit(
+    `audit-res-undo-checkout-${id}`,
+    'undo_checkout',
+    'Check-out Undone',
+    `Check-out undone for ${reservation.confirmationNumber}`,
+    id,
+    reservation.confirmationNumber,
+    tenantId,
+    'medium',
+    undefined,
+    actor
+  );
+  return prisma.reservation.findUniqueOrThrow({ where: { id } });
+}
