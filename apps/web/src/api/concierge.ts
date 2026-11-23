@@ -1,6 +1,6 @@
 /* apps/web/src/api/concierge.ts — T3 concierge board client */
 import { apiGet, apiPost, apiPatch } from './client';
-import { formatMoneyMinor, formatMoney } from '../lib/money';
+import { formatMoneyMinor } from '../lib/money';
 
 // House client (api/client.ts) already attaches the JWT, refreshes expired
 // tokens, sends x-property-id, and normalizes /v1. The local getToken() probe

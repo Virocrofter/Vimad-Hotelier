@@ -2,31 +2,46 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis } from 'recharts';
 import { apiClient } from '../../../api/client';
+import { formatMoneyMinor } from '../../../lib/money';
 
 export default function BiHubPage() {
   const [data, setData] = useState(null);
   const [err, setErr] = useState(null);
   const [briefing, setBriefing] = useState(null);
   const [curve, setCurve] = useState(null);
+  const [props, setProps] = useState([]);
+  const [propId, setPropId] = useState(null);
+  const [views, setViews] = useState([]);
+
+  const refreshViews = async () => {
+    const r = await apiClient.get('/bi/views');
+    const raw = r?.data?.data ?? r?.data ?? [];
+    setViews(Array.isArray(raw) ? raw : (raw.views ?? []));
+  };
+
+  const load = async (pid) => {
+    const fam = await apiClient.get('/bi/families', { params: { propertyId: pid } });
+    setData(fam?.data?.data ?? fam?.data);
+    const br = await apiClient.get('/bi/briefing', { params: { propertyId: pid } });
+    setBriefing(br?.data?.data ?? br?.data);
+    const cv = await apiClient.get('/bi/booking-curve', { params: { propertyId: pid, days: 30 } });
+    setCurve(cv?.data?.data ?? cv?.data);
+    setPropId(pid);
+  };
 
   useEffect(() => {
     apiClient
       .get('/properties')
       .then(async (r) => {
         const raw = r?.data?.data ?? r?.data ?? [];
-        const props = Array.isArray(raw) ? raw : (raw.properties ?? []);
-        const first = props[0];
-        if (!first) throw new Error('no property');
-        const fam = await apiClient.get('/bi/families', { params: { propertyId: first.id } });
-        setData(fam?.data?.data ?? fam?.data);
-        const br = await apiClient.get('/bi/briefing', { params: { propertyId: first.id } });
-        setBriefing(br?.data?.data ?? br?.data);
-        const cv = await apiClient.get('/bi/booking-curve', {
-          params: { propertyId: first.id, days: 30 },
-        });
-        setCurve(cv?.data?.data ?? cv?.data);
+        const list = Array.isArray(raw) ? raw : (raw.properties ?? []);
+        setProps(list);
+        if (!list[0]) throw new Error('no property');
+        await load(list[0].id);
+        await refreshViews();
       })
       .catch((e) => setErr(e?.response?.data?.error?.message ?? e.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only bootstrap
   }, []);
 
   if (err) return <div className="p-6 text-sm text-danger">{err}</div>;

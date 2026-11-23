@@ -414,21 +414,21 @@ export default function AuditTrailPage() {
   const [expandedRows, setExpandedRows] = useState(new Set());
 
   /* ─── Computed Data ─── */
-  const matchesDateRange = (e) => {
-    if (dateRange === 'all' || !e.timestamp) return true;
-    const d = new Date(e.timestamp.replace(' ', 'T'));
-    if (Number.isNaN(d.getTime())) return true;
-    const now = new Date();
-    const dayMs = 86400000;
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (dateRange === 'today') return d >= startOfToday;
-    if (dateRange === 'yesterday')
-      return d >= new Date(startOfToday.getTime() - dayMs) && d < startOfToday;
-    if (dateRange === 'week') return d >= new Date(startOfToday.getTime() - 6 * dayMs);
-    if (dateRange === 'month') return d >= new Date(startOfToday.getTime() - 29 * dayMs);
-    return true; // custom: no range pickers yet — show all
-  };
   const filteredEntries = useMemo(() => {
+    const matchesDateRange = (e) => {
+      if (dateRange === 'all' || !e.timestamp) return true;
+      const d = new Date(e.timestamp.replace(' ', 'T'));
+      if (Number.isNaN(d.getTime())) return true;
+      const now = new Date();
+      const dayMs = 86400000;
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      if (dateRange === 'today') return d >= startOfToday;
+      if (dateRange === 'yesterday')
+        return d >= new Date(startOfToday.getTime() - dayMs) && d < startOfToday;
+      if (dateRange === 'week') return d >= new Date(startOfToday.getTime() - 6 * dayMs);
+      if (dateRange === 'month') return d >= new Date(startOfToday.getTime() - 29 * dayMs);
+      return true; // custom: no range pickers yet — show all
+    };
     let result = entries.filter((e) => {
       const matchesQuery =
         !query ||
