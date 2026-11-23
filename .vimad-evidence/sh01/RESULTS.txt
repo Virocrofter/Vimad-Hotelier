@@ -1,0 +1,10 @@
+PASS admin login
+PASS staff user created — status 201
+PASS staff login
+PASS admin holds all five create perms
+PASS staff permission set differs from admin
+PASS dev server — http://localhost:5173
+PASS admin palette opened
+PASS admin sees all five create actions — {"New Reservation":1,"Add Guest":1,"Create Task":1,"Post Charge / Take Payment":1,"Walk-In Check-in":1}
+PASS staff palette opened
+PASS staff: palette mirrors permission set exactly — New Reservation:shown(perm-held) Add Guest:shown(perm-held) Create Task:hidden(perm-denied) Post Charge / Take Payment:shown(perm-held) Walk-In Check-in:shown(perm-held)
