@@ -41,6 +41,14 @@ const TYPE_LABELS = {
   room_readiness: 'Room readiness',
 };
 
+const TYPE_LINKS = {
+  overdue_task: '/app/tasks',
+  room_readiness: '/app/housekeeping',
+  channel_sync_failure: '/app/channel-manager',
+  payment_failure: '/app/billing/payments',
+  due_out_unsettled: '/app/billing',
+};
+
 const money = (value, currency) => formatMoney(value ?? 0, currency ?? 'ZAR', 0);
 
 const relTime = (iso) => {
@@ -83,6 +91,12 @@ function CriticalStrip({ critical }) {
         <AlertTriangle className="h-4 w-4 text-danger" />
         <h3 className="text-sm font-semibold text-text-primary">Needs attention</h3>
         <span className="text-xs text-text-muted">— recommended next safe action per item</span>
+        <Link
+          to="/app/exceptions"
+          className="ml-auto text-xs font-medium text-primary hover:underline"
+        >
+          View all exceptions →
+        </Link>
       </div>
       <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {active.map((c) => {
@@ -122,6 +136,14 @@ function CriticalStrip({ critical }) {
                   </li>
                 ))}
               </ul>
+              {c.items.length === 0 && (
+                <Link
+                  to={TYPE_LINKS[c.type] ?? '/app/exceptions'}
+                  className="mt-2 block text-xs font-medium text-primary underline-offset-2 hover:underline"
+                >
+                  Open {TYPE_LABELS[c.type] ?? c.type} →
+                </Link>
+              )}
               <p className="mt-2 text-[11px] text-text-muted">{c.recommendedAction}</p>
             </div>
           );

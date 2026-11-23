@@ -1,0 +1,13 @@
+PASS admin login
+PASS scope property
+PASS staff user created
+PASS staff login
+PASS overdue task seeded — status 201
+PASS urgent items visible <10s — 6488ms
+PASS critical strip renders
+PASS overdue alert shown (seeded) — Overdue tasks=2
+PASS alerts actionable (deep links present) — 2 links, first=/app/exceptions
+PASS alert link navigates — http://localhost:5173/app/exceptions
+PASS worklist section present
+PASS worklist surface (informational — beyond SH-04 gate) — buttons=0 children=1 — empty worklist valid when no front-desk actions today
+PASS overdue task cleaned up — status 200
