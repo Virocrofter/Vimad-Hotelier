@@ -1,0 +1,11 @@
+PASS admin login
+PASS scope property resolved
+PASS role users created + logged in — staff:ok housekeeper:ok manager:ok
+PASS admin: five ordered sections — 5 sections
+PASS staff: five ordered sections — 5 sections
+PASS housekeeper: five ordered sections — 5 sections
+PASS manager: five ordered sections — 5 sections
+PASS staff(frontdesk): worklist first — 10:worklist
+PASS housekeeper: roomboard first — 10:roomboard
+PASS manager: kpi first — 10:kpi
+PASS variant families distinct (admin=manager by design) — 3 unique sequences

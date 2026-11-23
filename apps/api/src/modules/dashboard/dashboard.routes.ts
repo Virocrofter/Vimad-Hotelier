@@ -240,7 +240,7 @@ registry.registerPath({
 
 dashboardRouter.get(
   '/stats',
-  requirePermission('report', 'read'),
+  requirePermission('dashboard', 'read'),
   validateQuery(PropertyQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -305,7 +305,7 @@ registry.registerPath({
 
 dashboardRouter.get(
   '/ops-today',
-  requirePermission('report', 'read'),
+  requirePermission('dashboard', 'read'),
   validateQuery(PropertyQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -339,7 +339,7 @@ registry.registerPath({
 
 dashboardRouter.get(
   '/activity',
-  requirePermission('report', 'read'),
+  requirePermission('dashboard', 'read'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const propertyId = req.query.propertyId as string | undefined;
@@ -371,7 +371,7 @@ registry.registerPath({
 
 dashboardRouter.get(
   '/alerts',
-  requirePermission('report', 'read'),
+  requirePermission('dashboard', 'read'),
   validateQuery(PropertyQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -418,7 +418,7 @@ registry.registerPath({
 
 dashboardRouter.get(
   '/deltas',
-  requirePermission('report', 'read'),
+  requirePermission('dashboard', 'read'),
   validateQuery(PropertyQuerySchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {

@@ -168,12 +168,14 @@ function AppDashboardV1() {
   // structural change). admin/owner get the manager view.
   const roleKey = (sessionUser?.role ?? '').toLowerCase();
   const roleMap =
-    roleKey === 'front_desk' || roleKey === 'frontdesk'
-      ? 'frontdesk'
+    roleKey === 'front_desk' || roleKey === 'frontdesk' || roleKey === 'staff'
+      ? 'frontdesk' // staff IS the front-desk agent role in this vocabulary
       : ['admin', 'owner', 'manager'].includes(roleKey)
         ? 'manager'
-        : ['housekeeping', 'finance'].includes(roleKey)
-          ? roleKey
+        : ['housekeeper', 'housekeeping', 'finance'].includes(roleKey)
+          ? roleKey === 'housekeeper'
+            ? 'housekeeping'
+            : roleKey
           : 'default';
   const ROLE_ORDER = {
     default: { kpi: 10, worklist: 20, ops: 30, roomboard: 40, chart: 50 },
