@@ -1,4 +1,5 @@
 /* src/app/guest-portal/billing/page.jsx */
+import { formatMoneyMinor } from '../../../lib/money';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -99,7 +100,7 @@ export default function BillingPage() {
         v.status === 'success' && v.postedToFolio
           ? {
               ok: true,
-              text: `Payment received — ${formatCurrency(v.amountMinor / 100)} posted to your folio.`,
+              text: `Payment received — ${formatMoneyMinor(v.amountMinor)} posted to your folio.`,
             }
           : v.status === 'failed'
             ? { ok: false, text: 'The payment did not complete. No charge was made to your folio.' }
@@ -271,7 +272,7 @@ export default function BillingPage() {
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-sm font-mono font-medium text-text-primary">
-                    {formatCurrency(r.amountMinor / 100)}
+                    {formatMoneyMinor(r.amountMinor)}
                   </span>
                   <Button
                     size="sm"
@@ -329,7 +330,7 @@ export default function BillingPage() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-sm font-mono font-medium text-text-primary">
-                      {formatCurrency(p.amountMinor / 100)}
+                      {formatMoneyMinor(p.amountMinor)}
                     </span>
                     <span
                       className={cn(
