@@ -333,11 +333,11 @@ export default function ParkingSpotsPage() {
     } finally {
       setLoading(false);
     }
-  }, [date, propertyId]);
+  }, [date]);
 
   useEffect(() => {
     load();
-  }, [load]);
+  }, [load, propertyId]);
 
   const act = async (id, fn, okMsg) => {
     setBusyId(id);

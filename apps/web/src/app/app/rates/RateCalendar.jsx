@@ -1,5 +1,5 @@
 /* apps/web/src/app/app/rates/RateCalendar.jsx */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Calendar,
@@ -87,21 +87,24 @@ export default function RateCalendar() {
 
   // Single source of truth: effective cell for a room type + date.
   // Manual override wins; stats, CSV export, and the grid all resolve here.
-  const resolveCell = (rt, date) => {
-    const plan = planForDate(ratePlans, rt.id, date);
-    if (!plan) return null;
-    const ov = overrideMap.get(`${plan.id}|${date}`);
-    if (ov !== undefined) {
-      return {
-        rate: ov,
-        minStay: plan.minStay ?? 1,
-        weekend: isWeekend(date),
-        currency: plan.currency ?? 'ZAR',
-        overridden: true,
-      };
-    }
-    return getCellRate(ratePlans, rt.id, date);
-  };
+  const resolveCell = useCallback(
+    (rt, date) => {
+      const plan = planForDate(ratePlans, rt.id, date);
+      if (!plan) return null;
+      const ov = overrideMap.get(`${plan.id}|${date}`);
+      if (ov !== undefined) {
+        return {
+          rate: ov,
+          minStay: plan.minStay ?? 1,
+          weekend: isWeekend(date),
+          currency: plan.currency ?? 'ZAR',
+          overridden: true,
+        };
+      }
+      return getCellRate(ratePlans, rt.id, date);
+    },
+    [ratePlans, overrideMap]
+  );
 
   const filteredRoomTypes =
     selectedRoomType === 'all' ? roomTypes : roomTypes.filter((rt) => rt.id === selectedRoomType);
@@ -131,7 +134,7 @@ export default function RateCalendar() {
       max: Math.max(...rates),
       avg: Math.round(rates.reduce((a, b) => a + b, 0) / rates.length),
     };
-  }, [filteredRoomTypes, dates, ratePlans, overrideMap]);
+  }, [filteredRoomTypes, dates, resolveCell]);
 
   const exportCsv = () => {
     const header = [

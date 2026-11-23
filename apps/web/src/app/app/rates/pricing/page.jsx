@@ -52,22 +52,22 @@ export default function PricingConsolePage() {
   const [voucherPct, setVoucherPct] = useState(10);
 
   const inv = (k) => () => qc.invalidateQueries({ queryKey: k });
-  const q = (key, fn, opts = {}) =>
+  const useQ = (key, fn, opts = {}) =>
     useQuery({ queryKey: key, queryFn: fn, enabled: !!pid, ...opts });
 
-  const { data: rules } = q(
+  const { data: rules } = useQ(
     ['c1-rules', pid],
     async () => (await apiClient.get('/rates/rules', { params: { propertyId: pid } })).data.data
   );
-  const { data: plans } = q(
+  const { data: plans } = useQ(
     ['c1-plans', pid],
     async () => (await apiClient.get('/rates/plans', { params: { propertyId: pid } })).data.data
   );
-  const { data: vouchers, refetch: refetchVouchers } = q(
+  const { data: vouchers, refetch: refetchVouchers } = useQ(
     ['c1-vouchers', pid],
     async () => (await apiClient.get('/rates/vouchers', { params: { propertyId: pid } })).data.data
   );
-  const { data: review, refetch: refetchReview } = q(
+  const { data: review, refetch: refetchReview } = useQ(
     ['c1-review', pid],
     async () =>
       (
@@ -77,7 +77,7 @@ export default function PricingConsolePage() {
       ).data.data
   );
 
-  const m = (fn, okMsg, onDone) =>
+  const useM = (fn, okMsg, onDone) =>
     useMutation({
       mutationFn: fn,
       onSuccess: () => {
@@ -92,17 +92,17 @@ export default function PricingConsolePage() {
         }),
     });
 
-  const createRule = m(
+  const createRule = useM(
     (body) => apiClient.post('/rates/rules', body, { params: { propertyId: pid } }),
     'Rule created',
     inv(['c1-rules'])
   );
-  const toggleRule = m(
+  const toggleRule = useM(
     ({ id, isActive }) => apiClient.post(`/rates/rules/${id}/toggle`, { isActive }),
     'Rule toggled',
     inv(['c1-rules'])
   );
-  const evaluate = m(
+  const evaluate = useM(
     () =>
       apiClient.post(
         '/rates/rules/evaluate',
@@ -114,16 +114,16 @@ export default function PricingConsolePage() {
       refetchReview();
     }
   );
-  const deleteRule = m(
+  const deleteRule = useM(
     (id) => apiClient.delete(`/rates/rules/${id}`),
     'Rule deleted',
     inv(['c1-rules'])
   );
-  const bulkUpdate = m(
+  const bulkUpdate = useM(
     () => apiClient.post('/rates/bulk-update', bulk, { params: { propertyId: pid } }),
     'Bulk override written'
   );
-  const clearBulk = m(
+  const clearBulk = useM(
     () =>
       apiClient.post(
         '/rates/bulk-update',
@@ -132,7 +132,7 @@ export default function PricingConsolePage() {
       ),
     'Manual overrides cleared'
   );
-  const createVoucher = m(
+  const createVoucher = useM(
     () =>
       apiClient.post(
         '/rates/vouchers',
@@ -142,12 +142,12 @@ export default function PricingConsolePage() {
     'Voucher created',
     refetchVouchers
   );
-  const applySuggestion = m(
+  const applySuggestion = useM(
     (id) => apiClient.post(`/rates/restrictions-review/${id}/apply`),
     'Stop-sell applied',
     refetchReview
   );
-  const dismissSuggestion = m(
+  const dismissSuggestion = useM(
     (id) => apiClient.post(`/rates/restrictions-review/${id}/dismiss`),
     'Dismissed',
     refetchReview
