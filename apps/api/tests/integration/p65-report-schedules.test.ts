@@ -107,7 +107,7 @@ describe('6.5 report definitions on the scheduler', () => {
       const r = await request(app)
         .post('/v1/reports/run')
         .set(ctx.H())
-        .send({ definition: mapped, params });
+        .send({ definitionKey: mapped, params });
       if (r.status !== 200) {
         console.log('SENT', mapped, JSON.stringify(params));
         console.log('DEFDUMP', mapped, JSON.stringify(def?.params ?? null).slice(0, 400));

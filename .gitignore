@@ -63,3 +63,5 @@ apps/api/.backups/
 *.bak
 bulk3-recon.txt
 apps/api/minted-post.cjs
+
+eng.traineddata
