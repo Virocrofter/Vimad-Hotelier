@@ -170,14 +170,14 @@ describe('P14 property switcher scoping', () => {
     console.log('P14 S2 OK');
   }, 60000);
 
-  it('S3: guests narrowed to guests WITH STAYS at property; orphan excluded', async () => {
+  it('S3: guests narrowed to stays-at-property PLUS tenant-level (orphan included per SH-05)', async () => {
     const H = { Authorization: 'Bearer ' + agent.token, 'x-property-id': ctx.a.prop.id };
     const res = await request(app).get('/v1/guests?page=1&pageSize=50').set(H);
     expect(res.status).toBe(200);
     const ids = rows(res).map((g: any) => g.id);
     expect(ids).toContain(ctx.a.guest.id);
     expect(ids).not.toContain(ctx.b.guest.id);
-    expect(ids).not.toContain(ctx.orphan.id); // documented: no stays at A
+    expect(ids).toContain(ctx.orphan.id); // SH-05: tenant-level guests (no stays) stay searchable
     console.log('P14 S3 OK');
   }, 60000);
 });

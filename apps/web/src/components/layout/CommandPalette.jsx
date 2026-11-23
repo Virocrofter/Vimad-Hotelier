@@ -231,11 +231,20 @@ export default function CommandPalette({ open, onOpen, onClose }) {
           apiClient.get('/payments', { params: { pageSize: 50 } }).catch(() => null),
         ]);
         // Endpoints vary in envelope shape: flat | {data:[…]} | paginated {data:{items}}.
+        // Endpoints vary in envelope shape: flat | {data:[…]} | {data:{guests|tasks|reservations|items}}.
+        // Walk for the first array — every list endpoint wraps its rows in one.
         const asArr = (resp) => {
-          const d = resp?.data?.data ?? resp?.data ?? [];
-          if (Array.isArray(d)) return d;
-          if (Array.isArray(d?.data)) return d.data; // /v1/tasks double-wraps: {data:{data:[…]}}
-          return d?.items ?? [];
+          const findArr = (x) => {
+            if (Array.isArray(x)) return x;
+            if (x && typeof x === 'object') {
+              for (const v of Object.values(x)) {
+                const f = findArr(v);
+                if (f) return f;
+              }
+            }
+            return null;
+          };
+          return findArr(resp?.data) ?? [];
         };
         setPaymentHits(
           asArr(pay)

@@ -1,0 +1,19 @@
+PASS login
+PASS demo topology — roomProp=cmvpvm9h resProp=cmvpvm9h
+PASS api pre-flight: tenant-level guest searchable under scope (fix live) — Liam
+PASS seed task created — status 201
+PASS A: palette opens
+PASS A: rooms searchable (own property) — room 103
+PASS A: zero cross-property leak (foreign room hidden) — room 101
+PASS B: palette opens
+PASS B: guests searchable (tenant-level under scope) — Liam
+PASS B: tasks searchable (seeded open task)
+PASS B: reservations searchable by conf# — FXA2-Z116
+PASS B: search filters (gibberish → empty state) — leak=false empty=true
+PASS B: prefix '@' → guest mode
+PASS B: prefix '>' → action mode
+PASS B: Enter navigates to target — http://localhost:5173/app/tasks
+PASS B: frecency recorded (per-user store) — {"count":1,"last":1795438642244}
+PASS B: empty query shows recents incl. used action
+PASS B: guest action panel (key 1 → Open card drawer)
+PASS seed task cleaned up — status 200

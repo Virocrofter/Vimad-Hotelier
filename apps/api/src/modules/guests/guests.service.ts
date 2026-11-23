@@ -71,7 +71,14 @@ export async function listGuests(tenantId: string, query: GuestListQuery, proper
   const pagination = paginationSchema.parse(query);
   const where: Record<string, unknown> = { tenantId };
 
-  if (propertyIds?.length) where.reservations = { some: { propertyId: { in: propertyIds } } };
+  if (propertyIds?.length) {
+    // Scoped guests PLUS property-less guests (no reservations at all) —
+    // tenant-level CRM profiles stay searchable under property scope (SH-05).
+    where.OR = [
+      { reservations: { some: { propertyId: { in: propertyIds } } } },
+      { reservations: { none: {} } },
+    ];
+  }
 
   if (query.search) {
     where.OR = [
