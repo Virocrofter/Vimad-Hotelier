@@ -1,5 +1,6 @@
 /* apps/web/src/app/app/tasks/page.jsx — T1 + T5 */
 import { useState, useMemo } from 'react';
+import { useBulkAssign } from '../../../hooks/useSupervisor';
 import {
   useTaskList,
   useTaskSummary,
@@ -46,6 +47,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../../../components/ui/dialog';
+import { Drawer } from '../../../components/ui/drawer';
 import { Textarea } from '../../../components/ui/textarea';
 import { EmptyState } from '../../../components/ui/EmptyState';
 import { LoadingSkeleton } from '../../../components/ui/LoadingSkeleton';
@@ -135,6 +137,12 @@ export default function TasksPage() {
     () => (ruleFilter ? tasks.filter((t) => t.ruleId === ruleFilter) : tasks),
     [tasks, ruleFilter]
   );
+
+  // 7.4 queue shell — selection + bulk assign + slide-over inspector
+  const [selected, setSelected] = useState([]);
+  const [bulkAssignee, setBulkAssignee] = useState('');
+  const [openTask, setOpenTask] = useState(null);
+  const bulkAssign = useBulkAssign();
 
   return (
     <div className="hq-surface-0 min-h-full space-y-6 p-6">
@@ -248,6 +256,56 @@ export default function TasksPage() {
             </Select>
           </div>
 
+          {selected.length > 0 && (
+            <div className="sticky top-0 z-10 flex flex-wrap items-center gap-3 border-b bg-background py-2">
+              <span className="text-sm font-medium">{selected.length} selected</span>
+              <Select value={bulkAssignee} onValueChange={setBulkAssignee}>
+                <SelectTrigger className="w-52">
+                  <SelectValue placeholder="Assign to…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(staffQuery.data ?? []).map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name ??
+                        [s.firstName, s.lastName].filter(Boolean).join(' ') ??
+                        s.email ??
+                        s.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                size="sm"
+                disabled={!bulkAssignee || bulkAssign.isPending}
+                onClick={() =>
+                  bulkAssign.mutate(
+                    { taskIds: selected, assigneeId: bulkAssignee },
+                    {
+                      onSuccess: (d) => {
+                        toast({
+                          title: `Assigned ${d?.data?.updated ?? selected.length} task(s)`,
+                        });
+                        setSelected([]);
+                        setBulkAssignee('');
+                      },
+                      onError: (e) =>
+                        toast({
+                          title: 'Bulk assign failed',
+                          description: e?.response?.data?.error?.message ?? String(e?.message ?? e),
+                          variant: 'destructive',
+                        }),
+                    }
+                  )
+                }
+              >
+                Assign
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setSelected([])}>
+                Clear
+              </Button>
+            </div>
+          )}
+
           {listQuery.isLoading ? (
             <LoadingSkeleton />
           ) : listQuery.isError ? (
@@ -263,6 +321,7 @@ export default function TasksPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10"></TableHead>
                     <TableHead>Task</TableHead>
                     <TableHead>Department</TableHead>
                     <TableHead>Priority</TableHead>
@@ -274,13 +333,25 @@ export default function TasksPage() {
                 </TableHeader>
                 <TableBody>
                   {tasksForView.map((t) => (
-                    <TaskRow key={t.id} task={t} />
+                    <TaskRow
+                      key={t.id}
+                      task={t}
+                      selected={selected.includes(t.id)}
+                      onToggle={(id) =>
+                        setSelected((sel) =>
+                          sel.includes(id) ? sel.filter((x) => x !== id) : [...sel, id]
+                        )
+                      }
+                      onOpen={() => setOpenTask(t)}
+                    />
                   ))}
                 </TableBody>
               </Table>
             </Card>
           )}
         </TabsContent>
+
+        <TaskInspector task={openTask} onClose={() => setOpenTask(null)} />
 
         <TabsContent value="rules" className="space-y-4">
           <div className="flex justify-end">
@@ -328,6 +399,81 @@ export default function TasksPage() {
   );
 }
 
+function TaskInspector({ task, onClose }) {
+  const completeMut = useCompleteTask();
+  if (!task) return null;
+  const isActive = task.status === 'open' || task.status === 'in_progress';
+  return (
+    <Drawer open={!!task} onClose={onClose} title={task.title}>
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <Badge variant="outline">{DEPT_LABEL[task.department] ?? task.department}</Badge>
+          <Badge variant="outline" className={PRIORITY_STYLE[task.priority]}>
+            {task.priority}
+          </Badge>
+          <Badge variant="outline">{task.status}</Badge>
+        </div>
+        <dl className="space-y-1 text-sm">
+          <div>
+            <dt className="inline text-muted-foreground">Room: </dt>
+            <dd className="inline">{task.room?.number ?? '—'}</dd>
+          </div>
+          <div>
+            <dt className="inline text-muted-foreground">Guest: </dt>
+            <dd className="inline">
+              {task.guest ? `${task.guest.firstName} ${task.guest.lastName}` : '—'}
+            </dd>
+          </div>
+          <div>
+            <dt className="inline text-muted-foreground">Reservation: </dt>
+            <dd className="inline">{task.reservation?.confirmationNumber ?? '—'}</dd>
+          </div>
+          <div>
+            <dt className="inline text-muted-foreground">Due: </dt>
+            <dd className="inline">
+              {task.dueAt ? new Date(task.dueAt).toLocaleString() : 'No SLA'}
+            </dd>
+          </div>
+          <div>
+            <dt className="inline text-muted-foreground">Assignee: </dt>
+            <dd className="inline">
+              {task.assignee
+                ? `${task.assignee.firstName ?? ''} ${task.assignee.lastName ?? ''}`.trim() || '—'
+                : 'Unassigned'}
+            </dd>
+          </div>
+        </dl>
+        {task.description && <p className="whitespace-pre-wrap text-sm">{task.description}</p>}
+        {isActive && (
+          <Button
+            className="w-full"
+            disabled={completeMut.isPending}
+            onClick={() =>
+              completeMut.mutate(
+                { id: task.id },
+                {
+                  onSuccess: () => {
+                    toast({ title: 'Task completed' });
+                    onClose();
+                  },
+                  onError: (e) =>
+                    toast({
+                      title: 'Complete failed',
+                      description: e?.response?.data?.error?.message ?? String(e?.message ?? e),
+                      variant: 'destructive',
+                    }),
+                }
+              )
+            }
+          >
+            Complete task
+          </Button>
+        )}
+      </div>
+    </Drawer>
+  );
+}
+
 function KpiCard({ label, value, icon: Icon, danger }) {
   const hex = danger ? '#ef4444' : '#3b82f6';
   return (
@@ -350,7 +496,7 @@ function KpiCard({ label, value, icon: Icon, danger }) {
   );
 }
 
-function TaskRow({ task }) {
+function TaskRow({ task, selected, onToggle, onOpen }) {
   const completeMut = useCompleteTask();
   const updateMut = useUpdateTask();
   const cancelMut = useCancelTask();
@@ -381,7 +527,15 @@ function TaskRow({ task }) {
     );
 
   return (
-    <TableRow className={cn(!isActive && 'opacity-50')}>
+    <TableRow className={cn('cursor-pointer', !isActive && 'opacity-50')} onClick={onOpen}>
+      <TableCell onClick={(e) => e.stopPropagation()}>
+        <input
+          type="checkbox"
+          className="accent-primary"
+          checked={!!selected}
+          onChange={() => onToggle(task.id)}
+        />
+      </TableCell>
       <TableCell className="max-w-md">
         <div className="font-medium">{task.title}</div>
         <div className="text-xs text-muted-foreground truncate">
@@ -429,7 +583,7 @@ function TaskRow({ task }) {
           </Badge>
         )}
       </TableCell>
-      <TableCell className="text-right">
+      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
         {isActive && (
           <div className="flex justify-end gap-1">
             {task.assignee && (
