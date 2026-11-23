@@ -65,15 +65,23 @@ export async function moveFolioItem(
 ) {
   const item = await prisma.folioItem.findFirst({
     where: { id: itemId, folio: { tenantId } },
-    include: { folio: { select: { id: true, groupId: true } } },
+    include: { folio: { select: { id: true, groupId: true, reservationId: true } } },
   });
   if (!item) throw new AppError(404, 'Folio item not found', 'NOT_FOUND');
-  const target = await prisma.folio.findFirst({ where: { id: targetFolioId, tenantId } });
+  const target = await prisma.folio.findFirst({
+    where: { id: targetFolioId, tenantId },
+    select: { id: true, groupId: true, reservationId: true },
+  });
   if (!target) throw new AppError(404, 'Target folio not found', 'NOT_FOUND');
   if (target.id === item.folioId)
     throw new AppError(400, 'Item already on that folio', 'VALIDATION_ERROR');
   if ((target.groupId ?? null) !== (item.folio.groupId ?? null)) {
     throw new AppError(400, 'Cannot move items across different groups', 'VALIDATION_ERROR');
+  }
+  // Ungrouped folios share groupId null — without this the guard above is
+  // vacuous and any same-tenant cross-reservation move would pass (P35).
+  if (!target.groupId && (target.reservationId ?? null) !== (item.folio.reservationId ?? null)) {
+    throw new AppError(400, 'Cannot move items across different reservations', 'VALIDATION_ERROR');
   }
   await prisma.folioItem.update({
     where: { id: itemId },
