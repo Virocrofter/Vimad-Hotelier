@@ -24,7 +24,7 @@ export function animateCount(
     el.textContent = String(to);
     return;
   }
-  const { duration, easing } = motionPresets[preset];
+  const { duration } = motionPresets[preset];
   const start = performance.now();
   const tick = (now: number) => {
     const t = Math.min(1, (now - start) / duration);

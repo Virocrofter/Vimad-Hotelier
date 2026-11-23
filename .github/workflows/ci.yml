@@ -189,6 +189,11 @@ jobs:
       - name: Run a11y scan (DS-07 gate — fails on critical/serious)
         run: npm run a11y
         working-directory: apps/web
+      - name: Surface a11y violations
+        if: always()
+        run: |
+          echo '## A11y report' >> "$GITHUB_STEP_SUMMARY"
+          cat docs/design-system/a11y-report.json >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
       - name: Upload a11y report
         if: always()
         uses: actions/upload-artifact@v4

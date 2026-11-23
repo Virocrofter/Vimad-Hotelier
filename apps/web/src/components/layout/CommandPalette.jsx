@@ -144,7 +144,9 @@ function saveStore(userId, map) {
     const all = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}');
     all[userId ?? 'anonymous'] = map;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-  } catch {}
+  } catch {
+    /* persistence best-effort */
+  }
 }
 
 function frecencyScore(rec) {
@@ -403,6 +405,7 @@ export default function CommandPalette({ open, onOpen, onClose }) {
       list = [...list].sort((a, b) => b.score - a.score);
     }
     return list;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- item actions close over navigate/onClose/openCard/hereBoost; pools rebuild from hits and query
   }, [
     term,
     mode,

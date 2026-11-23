@@ -1,5 +1,5 @@
 /* apps/web/src/hooks/guestCommsApi.ts — G5 chat / reviews / announcements client */
-import { getGuestToken, GuestPortalError } from './guestPortalApi';
+import { GuestPortalError } from './guestPortalApi';
 
 const API_BASE: string = (import.meta as any).env?.VITE_API_URL ?? '/api';
 

@@ -9,7 +9,6 @@ import { PropertySwitcher } from './PropertySwitcher';
 import { BusinessDatePill } from './BusinessDatePill';
 import { AlertCluster } from './AlertCluster';
 import { ThemeToggle } from '../theme/themeToggle';
-import { useMemo } from 'react';
 import { NAV_GROUPS } from '../../lib/navGroups';
 
 export function Topbar() {
