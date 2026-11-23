@@ -37,7 +37,6 @@ import {
 import FolioOverview from './components/FolioOverview';
 import TransactionSheet from './components/TransactionSheet';
 import { flags } from '../../../lib/flags';
-import PaymentExceptions from './PaymentExceptions';
 
 /* ─── Transaction codes (kept — now mapped to backend charge/payment types) ─── */
 const transactionCodes = [

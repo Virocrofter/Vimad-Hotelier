@@ -26,7 +26,7 @@ import {
   resolveException,
 } from '../../../api/exceptions';
 import { flags } from '../../../lib/flags';
-import PaymentExceptions from '../billing/PaymentExceptions';
+import { Link } from 'react-router-dom';
 import { useTenantUsers } from '../../../hooks/useTenantUsers';
 import { cn } from '../../../lib/utils';
 
@@ -235,7 +235,31 @@ function ExceptionsPage() {
       )}
 
       {tab === 'payments' ? (
-        <PaymentExceptions />
+        <div className="space-y-2">
+          {items.filter((i) => i.type.startsWith('payment')).length === 0 ? (
+            <p className="text-sm text-text-muted">No payment exceptions — the queue is clear.</p>
+          ) : (
+            items
+              .filter((i) => i.type.startsWith('payment'))
+              .map((i) => (
+                <div
+                  key={i.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-text-primary">{i.title}</p>
+                    <p className="truncate text-xs text-text-secondary">{i.detail}</p>
+                  </div>
+                  <Link
+                    to={i.actionUrl ?? '/app/billing'}
+                    className="shrink-0 text-xs font-medium text-primary hover:underline"
+                  >
+                    Open
+                  </Link>
+                </div>
+              ))
+          )}
+        </div>
       ) : items.length === 0 ? (
         <p className="flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-6 text-xs text-text-muted">
           <ShieldCheck className="h-4 w-4 text-accent-foreground" /> No exceptions in this view.
