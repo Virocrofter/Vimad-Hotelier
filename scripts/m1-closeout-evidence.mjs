@@ -62,14 +62,14 @@ const api = async (p, { method = 'GET', token = loginToken, propertyId, body } =
 
 const resList = await api('/v1/reservations?limit=100');
 const reservations = resList.reservations ?? resList ?? [];
-const checkedIn = reservations.filter((r) => r.status === 'checked_in');
-let res = null;
-for (const cand of checkedIn) {
-  const detail = await api(`/v1/reservations/${cand.id}`);
-  const d = detail.reservation ?? detail;
-  if (d.folio ?? d.folioId) { res = cand; break; }
-}
-if (!res) throw new Error('no checked_in reservation with a folio in demo data');
+// demo data rotates (lifecycle jobs) — the list payload carries `folios`;
+// take any reservation with a non-empty folio set, preferring checked_in.
+const hasFolio = (r) =>
+  Array.isArray(r.folios) ? r.folios.length > 0 : !!(r.folio ?? r.folioId);
+const withFolio = reservations.filter(hasFolio);
+withFolio.sort((x, y) => (y.status === 'checked_in') - (x.status === 'checked_in'));
+const res = withFolio[0];
+if (!res) throw new Error('no reservation with a folio in demo data — reseed the demo tenant');
 const propId = res.propertyId ?? res.property_id;
 console.log('reservation:', res.id, res.status, 'property:', propId);
 
