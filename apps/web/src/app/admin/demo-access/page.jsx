@@ -100,7 +100,7 @@ export default function DemoAccessPage() {
       .catch((e) =>
         toast({ title: 'Load failed', description: e.message, variant: 'destructive' })
       );
-  }, [drawerId]);
+  }, [drawerId, toast]);
 
   const act = async (fn, okMsg, refreshDetail) => {
     setBusy(true);

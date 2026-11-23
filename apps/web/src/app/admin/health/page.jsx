@@ -40,6 +40,7 @@ const useData = (fn) => {
       live = false;
       clearInterval(t);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- polling bootstrap; the interval must not restart per render
   }, []);
   return state;
 };
@@ -91,7 +92,9 @@ export default function SystemHealthPage() {
   const doResolve = async (id, status, note) => {
     try {
       await apiPatch(`/admin/health/incidents/${id}`, { status, note });
-    } catch {}
+    } catch {
+      /* resolution best-effort */
+    }
     await incidents.reload();
   };
 
