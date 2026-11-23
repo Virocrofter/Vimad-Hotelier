@@ -51,7 +51,7 @@ function useData(fn, msPoll = 15000) {
     load();
     const t = setInterval(load, msPoll);
     return () => clearInterval(t);
-  }, [load]);
+  }, [load, msPoll]);
   return { data, error, loading, reload: load };
 }
 const Skel = () => <div className="prf-skel">loading…</div>;
