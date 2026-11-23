@@ -192,7 +192,7 @@ jobs:
       - name: Annotate a11y violations
         if: failure()
         run: |
-          node -e "const r=require('./docs/design-system/a11y-report.json');(r.violations||[]).forEach(v=>console.log('::error title=A11Y '+v.impact+'::'+v.id+' — '+v.help))"
+          node -e "const r=require('./docs/design-system/a11y-report.json');for(const [n,p] of Object.entries(r.pages||{}))for(const v of (p.violations||[]))console.log('::error title=A11Y '+v.impact+' ['+n+']::'+v.id+' — '+v.help+' ('+v.nodes+' nodes) '+(v.targets||[]).slice(0,2).join(' | '))"
 
       - name: Surface a11y violations
         if: always()

@@ -8,7 +8,7 @@
  * census (P3.2b). Ribbon collapse <1200px + phone sheet land in P3.2b with
  * the layout pass.
  */
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getScope } from '../../api/chains';
@@ -36,7 +36,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const role = auth?.user?.role;
   const [hoverGroup, setHoverGroup] = useState<string | null>(null);
 
-  const isActive = (to: string) => pathname === to || pathname.startsWith(to + '/');
+  const isActive = useCallback(
+    (to: string) => pathname === to || pathname.startsWith(to + '/'),
+    [pathname]
+  );
 
   const scopeQ = useQuery({ queryKey: ['nav-scope'], queryFn: getScope, staleTime: 60000 });
   const hasChain = (scopeQ.data?.properties?.length ?? 0) > 1;
