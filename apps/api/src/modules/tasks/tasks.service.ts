@@ -896,6 +896,10 @@ export async function getTask(tenantId: string, id: string) {
 }
 
 export interface CreateTaskInput {
+  blocksSpaceStatus?: boolean;
+  escalateAt?: string | null;
+  attachments?: unknown[] | null;
+  sourceLanguage?: string | null;
   propertyId: string;
   department: string;
   title: string;
@@ -947,6 +951,10 @@ export async function createTask(tenantId: string, input: CreateTaskInput, actor
       dueAt: slaMinutes ? addHours(new Date(), slaMinutes / 60) : null,
       source: 'manual',
       metadata: (input.metadata ?? {}) as Prisma.InputJsonValue,
+      blocksSpaceStatus: input.blocksSpaceStatus ?? false,
+      escalateAt: input.escalateAt ? new Date(input.escalateAt) : null,
+      attachments: (input.attachments ?? []) as Prisma.InputJsonValue,
+      sourceLanguage: input.sourceLanguage ?? null,
     },
   });
 
@@ -957,6 +965,8 @@ export async function createTask(tenantId: string, input: CreateTaskInput, actor
     assigneeId: task.assigneeId,
     source: 'manual',
   });
+
+  await applySpaceBlock(tenantId, task);
 
   return task;
 }
@@ -1028,6 +1038,8 @@ export async function completeTask(tenantId: string, id: string, userId: string)
     where: { id },
     data: { status: 'done', completedAt: new Date(), completedBy: userId },
   });
+
+  await applySpaceBlock(tenantId, updated);
 
   safeAudit(tenantId, userId, 'task.complete', id, {
     from: task.status,
@@ -1317,4 +1329,57 @@ export async function flagSlaBreaches(): Promise<number> {
   });
   if (result.count > 0) logger.warn({ count: result.count }, 'SLA breaches flagged');
   return result.count;
+}
+
+/* 7.1 — space-blocking coupling: a CRITICAL ticket marked blocksSpaceStatus
+ * flips its room OOO with a reason; the room clears when the ticket resolves
+ * AND no other open blocking ticket holds it. System-driven (the manual HK
+ * transition rules govern staff actions, not system blocks) and audited. */
+async function applySpaceBlock(
+  tenantId: string,
+  task: {
+    id: string;
+    roomId: string | null;
+    priority: string;
+    blocksSpaceStatus: boolean;
+    status: string;
+    title: string;
+  }
+): Promise<void> {
+  if (!task.roomId) return;
+  const room = await prisma.room.findFirst({ where: { id: task.roomId, tenantId } });
+  if (!room) return;
+  const others = await prisma.task.count({
+    where: {
+      tenantId,
+      roomId: task.roomId,
+      blocksSpaceStatus: true,
+      priority: 'urgent',
+      status: { in: ['open', 'in_progress'] },
+      id: { not: task.id },
+    },
+  });
+  const terminal = task.status === 'done' || task.status === 'cancelled';
+  if (task.blocksSpaceStatus && task.priority === 'urgent' && !terminal) {
+    if (room.serviceStatus !== 'oos') {
+      await prisma.room.update({
+        where: { id: room.id },
+        data: { serviceStatus: 'oos', serviceReason: `Blocked by ticket: ${task.title}` },
+      });
+      safeAudit(tenantId, undefined, 'room.blocked_by_ticket', room.id, {
+        taskId: task.id,
+        title: task.title,
+      });
+    }
+  } else if (
+    others === 0 &&
+    room.serviceStatus === 'oos' &&
+    room.serviceReason?.startsWith('Blocked by ticket')
+  ) {
+    await prisma.room.update({
+      where: { id: room.id },
+      data: { serviceStatus: 'active', serviceReason: null },
+    });
+    safeAudit(tenantId, undefined, 'room.unblocked_by_ticket', room.id, { taskId: task.id });
+  }
 }

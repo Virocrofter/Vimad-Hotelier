@@ -1414,6 +1414,10 @@ model Task {
   dueAt       DateTime?
   slaMinutes  Int?
   slaBreached Boolean   @default(false)
+  blocksSpaceStatus Boolean   @default(false)
+  escalateAt        DateTime?
+  attachments       Json?
+  sourceLanguage    String?
 
   ruleId    String?
   rule      TaskRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
