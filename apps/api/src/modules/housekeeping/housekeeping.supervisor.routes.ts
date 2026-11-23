@@ -224,3 +224,113 @@ housekeepingSupervisorRouter.get(
     }
   }
 );
+
+/* ─── GET /space-report — rooms grouped by floor with status + next arrival.
+ * The "floor state without scrolling" surface for the supervisor. ─── */
+housekeepingSupervisorRouter.get(
+  '/space-report',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId } = (req as AuthenticatedRequest).auth;
+      const propertyId = String((req.query as any).propertyId ?? '');
+      if (!propertyId) {
+        return res
+          .status(400)
+          .json({ error: { code: 'VALIDATION_ERROR', message: 'propertyId is required' } });
+      }
+      const today = new Date();
+      const rooms = await prisma.room.findMany({
+        where: { tenantId, propertyId },
+        include: { roomType: { select: { name: true } } },
+        orderBy: [{ floor: 'asc' }, { number: 'asc' }],
+      });
+      const roomIds = rooms.map((r) => r.id);
+      const openTasks = await prisma.task.findMany({
+        where: {
+          tenantId,
+          propertyId,
+          roomId: { in: roomIds },
+          status: { in: ['open', 'in_progress'] },
+        },
+        select: { roomId: true, assigneeId: true },
+      });
+      const attendantByRoom = new Map<string, string | null>();
+      for (const t of openTasks) {
+        if (t.roomId && !attendantByRoom.has(t.roomId)) attendantByRoom.set(t.roomId, t.assigneeId);
+      }
+      const nextStays = await prisma.reservationStay.findMany({
+        where: {
+          roomId: { in: roomIds },
+          date: { gte: today },
+          reservation: { tenantId, propertyId, status: 'confirmed' },
+        },
+        include: { reservation: { select: { arrivalDate: true } } },
+        orderBy: { date: 'asc' },
+      });
+      const nextByRoom = new Map<string, string>();
+      for (const st of nextStays) {
+        if (!nextByRoom.has(st.roomId)) {
+          nextByRoom.set(
+            st.roomId,
+            (st.reservation.arrivalDate as Date).toISOString().slice(0, 10)
+          );
+        }
+      }
+      const byFloor = new Map<string, any[]>();
+      for (const r of rooms) {
+        const floor = r.floor ?? '—';
+        if (!byFloor.has(floor)) byFloor.set(floor, []);
+        byFloor.get(floor)!.push({
+          id: r.id,
+          number: r.number,
+          floor,
+          category: r.roomType?.name ?? null,
+          housekeepingStatus: r.housekeepingStatus,
+          serviceStatus: r.serviceStatus,
+          serviceReason: r.serviceReason,
+          attendantId: attendantByRoom.get(r.id) ?? null,
+          nextArrival: nextByRoom.get(r.id) ?? null,
+        });
+      }
+      const floors = [...byFloor.entries()].map(([floor, roomsArr]) => ({
+        floor,
+        rooms: roomsArr,
+        counts: roomsArr.reduce((acc: Record<string, number>, r) => {
+          const k = r.serviceStatus !== 'active' ? 'blocked' : r.housekeepingStatus;
+          acc[k] = (acc[k] ?? 0) + 1;
+          return acc;
+        }, {}),
+      }));
+      return res.json({ data: { floors, totalRooms: rooms.length } });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/* ─── POST /tasks/bulk-assign — assign many open tasks to one attendant. ─── */
+housekeepingSupervisorRouter.post(
+  '/tasks/bulk-assign',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tenantId } = (req as AuthenticatedRequest).auth;
+      const { taskIds, assigneeId } = (req.body ?? {}) as any;
+      if (!Array.isArray(taskIds) || taskIds.length === 0 || !assigneeId) {
+        return res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'taskIds (non-empty array) and assigneeId are required',
+          },
+        });
+      }
+      const ids = taskIds.map(String).slice(0, 200);
+      const result = await prisma.task.updateMany({
+        where: { tenantId, id: { in: ids }, status: { in: ['open', 'in_progress'] } },
+        data: { assigneeId: String(assigneeId) },
+      });
+      return res.json({ data: { updated: result.count } });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
