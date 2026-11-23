@@ -301,7 +301,28 @@ housekeepingSupervisorRouter.get(
           return acc;
         }, {}),
       }));
-      return res.json({ data: { floors, totalRooms: rooms.length } });
+      // 7.3 — arrival urgency: unserviced rooms with an upcoming arrival,
+      // sorted by arrival date. "These N must be clean first" at a glance.
+      const SERVICED = ['ready', 'inspected'];
+      const urgent = rooms
+        .filter(
+          (r) =>
+            r.serviceStatus === 'active' &&
+            !SERVICED.includes(r.housekeepingStatus) &&
+            nextByRoom.has(r.id)
+        )
+        .map((r) => ({
+          id: r.id,
+          number: r.number,
+          floor: r.floor ?? '—',
+          housekeepingStatus: r.housekeepingStatus,
+          nextArrival: nextByRoom.get(r.id),
+          attendantId: attendantByRoom.get(r.id) ?? null,
+        }))
+        .sort((x, y) => String(x.nextArrival).localeCompare(String(y.nextArrival)));
+      return res.json({
+        data: { floors, totalRooms: rooms.length, urgent, urgentCount: urgent.length },
+      });
     } catch (err) {
       return next(err);
     }
