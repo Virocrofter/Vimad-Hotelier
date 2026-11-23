@@ -34,6 +34,7 @@ export default function DemoEnterPage() {
         setError(e.message);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-once demo-entry bootstrap
   }, []);
 
   return (

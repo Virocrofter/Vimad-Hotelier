@@ -1439,7 +1439,7 @@ async function main() {
         },
         ...(countsForRevenue
           ? {
-              folio: {
+              folios: {
                 create: {
                   tenantId: tenant.id,
                   totalCharges: total,

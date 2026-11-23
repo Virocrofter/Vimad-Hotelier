@@ -1,20 +1,7 @@
 /* src/app/guest-portal/support/tickets/page.jsx */
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  ChevronLeft,
-  Ticket,
-  Plus,
-  Search,
-  Filter,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  MessageSquare,
-  FileText,
-  Send,
-  X,
-} from 'lucide-react';
+import { ChevronLeft, Ticket, Plus, Search, Send, X } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import { Button } from '../../../../components/ui/button';
 import { TicketCard, TicketDetail } from '../components';

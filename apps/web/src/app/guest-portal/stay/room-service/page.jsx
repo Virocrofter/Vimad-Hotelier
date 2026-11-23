@@ -78,7 +78,7 @@ function RoomServicePageInner() {
   // #99: menu + categories must exist before ANY early return — the useMemo
   // used to sit after the loading/error returns, so a retry after a menu
   // error changed the hook count and crashed the page.
-  const menu = menuData?.menu ?? [];
+  const menu = useMemo(() => menuData?.menu ?? [], [menuData]);
   const categories = useMemo(() => [...new Set(menu.map((m) => m.category))], [menu]);
 
   if (!hasToken) return null;
