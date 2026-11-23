@@ -153,6 +153,104 @@ function ruleScope(rule: RuleRow): { tenantId: string; propertyId?: string } {
 // ─── Context providers: rule.key → candidate fetchers ───
 
 const RULE_PROVIDERS: Record<string, (rule: RuleRow) => Promise<TaskCandidate[]>> = {
+  // 7.6 — HK auto-triggers (config over the cadence engine):
+  // stayover cleans nightly, linen intervals per room (derived from each
+  // room's last completed linen task — zero schema cost), Legionella flush
+  // for rooms unoccupied N days (config.days, default 7).
+  'hk-stayover-clean': async (rule) => {
+    // TZ-immune bounds: arrival/departure are @db.Date columns — compare
+    // against UTC midnights with margin so the session timezone cannot
+    // flip the boundary (the P10 '+02:00 reads 0' trap).
+    const now = new Date();
+    const utcMidnight = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    );
+    const rsvs = await prisma.reservation.findMany({
+      where: {
+        ...ruleScope(rule),
+        status: 'checked_in',
+        arrivalDate: { lte: addDays(utcMidnight, -1) },
+        departureDate: { gte: addDays(utcMidnight, 1) },
+      },
+      include: { guest: true, stays: { include: { room: true }, take: 1 } },
+      take: 300,
+    });
+    return rsvs.flatMap((r) => {
+      const room = r.stays[0]?.room;
+      if (!room) return [];
+      return [
+        {
+          entityType: 'room',
+          entityId: room.id,
+          propertyId: r.propertyId,
+          roomId: room.id,
+          guestId: r.guestId,
+          reservationId: r.id,
+          ctx: {
+            confirmationNumber: r.confirmationNumber,
+            guestName: `${r.guest.firstName} ${r.guest.lastName}`,
+            roomNumber: room.number,
+          },
+        },
+      ];
+    });
+  },
+
+  'hk-linen-change': async (rule) => {
+    const cfg = (rule as unknown as { config?: Record<string, unknown> }).config ?? {};
+    const intervalDays = Math.max(1, Number(cfg.intervalDays) || 7);
+    const cutoff = addDays(startOfDay(), -intervalDays);
+    const rooms = await prisma.room.findMany({ where: ruleScope(rule), take: 500 });
+    const out: TaskCandidate[] = [];
+    for (const room of rooms) {
+      const last = await prisma.task.findFirst({
+        where: { tenantId: rule.tenantId, ruleId: rule.id, roomId: room.id, status: 'done' },
+        orderBy: { updatedAt: 'desc' },
+        select: { updatedAt: true },
+      });
+      if (!last || last.updatedAt < cutoff) {
+        out.push({
+          entityType: 'room',
+          entityId: room.id,
+          propertyId: room.propertyId,
+          roomId: room.id,
+          ctx: {
+            roomNumber: room.number,
+            floor: room.floor ?? '—',
+            lastChange: last ? last.updatedAt.toISOString().slice(0, 10) : 'never',
+          },
+        });
+      }
+    }
+    return out;
+  },
+
+  'hk-legionella-flush': async (rule) => {
+    const cfg = (rule as unknown as { config?: Record<string, unknown> }).config ?? {};
+    const days = Math.max(1, Number(cfg.days) || 7);
+    const cutoff = addDays(startOfDay(), -days);
+    const rooms = await prisma.room.findMany({ where: ruleScope(rule), take: 500 });
+    const recentlyOccupied = await prisma.reservationStay.findMany({
+      where: {
+        roomId: { in: rooms.map((r) => r.id) },
+        date: { gte: cutoff },
+        reservation: { status: 'checked_in' },
+      },
+      select: { roomId: true },
+      distinct: ['roomId'],
+    });
+    const occupiedIds = new Set(recentlyOccupied.map((x) => x.roomId));
+    return rooms
+      .filter((room) => !occupiedIds.has(room.id))
+      .map((room) => ({
+        entityType: 'room',
+        entityId: room.id,
+        propertyId: room.propertyId,
+        roomId: room.id,
+        ctx: { roomNumber: room.number, floor: room.floor ?? '—', unoccupiedDays: days },
+      }));
+  },
+
   // 1. Departure → dirty-room task (the headline zero-click case)
   'dirty-room-on-departure': async (rule) => {
     const rsvs = await prisma.reservation.findMany({
