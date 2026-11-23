@@ -1,4 +1,5 @@
 /* apps/web/src/app/app/groups/billing/page.jsx — T3+ group billing view */
+import { Row } from '@/components/billing/ReceiptCard';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -239,14 +240,15 @@ function FolioCard({
             key={item.id}
             className="flex items-center justify-between gap-3 rounded border border-border px-3 py-2 text-sm"
           >
-            <div>
-              <p className="text-text-primary">{item.description}</p>
-              <p className="text-xs text-text-muted">
-                {money(item.amount * item.quantity)}
-                {item.movedAt
-                  ? ` · moved ${new Date(item.movedAt).toLocaleDateString('en-ZA')}`
-                  : ''}
-              </p>
+            <div className="min-w-0 flex-1">
+              <Row
+                label={
+                  item.movedAt
+                    ? `${item.description} · moved ${new Date(item.movedAt).toLocaleDateString('en-ZA')}`
+                    : item.description
+                }
+                amount={item.amount * item.quantity}
+              />
             </div>
             <div className="flex items-center gap-2">
               <Select

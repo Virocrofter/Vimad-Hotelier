@@ -7,7 +7,7 @@ import { formatMoney } from '../../lib/money';
 
 const fmt = (n, currency = 'ZAR') => formatMoney(Number(n) || 0, currency);
 
-function Row({ label, amount, currency, tone }) {
+export function Row({ label, amount, currency, tone }) {
   return (
     <div className="flex items-baseline gap-2 text-sm">
       <span className="text-text-secondary">{label}</span>
