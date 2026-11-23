@@ -34,7 +34,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
-import { formatMoneyMinor } from '../../../lib/money';
+import { toMajor, formatMoneyMinor } from '../../../lib/money';
 import { Button } from '@/components/ui/button';
 import { listPayments, recordVccCharge, refundPayment } from '../../../api/payments';
 
@@ -560,7 +560,7 @@ function CardDetailDrawer({ card, onClose, onRefund, refresh }) {
   const fullyRefunded = card.payments.filter((p) => p.refundedMinor >= p.amountMinor).length;
 
   const handleRefund = async (p) => {
-    const outstanding = (p.amountMinor - p.refundedMinor) / 100;
+    const outstanding = toMajor(p.amountMinor - p.refundedMinor);
     const amt = parseFloat(refundAmount);
     if (!Number.isFinite(amt) || amt <= 0 || amt > outstanding) {
       onRefund.error(`Enter an amount between 0 and ${outstanding.toFixed(2)}.`);
@@ -750,7 +750,7 @@ function CardDetailDrawer({ card, onClose, onRefund, refresh }) {
               ) : (
                 <div className="space-y-2">
                   {card.payments.map((p) => {
-                    const outstanding = (p.amountMinor - p.refundedMinor) / 100;
+                    const outstanding = toMajor(p.amountMinor - p.refundedMinor);
                     return (
                       <div key={p.id} className="rounded-lg border border-border bg-surface p-4">
                         <div className="flex items-start justify-between">

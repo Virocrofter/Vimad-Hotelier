@@ -22,3 +22,7 @@ export function formatMoneyMinor(
 ): string {
   return formatMoney((Number(amountMinor) || 0) / 100, currency, fractionDigits);
 }
+
+/** P7.2: single named owner of the minor→major conversion (TRAP ledger) —
+ * call sites never write the raw ÷100. */
+export const toMajor = (amountMinor: number): number => (Number(amountMinor) || 0) / 100;
