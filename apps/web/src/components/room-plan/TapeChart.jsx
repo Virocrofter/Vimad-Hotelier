@@ -34,6 +34,7 @@ import {
 } from '../../api/api-reservations';
 import { listGuests, createGuest } from '../../api/guests';
 import { createRoomBlock, returnRoomBlock } from '../../api/room-plan';
+import { requestCheckIn } from '../../components/reservations/CheckInDialog';
 import TapeGrid from './TapeGrid';
 
 export const STATUS_META = {
