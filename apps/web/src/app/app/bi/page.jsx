@@ -146,7 +146,7 @@ export default function BiHubPage() {
               <li key={p.channel} className="flex justify-between">
                 <span className="capitalize text-text-secondary">{p.channel}</span>
                 <span className="hq-tnum">
-                  {p.count} · {fmtR(p.totalMinor / 100)}
+                  {p.count} · {formatMoneyMinor(p.totalMinor)}
                 </span>
               </li>
             ))}
