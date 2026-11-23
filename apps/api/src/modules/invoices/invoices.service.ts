@@ -286,6 +286,7 @@ export async function issueCreditNote(
     if (input.applyToFolio && original.folioId) {
       await tx.folioItem.create({
         data: {
+          consumedAt: new Date(), // P33: consumed_at stamped at posting
           folioId: original.folioId,
           type: 'credit',
           description: `Credit note ${number} for ${original.number}: ${input.reason}`,

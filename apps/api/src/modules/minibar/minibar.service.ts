@@ -151,6 +151,7 @@ async function postChargeToFolio(
 
     const item = await tx.folioItem.create({
       data: {
+        consumedAt: new Date(), // P33: consumed_at stamped at posting
         folioId,
         type: 'minibar',
         description: `Minibar — ${describeItems(items)}`,
@@ -227,6 +228,7 @@ export async function settleMinibarCheck(
         const amount = check.totalMinor / 100;
         await tx.folioItem.create({
           data: {
+            consumedAt: new Date(), // P33: consumed_at stamped at posting
             folioId: folio.id,
             type: 'minibar_adjustment',
             description: `Minibar waived — ${reason}`,

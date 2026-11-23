@@ -123,6 +123,7 @@ export async function postCharge(
   const [item] = await prisma.$transaction([
     prisma.folioItem.create({
       data: {
+        consumedAt: new Date(), // P33: consumed_at stamped at posting
         folioId,
         type: input.type,
         description: input.description,
@@ -162,12 +163,14 @@ export async function reverseCharge(
   const [reversal] = await prisma.$transaction([
     prisma.folioItem.create({
       data: {
+        consumedAt: new Date(), // P33: consumed_at stamped at posting
         folioId,
         type: 'adjustment',
         description: `Reversal: ${charge.description} — ${reason}`,
         amount: -charge.amount,
         quantity: 1,
         postedAt: new Date(),
+        rebateOfId: chargeId, // P33: corrections are rebates, linked to the immutable original
       },
     }),
     prisma.folio.update({
@@ -198,6 +201,7 @@ export async function postPayment(
   const [item] = await prisma.$transaction([
     prisma.folioItem.create({
       data: {
+        consumedAt: new Date(), // P33: consumed_at stamped at posting
         folioId,
         type: input.type === 'refund' ? 'refund' : 'payment',
         description: input.description ?? `${input.type} payment`,

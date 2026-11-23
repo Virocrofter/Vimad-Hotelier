@@ -67,6 +67,7 @@ export async function sellProduct(
   const total = r2(unitPrice * quantity);
   const item = await prisma.folioItem.create({
     data: {
+      consumedAt: new Date(), // P33: consumed_at stamped at posting
       folioId: (reservation.folios ?? [])[0].id,
       type: 'upsell',
       description: 'Upsell: ' + product.name,

@@ -415,6 +415,7 @@ export async function provisionTenant(
     });
     await prisma.folioItem.create({
       data: {
+        consumedAt: new Date(), // P33: consumed_at stamped at posting
         folioId: folio.id,
         type: 'room',
         description: `Room ${room.number} — night`,
@@ -425,6 +426,7 @@ export async function provisionTenant(
     if (status === 'checked_in') {
       await prisma.folioItem.create({
         data: {
+          consumedAt: new Date(), // P33: consumed_at stamped at posting
           folioId: folio.id,
           type: 'restaurant',
           description: 'Dinner — Grill Room',
@@ -432,7 +434,13 @@ export async function provisionTenant(
         },
       });
       await prisma.folioItem.create({
-        data: { folioId: folio.id, type: 'payment', description: 'Card deposit', amount: -1450 },
+        data: {
+          consumedAt: new Date(), // P33: consumed_at stamped at posting
+          folioId: folio.id,
+          type: 'payment',
+          description: 'Card deposit',
+          amount: -1450,
+        },
       });
     }
     return res;

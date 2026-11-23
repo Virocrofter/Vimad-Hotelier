@@ -100,6 +100,7 @@ export async function postPaymentToFolio(paymentId: string): Promise<void> {
 
     await tx.folioItem.create({
       data: {
+        consumedAt: new Date(), // P33: consumed_at stamped at posting
         folioId: folio.id,
         type: 'payment',
         description:
@@ -170,6 +171,7 @@ export async function postRefundToFolio(paymentId: string, refundMinor: number):
   await prisma.$transaction(async (tx) => {
     await tx.folioItem.create({
       data: {
+        consumedAt: new Date(), // P33: consumed_at stamped at posting
         folioId: payment.folioId!,
         type: 'refund',
         description: `Refund to card •••• ${payment.cardLast4 ?? ''} (${payment.reference})`,

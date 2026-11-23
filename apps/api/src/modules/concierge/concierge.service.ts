@@ -271,6 +271,7 @@ export async function postToFolio(
   const folioItem = await prisma.$transaction(async (tx) => {
     const fi = await tx.folioItem.create({
       data: {
+        consumedAt: new Date(), // P33: consumed_at stamped at posting
         folioId: folio.id,
         type: 'concierge',
         description: `[Concierge] ${item.title}`,
