@@ -137,4 +137,61 @@ jobs:
             apps/web/dist
           retention-days: 7
 
-         
+  a11y:
+    name: Accessibility (DS-07)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: vimad
+          POSTGRES_PASSWORD: vimad_dev_password
+          POSTGRES_DB: unified_pms
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U vimad" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate Prisma Client
+        run: npx prisma generate --schema apps/api/prisma/schema.prisma
+      - name: Apply migrations
+        run: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+        env:
+          DATABASE_URL: postgresql://vimad:vimad_dev_password@localhost:5432/unified_pms
+      - name: Seed demo tenant
+        run: npx prisma db seed --schema apps/api/prisma/schema.prisma
+        env:
+          DATABASE_URL: postgresql://vimad:vimad_dev_password@localhost:5432/unified_pms
+      - name: Start API
+        run: |
+          cd apps/api
+          NODE_ENV=test DATABASE_URL=postgresql://vimad:vimad_dev_password@localhost:5432/unified_pms             REDIS_URL=redis://localhost:6379 JWT_SECRET=a11y-ci-secret-key-min-32-chars-xx             npx tsx src/index.ts > /tmp/api.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:3001/v1/public/status > /dev/null 2>&1 && break; sleep 2; done
+          curl -sf http://localhost:3001/v1/public/status > /dev/null || (cat /tmp/api.log && exit 1)
+      - name: Start web dev server
+        run: |
+          echo "VITE_API_URL=http://localhost:3001" > apps/web/.env
+          cd apps/web
+          npx vite --port 5173 > /tmp/web.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:5173/ > /dev/null 2>&1 && break; sleep 2; done
+          curl -sf http://localhost:5173/ > /dev/null || (cat /tmp/web.log && exit 1)
+      - name: Install Playwright browser
+        run: npx playwright install chromium
+      - name: Run a11y scan (DS-07 gate — fails on critical/serious)
+        run: npm run a11y
+        working-directory: apps/web
+      - name: Upload a11y report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report
+          path: docs/design-system/a11y-report.json
