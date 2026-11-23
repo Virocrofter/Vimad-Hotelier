@@ -144,6 +144,7 @@ export default function TasksPage() {
   const [bulkAssignee, setBulkAssignee] = useState('');
   const [openTask, setOpenTask] = useState(null);
   const bulkAssign = useBulkAssign();
+  const staffQuery = useHousekeepingStaff();
 
   return (
     <div className="hq-surface-0 min-h-full space-y-6 p-6">
