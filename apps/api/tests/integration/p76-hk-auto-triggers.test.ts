@@ -118,11 +118,14 @@ beforeAll(async () => {
 describe('7.6 HK auto-trigger rules', () => {
   it('S1: stayover clean generates for the in-house room', async () => {
     const created = await svc.evaluateRule(ctx.rules['hk-stayover-clean']);
-    expect(created).toBe(1);
-    const task = await prisma.task.findFirst({ where: { ruleId: ctx.rules['hk-stayover-clean'] } });
-    expect(task.roomId).toBe(ctx.rStay.id);
-    expect(task.title).toContain('HK-101');
-    console.log('7.6 S1 OK — stayover task generated');
+    // two in-house rooms tonight (rStay + rOccupied both checked_in spanning today)
+    expect(created).toBe(2);
+    const tasks = await prisma.task.findMany({
+      where: { ruleId: ctx.rules['hk-stayover-clean'] },
+    });
+    expect(tasks.map((x: any) => x.roomId).sort()).toEqual([ctx.rStay.id, ctx.rOccupied.id].sort());
+    expect(tasks.map((x: any) => x.title).join(' ')).toContain('HK-101');
+    console.log('7.6 S1 OK — stayover tasks generated for both in-house rooms');
   }, 60000);
 
   it('S2: linen interval — every unserviced room due, recently-serviced skipped', async () => {
