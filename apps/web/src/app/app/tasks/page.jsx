@@ -1,6 +1,7 @@
 /* apps/web/src/app/app/tasks/page.jsx — T1 + T5 */
 import { useState, useMemo } from 'react';
 import { useBulkAssign } from '../../../hooks/useSupervisor';
+import { transitionRoomStatus } from '../../../api/housekeeping';
 import {
   useTaskList,
   useTaskSummary,
@@ -351,7 +352,11 @@ export default function TasksPage() {
           )}
         </TabsContent>
 
-        <TaskInspector task={openTask} onClose={() => setOpenTask(null)} />
+        <TaskInspector
+          key={openTask?.id ?? 'none'}
+          task={openTask}
+          onClose={() => setOpenTask(null)}
+        />
 
         <TabsContent value="rules" className="space-y-4">
           <div className="flex justify-end">
@@ -401,6 +406,8 @@ export default function TasksPage() {
 
 function TaskInspector({ task, onClose }) {
   const completeMut = useCompleteTask();
+  const [flip, setFlip] = useState(false);
+  const [flipping, setFlipping] = useState(false);
   if (!task) return null;
   const isActive = task.status === 'open' || task.status === 'in_progress';
   return (
@@ -444,7 +451,81 @@ function TaskInspector({ task, onClose }) {
           </div>
         </dl>
         {task.description && <p className="whitespace-pre-wrap text-sm">{task.description}</p>}
-        {isActive && (
+
+        {task.room?.id && !flip && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Room {task.room.number} state:</span>
+            <Select
+              value=""
+              onValueChange={async (st) => {
+                try {
+                  await transitionRoomStatus(task.room.id, { housekeepingStatus: st });
+                  toast({ title: `Room marked ${st}` });
+                } catch (e) {
+                  toast({
+                    title: 'Status change failed',
+                    description: e?.response?.data?.error?.message ?? String(e?.message ?? e),
+                    variant: 'destructive',
+                  });
+                }
+              }}
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Set…" />
+              </SelectTrigger>
+              <SelectContent>
+                {['clean', 'dirty', 'inspected', 'ready'].map((st) => (
+                  <SelectItem key={st} value={st}>
+                    {st}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {flip && task.room?.id && (
+          <div className="space-y-2 rounded-md border p-3">
+            <p className="text-sm font-medium">
+              Room {task.room.number} block cleared — set its state:
+            </p>
+            <div className="flex gap-2">
+              {['inspected', 'ready'].map((st) => (
+                <Button
+                  key={st}
+                  size="sm"
+                  variant="outline"
+                  disabled={flipping}
+                  onClick={async () => {
+                    setFlipping(true);
+                    try {
+                      await transitionRoomStatus(task.room.id, {
+                        housekeepingStatus: st,
+                        note: `Cleared by ticket: ${task.title}`,
+                      });
+                      toast({ title: `Room marked ${st}` });
+                      onClose();
+                    } catch (e) {
+                      toast({
+                        title: 'Status change failed',
+                        description: e?.response?.data?.error?.message ?? String(e?.message ?? e),
+                        variant: 'destructive',
+                      });
+                    } finally {
+                      setFlipping(false);
+                    }
+                  }}
+                >
+                  Mark {st}
+                </Button>
+              ))}
+              <Button size="sm" variant="ghost" onClick={onClose}>
+                Skip
+              </Button>
+            </div>
+          </div>
+        )}
+        {isActive && !flip && (
           <Button
             className="w-full"
             disabled={completeMut.isPending}
@@ -454,7 +535,8 @@ function TaskInspector({ task, onClose }) {
                 {
                   onSuccess: () => {
                     toast({ title: 'Task completed' });
-                    onClose();
+                    if (task.blocksSpaceStatus && task.room?.id) setFlip(true);
+                    else onClose();
                   },
                   onError: (e) =>
                     toast({
