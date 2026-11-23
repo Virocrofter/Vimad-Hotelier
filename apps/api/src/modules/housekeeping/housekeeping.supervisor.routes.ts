@@ -355,3 +355,132 @@ housekeepingSupervisorRouter.post(
     }
   }
 );
+
+/* ─── 7.8 — Lost & Found ledger (P32). Item registry linked to the departed
+ * guest's reservation; found → claimed → returned | disposed lifecycle. ─── */
+const lfCreateSchema = z.object({
+  propertyId: z.string().min(1),
+  description: z.string().min(1).max(500),
+  category: z
+    .enum(['general', 'electronics', 'clothing', 'documents', 'valuables'])
+    .default('general'),
+  foundRoomId: z.string().optional(),
+  foundLocation: z.string().max(200).optional(),
+  foundAt: z.string().optional(),
+  photoUrls: z.array(z.string().url()).max(10).optional(),
+  guestId: z.string().optional(),
+  reservationId: z.string().optional(),
+  notes: z.string().max(2000).optional(),
+});
+
+const lfPatchSchema = z.object({
+  status: z.enum(['claimed', 'returned', 'disposed']).optional(),
+  guestId: z.string().nullable().optional(),
+  reservationId: z.string().nullable().optional(),
+  notes: z.string().max(2000).optional(),
+});
+
+housekeepingSupervisorRouter.get('/lost-found', async (req, res, next) => {
+  try {
+    const { tenantId } = (req as AuthenticatedRequest).auth;
+    const { status, propertyId } = req.query as Record<string, string>;
+    const items = await prisma.lostFoundItem.findMany({
+      where: {
+        tenantId,
+        ...(status ? { status } : {}),
+        ...(propertyId ? { propertyId } : {}),
+      },
+      include: {
+        guest: { select: { firstName: true, lastName: true } },
+        foundRoom: { select: { number: true } },
+        reservation: { select: { confirmationNumber: true } },
+      },
+      orderBy: { foundAt: 'desc' },
+      take: 200,
+    });
+    return res.json({ data: { items } });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+housekeepingSupervisorRouter.post('/lost-found', async (req, res, next) => {
+  try {
+    const { tenantId } = (req as AuthenticatedRequest).auth;
+    const parsed = lfCreateSchema.safeParse(req.body);
+    if (!parsed.success)
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: parsed.error.issues[0]?.message ?? 'Invalid body',
+        },
+      });
+    const item = await prisma.lostFoundItem.create({
+      data: {
+        tenantId,
+        propertyId: parsed.data.propertyId,
+        description: parsed.data.description,
+        category: parsed.data.category,
+        foundRoomId: parsed.data.foundRoomId ?? null,
+        foundLocation: parsed.data.foundLocation ?? null,
+        foundAt: parsed.data.foundAt ? new Date(parsed.data.foundAt) : undefined,
+        photoUrls: (parsed.data.photoUrls ?? undefined) as any,
+        guestId: parsed.data.guestId ?? null,
+        reservationId: parsed.data.reservationId ?? null,
+        notes: parsed.data.notes ?? null,
+      },
+    });
+    return res.status(201).json({ data: item });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+housekeepingSupervisorRouter.patch('/lost-found/:id', async (req, res, next) => {
+  try {
+    const { tenantId } = (req as AuthenticatedRequest).auth;
+    const parsed = lfPatchSchema.safeParse(req.body);
+    if (!parsed.success)
+      return res.status(400).json({
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: parsed.error.issues[0]?.message ?? 'Invalid body',
+        },
+      });
+    const item = await prisma.lostFoundItem.findFirst({
+      where: { id: req.params.id, tenantId },
+    });
+    if (!item)
+      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Item not found' } });
+    const target = parsed.data.status;
+    if (target) {
+      const legal =
+        (item.status === 'found' && (target === 'claimed' || target === 'disposed')) ||
+        (item.status === 'claimed' && target === 'returned');
+      if (!legal)
+        return res.status(409).json({
+          error: {
+            code: 'INVALID_TRANSITION',
+            message: `${item.status} → ${target} is not allowed`,
+          },
+        });
+    }
+    const updated = await prisma.lostFoundItem.update({
+      where: { id: item.id },
+      data: {
+        ...(target ? { status: target } : {}),
+        ...(target === 'claimed' ? { claimedAt: new Date() } : {}),
+        ...(target === 'returned' ? { returnedAt: new Date() } : {}),
+        ...(target === 'disposed' ? { disposedAt: new Date() } : {}),
+        ...(parsed.data.guestId !== undefined ? { guestId: parsed.data.guestId } : {}),
+        ...(parsed.data.reservationId !== undefined
+          ? { reservationId: parsed.data.reservationId }
+          : {}),
+        ...(parsed.data.notes !== undefined ? { notes: parsed.data.notes } : {}),
+      },
+    });
+    return res.json({ data: updated });
+  } catch (err) {
+    return next(err);
+  }
+});
