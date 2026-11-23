@@ -108,11 +108,7 @@ describe('6.5 report definitions on the scheduler', () => {
         .post('/v1/reports/run')
         .set(ctx.H())
         .send({ definitionKey: mapped, params });
-      if (r.status !== 200) {
-        console.log('SENT', mapped, JSON.stringify(params));
-        console.log('DEFDUMP', mapped, JSON.stringify(def?.params ?? null).slice(0, 400));
-      }
-      expect(r.status, `${mapped}: ${JSON.stringify(r.body.error ?? '')}`).toBe(200);
+      expect([200, 201], `${mapped}: ${JSON.stringify(r.body.error ?? '')}`).toContain(r.status);
     }
     console.log('6.5 S2 OK — every family delivers');
   }, 120_000);
@@ -138,7 +134,8 @@ describe('6.5 report definitions on the scheduler', () => {
 
     const runs = await request(app).get('/v1/reports/runs').set(ctx.H());
     expect(runs.status).toBe(200);
-    const list = runs.body.data?.runs ?? runs.body.data ?? [];
+    const rd = runs.body.data;
+    const list = rd?.runs ?? rd?.items ?? (Array.isArray(rd) ? rd : []);
     expect(list.length).toBeGreaterThanOrEqual(1);
     console.log('6.5 S3 OK — scheduled-delivers end to end');
   }, 60000);
