@@ -77,6 +77,20 @@ const startOfDay = (d: Date = new Date()) => {
   x.setHours(0, 0, 0, 0);
   return x;
 };
+
+/* TZ-stable calendar-date helpers for @db.Date columns: stored values are
+ * always UTC midnight and Postgres casts date→timestamptz at session TZ, so
+ * Node-local startOfDay() equality/boundaries read wrong across TZs (P10).
+ * Wide where + JS date-string compare is immune. */
+const dateKey = (d: Date) => d.toISOString().slice(0, 10);
+const localDateKey = (d: Date = new Date()) => d.toLocaleDateString('en-CA');
+const utcDayStart = (offsetDays = 0) => {
+  const n = new Date();
+  return addDays(
+    new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate())),
+    offsetDays
+  );
+};
 const addDays = (d: Date, n: number) => new Date(d.getTime() + n * 86400_000);
 const addHours = (d: Date, n: number) => new Date(d.getTime() + n * 3600_000);
 const dayKey = (d: Date = new Date()) => d.toISOString().slice(0, 10);
@@ -284,13 +298,19 @@ const RULE_PROVIDERS: Record<string, (rule: RuleRow) => Promise<TaskCandidate[]>
 
   // 2. Arrival not inspected by 12:00
   'arrival-not-inspected-by-12': async (rule) => {
-    if (new Date().getHours() < 12) return [];
+    const cfgA = (rule as unknown as { config?: Record<string, unknown> }).config ?? {};
+    if (new Date().getHours() < (cfgA.hour !== undefined ? Number(cfgA.hour) : 12)) return [];
     const rsvs = await prisma.reservation.findMany({
-      where: { ...ruleScope(rule), status: 'checked_in', arrivalDate: startOfDay() },
+      where: {
+        ...ruleScope(rule),
+        status: 'checked_in',
+        arrivalDate: { gte: utcDayStart(-1), lt: utcDayStart(2) },
+      },
       include: { guest: true, stays: { include: { room: true }, take: 1 } },
       take: 200,
     });
     return rsvs
+      .filter((r) => dateKey(r.arrivalDate) === localDateKey())
       .filter((r) => r.stays[0]?.room?.housekeepingStatus !== 'inspected')
       .map((r) => ({
         entityType: 'reservation',
@@ -309,13 +329,14 @@ const RULE_PROVIDERS: Record<string, (rule: RuleRow) => Promise<TaskCandidate[]>
 
   // 3. DND room — decide service vs skip at 16:00
   'dnd-decision-16': async (rule) => {
-    if (new Date().getHours() < 16) return [];
+    const cfgD = (rule as unknown as { config?: Record<string, unknown> }).config ?? {};
+    if (new Date().getHours() < (cfgD.hour !== undefined ? Number(cfgD.hour) : 16)) return [];
     const rsvs = await prisma.reservation.findMany({
       where: {
         ...ruleScope(rule),
         status: 'checked_in',
-        arrivalDate: { lte: startOfDay() },
-        departureDate: { gt: startOfDay() },
+        arrivalDate: { lte: utcDayStart(-1) },
+        departureDate: { gte: utcDayStart(1) },
         guest: { doNotDisturb: true },
       },
       include: { guest: true, stays: { include: { room: true }, take: 1 } },
@@ -363,29 +384,32 @@ const RULE_PROVIDERS: Record<string, (rule: RuleRow) => Promise<TaskCandidate[]>
 
   // 5. 16:00 — arrivals today still without a room assigned
   'unassigned-room-16': async (rule) => {
-    if (new Date().getHours() < 16) return [];
+    const cfgU = (rule as unknown as { config?: Record<string, unknown> }).config ?? {};
+    if (new Date().getHours() < (cfgU.hour !== undefined ? Number(cfgU.hour) : 16)) return [];
     const rsvs = await prisma.reservation.findMany({
       where: {
         ...ruleScope(rule),
         status: { in: ['confirmed', 'checked_in'] },
-        arrivalDate: startOfDay(),
+        arrivalDate: { gte: utcDayStart(-1), lt: utcDayStart(2) },
         stays: { none: {} },
       },
       include: { guest: true },
       take: 100,
     });
-    return rsvs.map((r) => ({
-      entityType: 'reservation',
-      entityId: r.id,
-      propertyId: r.propertyId,
-      guestId: r.guestId,
-      reservationId: r.id,
-      ctx: {
-        confirmationNumber: r.confirmationNumber,
-        guestName: `${r.guest.firstName} ${r.guest.lastName}`,
-        arrivalTime: r.arrivalDate.toISOString(),
-      },
-    }));
+    return rsvs
+      .filter((r) => dateKey(r.arrivalDate) === localDateKey())
+      .map((r) => ({
+        entityType: 'reservation',
+        entityId: r.id,
+        propertyId: r.propertyId,
+        guestId: r.guestId,
+        reservationId: r.id,
+        ctx: {
+          confirmationNumber: r.confirmationNumber,
+          guestName: `${r.guest.firstName} ${r.guest.lastName}`,
+          arrivalTime: r.arrivalDate.toISOString(),
+        },
+      }));
   },
 
   // 6. T-3 deposit payment request (operationally ties to A2)
@@ -394,25 +418,27 @@ const RULE_PROVIDERS: Record<string, (rule: RuleRow) => Promise<TaskCandidate[]>
       where: {
         ...ruleScope(rule),
         status: 'confirmed',
-        arrivalDate: addDays(startOfDay(), 3),
+        arrivalDate: { gte: utcDayStart(2), lt: utcDayStart(5) },
         balance: { gt: 0 },
       },
       include: { guest: true },
       take: 100,
     });
-    return rsvs.map((r) => ({
-      entityType: 'reservation',
-      entityId: r.id,
-      propertyId: r.propertyId,
-      guestId: r.guestId,
-      reservationId: r.id,
-      ctx: {
-        confirmationNumber: r.confirmationNumber,
-        guestName: `${r.guest.firstName} ${r.guest.lastName}`,
-        balance: Number(r.balance).toFixed(2),
-        arrivalDate: r.arrivalDate.toISOString().slice(0, 10),
-      },
-    }));
+    return rsvs
+      .filter((r) => dateKey(r.arrivalDate) === localDateKey(addDays(new Date(), 3)))
+      .map((r) => ({
+        entityType: 'reservation',
+        entityId: r.id,
+        propertyId: r.propertyId,
+        guestId: r.guestId,
+        reservationId: r.id,
+        ctx: {
+          confirmationNumber: r.confirmationNumber,
+          guestName: `${r.guest.firstName} ${r.guest.lastName}`,
+          balance: Number(r.balance).toFixed(2),
+          arrivalDate: r.arrivalDate.toISOString().slice(0, 10),
+        },
+      }));
   },
 
   // 7. Departed with an unsettled folio
