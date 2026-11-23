@@ -17,7 +17,8 @@
     "a11y": "node ../../scripts/a11y-scan.mjs",
     "vrt": "playwright test -c ../../scripts/playwright.vrt.config.ts",
     "vrt:update": "playwright test -c ../../scripts/playwright.vrt.config.ts --update-snapshots",
-    "vrt:docker": "docker build -f Dockerfile.vrt -t vimad-vrt . && docker run --rm -v $(pwd)/.vimad-vrt:/app/.vimad-vrt vimad-vrt"
+    "vrt:docker": "docker build -f Dockerfile.vrt -t vimad-vrt . && docker run --rm -v $(pwd)/.vimad-vrt:/app/.vimad-vrt vimad-vrt",
+    "tokens:check": "npm run tokens:build && git diff --exit-code -- src/styles/generated"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",

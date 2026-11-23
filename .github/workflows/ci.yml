@@ -23,6 +23,8 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
+      - name: Token pipeline compiles, no drift (DS-01)
+        run: npm --prefix apps/web run tokens:check
 
   typecheck:
     name: Type Check
