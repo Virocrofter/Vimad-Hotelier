@@ -55,7 +55,7 @@ const createBlocking = (title: string) =>
     propertyId: ctx.propId,
     department: 'maintenance',
     title,
-    priority: 'critical',
+    priority: 'urgent',
     roomId: ctx.roomId,
     blocksSpaceStatus: true,
   });
