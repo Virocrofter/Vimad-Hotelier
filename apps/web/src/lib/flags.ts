@@ -3,8 +3,12 @@
  * Set VITE_FLAG_*=true in apps/web/.env to re-enable.
  */
 
+// opt-in: unset = OFF (unfinished surfaces stay hidden by default)
 const env = (key: string): boolean =>
   (import.meta.env[`VITE_${key}`] as string | undefined) === 'true';
+// default-on: unset = ON (shipped surfaces are unconditional; 'false' disables)
+const envOn = (key: string): boolean =>
+  (import.meta.env[`VITE_${key}`] as string | undefined) !== 'false';
 
 export const flags = {
   adminAnalytics: env('FLAG_ADMIN_ANALYTICS'),
@@ -27,10 +31,10 @@ export const flags = {
 
   loyalty: env('FLAG_LOYALTY'),
   groups: env('FLAG_GROUPS'),
-  todayV2: env('FLAG_DASHBOARD_TODAY_V2'),
-  reservationWorkspace: env('FLAG_RESERVATION_WORKSPACE'),
+  todayV2: envOn('FLAG_DASHBOARD_TODAY_V2'), // HK-01: shipped, unconditional
+  reservationWorkspace: envOn('FLAG_RESERVATION_WORKSPACE'), // HK-01: shipped, unconditional
   paymentExceptions: env('FLAG_PAYMENT_EXCEPTIONS'),
-  exceptions: env('FLAG_EXCEPTIONS'),
+  exceptions: envOn('FLAG_EXCEPTIONS'), // HK-01: shipped, unconditional
   reports: env('FLAG_REPORTS'),
   guestReviews: env('FLAG_GUEST_REVIEWS'),
   guestBilling: env('FLAG_GUEST_BILLING'),
