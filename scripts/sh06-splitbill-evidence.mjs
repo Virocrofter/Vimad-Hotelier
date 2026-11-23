@@ -32,7 +32,7 @@ await page.addInitScript(([t, u, p]) => {
   localStorage.setItem('vimad_access_token', t);
   localStorage.setItem('auth-storage', JSON.stringify({ state: { user: u, token: t, refreshToken: null, isAuthenticated: true, permissions: p }, version: 0 }));
 }, [token, user, perms]);
-await page.goto('http://localhost:5173/app/groups/' + gid + '/billing', { waitUntil: 'networkidle' });
+await page.goto('http://localhost:5173/app/groups/billing?groupId=' + gid, { waitUntil: 'networkidle' });
 await page.waitForTimeout(2500);
 const bar = await page.locator('text=Group total').count();
 check('sticky totals bar renders', bar > 0, 'Group total=' + bar);

@@ -1,4 +1,4 @@
 PASS login
 PASS demo group present — 9 groups
-FAIL sticky totals bar renders — Group total=0
-FAIL bills render as cards with per-item move — 0 move selects
+PASS sticky totals bar renders — Group total=1
+PASS bills render as cards with per-item move — 6 move selects
