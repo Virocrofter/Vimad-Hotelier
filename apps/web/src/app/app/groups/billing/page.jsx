@@ -161,6 +161,38 @@ export default function GroupBillingPage() {
           />
         ) : null
       )}
+
+      <div className="sticky bottom-4 z-10 mt-2 rounded-xl border border-border bg-surface px-4 py-3 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-4 text-sm">
+            <span className="text-text-secondary">
+              Open bills:{' '}
+              <span className="font-semibold text-text-primary">
+                {money(
+                  data.bills.reduce(
+                    (sum, b) =>
+                      sum + (b.folio && b.folio.status !== 'closed' ? Number(b.folio.balance) : 0),
+                    0
+                  )
+                )}
+              </span>
+            </span>
+            <span className="text-text-secondary">
+              Master/unassigned:{' '}
+              <span className="font-semibold text-text-primary">
+                {money(Number(data.masterFolio?.balance ?? 0))}
+              </span>
+            </span>
+          </div>
+          <p className="font-mono text-base font-bold text-text-primary">
+            Group total:{' '}
+            {money(
+              Number(data.masterFolio?.balance ?? 0) +
+                data.bills.reduce((sum, b) => sum + (b.folio ? Number(b.folio.balance) : 0), 0)
+            )}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
