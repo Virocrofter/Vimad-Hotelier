@@ -189,6 +189,11 @@ jobs:
       - name: Run a11y scan (DS-07 gate — fails on critical/serious)
         run: npm run a11y
         working-directory: apps/web
+      - name: Annotate a11y violations
+        if: failure()
+        run: |
+          node -e "const r=require('./docs/design-system/a11y-report.json');(r.violations||[]).forEach(v=>console.log('::error title=A11Y '+v.impact+'::'+v.id+' — '+v.help))"
+
       - name: Surface a11y violations
         if: always()
         run: |

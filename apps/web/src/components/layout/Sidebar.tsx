@@ -52,7 +52,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
   const activeKey = useMemo(() => {
     for (const g of groups) if (g.items.some((i) => isActive(i.to))) return g.key;
     return ui.group;
-  }, [pathname, groups, ui.group, isActive]);
+  }, [groups, ui.group, isActive]);
 
   const openKey = hoverGroup ?? activeKey;
   const open = ui.open || hoverGroup !== null;
