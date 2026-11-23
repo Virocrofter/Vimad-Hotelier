@@ -64,3 +64,24 @@ export const fetchMinibarChecks = (params = {}) => {
 };
 export const waiveMinibar = (id, reason) =>
   api(`/v1/minibar/${id}/waive`, { method: 'POST', body: { reason } });
+
+// ─── 7.x supervisor space-report + bulk ops + L&F ledger ───
+export const fetchSpaceReport = (propertyId) =>
+  api(`/v1/housekeeping/supervisor/space-report?propertyId=${encodeURIComponent(propertyId)}`);
+
+export const bulkAssignTasks = (taskIds, assigneeId) =>
+  api('/v1/housekeeping/supervisor/tasks/bulk-assign', {
+    method: 'POST',
+    body: { taskIds, assigneeId },
+  });
+
+export const fetchLostFound = (params = {}) => {
+  const q = new URLSearchParams(params).toString();
+  return api(`/v1/housekeeping/supervisor/lost-found${q ? `?${q}` : ''}`);
+};
+
+export const createLostFound = (payload) =>
+  api('/v1/housekeeping/supervisor/lost-found', { method: 'POST', body: payload });
+
+export const updateLostFound = (id, payload) =>
+  api(`/v1/housekeeping/supervisor/lost-found/${id}`, { method: 'PATCH', body: payload });
