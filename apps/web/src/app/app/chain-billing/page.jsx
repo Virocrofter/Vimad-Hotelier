@@ -1,4 +1,5 @@
 /* apps/web/src/app/app/chain-billing/page.jsx — C5 chain corporate billing */
+import { Row } from '@/components/billing/ReceiptCard';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -222,13 +223,12 @@ function AccountRow({ account }) {
                     </div>
                     <div className="mt-1 space-y-0.5">
                       {inv.items.map((i) => (
-                        <div
+                        <Row
                           key={i.id}
-                          className="flex justify-between text-[11px] text-text-secondary"
-                        >
-                          <span>{i.description}</span>
-                          <span>{fmtMoney(i.amount)}</span>
-                        </div>
+                          label={i.description}
+                          amount={i.amount}
+                          currency={inv.currency ?? 'ZAR'}
+                        />
                       ))}
                     </div>
                   </div>
