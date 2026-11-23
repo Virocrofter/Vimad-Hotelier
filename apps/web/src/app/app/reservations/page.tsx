@@ -166,7 +166,9 @@ export default function ReservationsPage() {
     setViews(v);
     try {
       localStorage.setItem('reservations.savedViews.v1', JSON.stringify(v));
-    } catch {}
+    } catch {
+      /* localStorage unavailable */
+    }
   };
   const applyView = (v: SavedView) => {
     setTab(v.tab);

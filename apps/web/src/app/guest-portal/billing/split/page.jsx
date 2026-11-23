@@ -59,7 +59,7 @@ export default function SplitBillPage() {
   const [showAddGuest, setShowAddGuest] = useState(false);
   const [feedback, setFeedback] = useState(null); // { ok, text }
 
-  const items = folioData?.items ?? [];
+  const items = useMemo(() => folioData?.items ?? [], [folioData]);
   const splits = splitsData?.splits ?? [];
 
   const participantTotals = useMemo(() => {

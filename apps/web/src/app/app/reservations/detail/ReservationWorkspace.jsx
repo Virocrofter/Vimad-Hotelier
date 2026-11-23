@@ -10,7 +10,7 @@
  * already-tested reservation endpoints.
  */
 import { formatMoneyMinor, formatMoney } from '../../../../lib/money';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import {
