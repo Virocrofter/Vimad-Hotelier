@@ -438,7 +438,7 @@ housekeepingSupervisorRouter.post('/lost-found', async (req, res, next) => {
 
 housekeepingSupervisorRouter.patch('/lost-found/:id', async (req, res, next) => {
   try {
-    const { tenantId } = (req as AuthenticatedRequest).auth;
+    const { tenantId } = (req as unknown as AuthenticatedRequest).auth;
     const parsed = lfPatchSchema.safeParse(req.body);
     if (!parsed.success)
       return res.status(400).json({
