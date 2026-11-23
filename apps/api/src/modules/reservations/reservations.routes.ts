@@ -624,3 +624,19 @@ reservationsRouter.delete(
     }
   }
 );
+
+// 4.1b — undo check-in: guarded revert (service pre-shipped; mounted here).
+import { undoCheckIn } from './reservations.service.js';
+
+reservationsRouter.post(
+  '/:id/undo-check-in',
+  requirePermission('reservation', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await undoCheckIn(req.tenantId, String(req.params.id), actorOf(req));
+      res.json({ data });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
