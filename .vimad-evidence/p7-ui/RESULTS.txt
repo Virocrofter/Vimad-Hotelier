@@ -1,0 +1,10 @@
+PASS api login — status 200
+PASS dev server — http://localhost:5173
+PASS space report floors — 1 floor markers
+PASS lost & found view — register CTA present
+PASS task queue rows — 32 rows
+PASS task inspector drawer — 1 dialog(s)
+FAIL service worker registered — registrations: 0
+PASS offline read fails (probe)
+FAIL online read recovers
+PASS zero console errors (desktop walk)
