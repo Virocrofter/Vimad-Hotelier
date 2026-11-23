@@ -98,7 +98,7 @@ describe('P37 undo check-out (4.1b)', () => {
   }, 60000);
 
   it('S2: blocked once folio items posted after checkout', async () => {
-    await svc.checkInReservation(ctx.t, ctx.resB.id);
+    await svc.checkInReservation(ctx.t, ctx.resB.id, undefined, { force: true });
     await svc.checkOutReservation(ctx.t, ctx.resB.id);
     const res = await prisma.reservation.findFirst({ where: { id: ctx.resB.id } });
     const folio = await prisma.folio.findFirst({ where: { reservationId: ctx.resB.id } });
