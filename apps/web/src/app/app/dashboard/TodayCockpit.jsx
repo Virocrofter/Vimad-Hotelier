@@ -269,6 +269,8 @@ export default function TodayCockpit({ propertyId, onMutated }) {
   const queryClient = useQueryClient();
   const [busyId, setBusyId] = useState(null);
   const [actionError, setActionError] = useState(null);
+  const [revOpen, setRevOpen] = useState(true);
+  const [actOpen, setActOpen] = useState(false);
 
   const runAction = async (item, action) => {
     setBusyId(item.id);
@@ -398,19 +400,28 @@ export default function TodayCockpit({ propertyId, onMutated }) {
 
       {/* Revenue insight — glass focal surface with definitions + freshness */}
       <div className="glass rounded-xl px-5 py-4">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 className="text-sm font-semibold text-text-primary">Revenue snapshot</h3>
-            <p className="mt-0.5 text-xs text-text-muted">
-              Room revenue {money(d.revenue.roomRevenueToday, currency)} · ADR{' '}
-              {money(d.revenue.adr, currency)} · RevPAR {money(d.revenue.revpar, currency)} ·
-              occupancy {d.revenue.occupancyPct}%
-            </p>
+        <button
+          onClick={() => setRevOpen((o) => !o)}
+          aria-expanded={revOpen}
+          className="flex w-full items-center justify-between text-left"
+        >
+          <h3 className="text-sm font-semibold text-text-primary">Revenue snapshot</h3>
+          <span className="text-xs text-text-muted">{revOpen ? 'Hide' : 'Show'}</span>
+        </button>
+        {revOpen && (
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="mt-0.5 text-xs text-text-muted">
+                Room revenue {money(d.revenue.roomRevenueToday, currency)} · ADR{' '}
+                {money(d.revenue.adr, currency)} · RevPAR {money(d.revenue.revpar, currency)} ·
+                occupancy {d.revenue.occupancyPct}%
+              </p>
+            </div>
+            <span className="rounded-full bg-surface-elevated px-2 py-0.5 text-[11px] text-text-secondary">
+              updated {revenueFresh}
+            </span>
           </div>
-          <span className="rounded-full bg-surface-elevated px-2 py-0.5 text-[11px] text-text-secondary">
-            updated {revenueFresh}
-          </span>
-        </div>
+        )}
         <details className="mt-2">
           <summary className="cursor-pointer text-[11px] text-text-muted hover:text-text-secondary">
             Metric definitions & inclusion rules
@@ -423,22 +434,31 @@ export default function TodayCockpit({ propertyId, onMutated }) {
 
       {/* Activity timeline */}
       <div className="rounded-xl border border-border bg-surface px-5 py-4">
-        <h3 className="text-sm font-semibold text-text-primary">Latest activity</h3>
-        <ul className="mt-2 space-y-1.5">
-          {d.activity.slice(0, 8).map((a, i) => (
-            <li key={`${a.at}-${i}`} className="flex items-baseline gap-2 text-xs">
-              <span className="shrink-0 text-text-muted">{relTime(a.at)}</span>
-              <span className="shrink-0 font-medium text-text-primary">{a.action}</span>
-              <span className="truncate text-text-secondary">
-                {a.entity}
-                {a.entityId ? ` · ${a.entityId.slice(0, 8)}…` : ''}
-              </span>
-            </li>
-          ))}
-          {d.activity.length === 0 && (
-            <li className="text-xs text-text-muted">No activity recorded yet today.</li>
-          )}
-        </ul>
+        <button
+          onClick={() => setActOpen((o) => !o)}
+          aria-expanded={actOpen}
+          className="flex w-full items-center justify-between text-left"
+        >
+          <h3 className="text-sm font-semibold text-text-primary">Latest activity</h3>
+          <span className="text-xs text-text-muted">{actOpen ? 'Hide' : 'Show'}</span>
+        </button>
+        {actOpen && (
+          <ul className="mt-2 space-y-1.5">
+            {d.activity.slice(0, 8).map((a, i) => (
+              <li key={`${a.at}-${i}`} className="flex items-baseline gap-2 text-xs">
+                <span className="shrink-0 text-text-muted">{relTime(a.at)}</span>
+                <span className="shrink-0 font-medium text-text-primary">{a.action}</span>
+                <span className="truncate text-text-secondary">
+                  {a.entity}
+                  {a.entityId ? ` · ${a.entityId.slice(0, 8)}…` : ''}
+                </span>
+              </li>
+            ))}
+            {d.activity.length === 0 && (
+              <li className="text-xs text-text-muted">No activity recorded yet today.</li>
+            )}
+          </ul>
+        )}
       </div>
     </section>
   );
