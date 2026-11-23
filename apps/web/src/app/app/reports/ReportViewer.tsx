@@ -59,7 +59,7 @@ export default function ReportViewer({
 <div class="meta">Vimad Reports · run ${new Date(run.createdAt).toLocaleString()} · ${result.rows.length.toLocaleString()} rows${result.truncated ? ' (truncated)' : ''}</div>
 <div class="cards">${summaryHtml}</div>
 <table><thead><tr>${head}</tr></thead><tbody>${body || `<tr><td colspan="${cols.length}">No data</td></tr>`}</tbody></table>
-<script>window.onload = () => { window.print(); }<\/script>
+<script>window.onload = () => { window.print(); }</script>
 </body></html>`);
     w.document.close();
   };

@@ -171,6 +171,8 @@ jobs:
         run: cd apps/api && npx prisma db seed
         env:
           DATABASE_URL: postgresql://vimad:vimad_dev_password@localhost:5432/unified_pms
+        env:
+          DATABASE_URL: postgresql://vimad:vimad_dev_password@localhost:5432/unified_pms
       - name: Start API
         run: |
           cd apps/api
