@@ -18,6 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import SupervisorBoard from './SupervisorBoard';
+import SpaceReportView from './SpaceReportView';
+import LostFoundView from './LostFoundView';
 import MinibarModal from './MinibarModal';
 import {
   Select,
@@ -613,6 +615,8 @@ function HousekeepingPage() {
               <TabsTrigger value="supervisor">
                 <ShieldCheck className="h-4 w-4 mr-1" /> Supervisor
               </TabsTrigger>
+              <TabsTrigger value="space-report">Space Report</TabsTrigger>
+              <TabsTrigger value="lost-found">Lost &amp; Found</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -622,7 +626,7 @@ function HousekeepingPage() {
       <StatsCards stats={stats?.data} />
 
       {/* Filters — hidden on supervisor tab (board has its own) */}
-      {view !== 'supervisor' && (
+      {view !== 'supervisor' && view !== 'space-report' && view !== 'lost-found' && (
         <div className="flex flex-wrap items-center gap-3">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -762,6 +766,12 @@ function HousekeepingPage() {
           </TabsContent>
           <TabsContent value="supervisor" className="mt-4">
             <SupervisorBoard />
+          </TabsContent>
+          <TabsContent value="space-report" className="mt-4">
+            <SpaceReportView />
+          </TabsContent>
+          <TabsContent value="lost-found" className="mt-4">
+            <LostFoundView />
           </TabsContent>
         </Tabs>
       )}
