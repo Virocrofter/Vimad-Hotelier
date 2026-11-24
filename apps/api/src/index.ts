@@ -70,6 +70,8 @@ import './jobs/contracts.renewal.job.js'; // [CONTRACTS] renewal/expiry scan (se
 import { startReportsScheduler } from './jobs/reports.job.js';
 import { startExceptionsCadence } from './modules/exceptions/exceptions.routes.js';
 startExceptionsCadence();
+import { startWebhooksCadence } from './modules/webhooks/webhooks.service.js';
+startWebhooksCadence();
 // [SUPPORT] guest support tickets — staff desk + guest portal + SLA engine
 
 import { healthRouter } from './modules/health/health.routes.js';
@@ -147,6 +149,7 @@ import { centralReservationsRouter } from './modules/central-reservations/centra
 import { chainBillingRouter } from './modules/chain-billing/chain-billing.routes.js';
 // [USERS] tenant staff user management (list/create/update/suspend/audit)
 import { usersRouter } from './modules/users/users.routes.js';
+import { webhooksRouter } from './modules/webhooks/webhooks.routes.js';
 // [AUDIT] tenant-scoped audit trail (users > audit logs)
 import { auditLogsRouter } from './modules/audit/audit.routes.js';
 // [G1] Groups module — group blocks, rooming list, master folio
@@ -450,6 +453,7 @@ async function bootstrap() {
   app.use('/v1/rbac', rbacRouter);
   // [USERS] tenant staff management — sits next to RBAC (roles come from /v1/rbac)
   app.use('/v1/users', usersRouter);
+  app.use('/v1/webhooks', webhooksRouter);
   // [AUDIT] tenant-scoped audit trail (auth'd — report:read or audit:read)
   app.use('/v1/audit-logs', auditLogsRouter);
   app.use('/v1/push', pushRouter);

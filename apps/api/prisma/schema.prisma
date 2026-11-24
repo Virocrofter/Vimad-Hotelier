@@ -93,6 +93,7 @@ model Tenant {
 
   @@map("tenants")
   lostFoundItems LostFoundItem[]
+  webhookEndpoints WebhookEndpoint[]
 }
 
 model User {
@@ -3891,4 +3892,47 @@ model LostFoundItem {
   @@index([tenantId, status])
   @@index([tenantId, propertyId])
   @@map("lost_found_items")
+}
+
+model WebhookEndpoint {
+  id                String          @id @default(cuid())
+  tenantId          String
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  url               String
+  events            String[]
+  secret            String
+  previousSecret    String?
+  previousExpiresAt DateTime?
+  status            String          @default("active")
+  createdById       String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  dispatches        WebhookDispatch[]
+
+  @@index([tenantId, status])
+  @@map("webhook_endpoints")
+}
+
+// D1+ platform/developer webhooks — namespaced from the channel layer's
+// WebhookDelivery (connection-scoped B1 channel webhooks).
+model WebhookDispatch {
+  id          String          @id @default(cuid())
+  tenantId    String
+  endpointId  String
+  endpoint    WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  event       String
+  payload     Json
+  status      String          @default("pending")
+  attempts    Int             @default(0)
+  statusCode  Int?
+  durationMs  Int?
+  nextRetryAt DateTime?
+  lastError   String?
+  deliveredAt DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([tenantId, createdAt])
+  @@index([status, nextRetryAt])
+  @@map("webhook_dispatches")
 }

@@ -988,6 +988,9 @@ export async function checkInReservation(
   );
 
   broadcastReservationCheckedIn(toEventPayload(updated));
+  void import('../webhooks/webhooks.service.js')
+    .then((m) => m.emitWebhookEvent(tenantId, 'reservation.checked_in', toEventPayload(updated)))
+    .catch(() => {});
 
   return updated;
 }
@@ -1060,6 +1063,9 @@ export async function checkOutReservation(
   );
 
   broadcastReservationCheckedOut(toEventPayload(updated));
+  void import('../webhooks/webhooks.service.js')
+    .then((m) => m.emitWebhookEvent(tenantId, 'reservation.checked_out', toEventPayload(updated)))
+    .catch(() => {});
 
   return updated;
 }
