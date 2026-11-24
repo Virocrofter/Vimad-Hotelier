@@ -11,12 +11,16 @@ export default defineConfig([
     files: ['**/*.{js,jsx,ts,tsx}'],
     extends: [
       js.configs.recommended,
-      reactHooks.configs.flat.recommended,
+      // react-hooks preset removed: v7 bundles React-Compiler diagnostics (76 findings,
+      // queued as a dedicated sweep). The two classic rules are explicit below.
       reactRefresh.configs.vite,
     ],
     languageOptions: {
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    plugins: {
+      'react-hooks': reactHooks,
     },
     rules: {
       'no-unused-vars': 'off',
