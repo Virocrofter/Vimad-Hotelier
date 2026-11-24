@@ -141,6 +141,17 @@ export async function postCharge(
     }),
   ]);
 
+  void import('../webhooks/webhooks.service.js')
+    .then((m) =>
+      m.emitWebhookEvent(tenantId, 'folio.charge', {
+        folioItemId: item.id,
+        folioId,
+        type: item.type,
+        amount: Number(item.amount),
+        description: item.description,
+      })
+    )
+    .catch(() => {});
   return item;
 }
 

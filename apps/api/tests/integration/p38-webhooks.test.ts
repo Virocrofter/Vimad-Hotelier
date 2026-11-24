@@ -76,6 +76,47 @@ beforeAll(async () => {
     const lg = await request(app).post('/auth/login').send({ tenantSlug: slug, email, password });
     return (lg.body?.data ?? lg.body)?.token;
   };
+  const seedProp = await prisma.property.create({
+    data: {
+      tenantId: agent.tenantId,
+      name: 'WH',
+      code: ('WH' + runId)
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '')
+        .slice(-12),
+    },
+  });
+  const seedGuest = await prisma.guest.create({
+    data: {
+      tenantId: agent.tenantId,
+      firstName: 'WH',
+      lastName: 'Guest',
+      email: `wh-${runId}@example.com`,
+    },
+  });
+  const seedRes = await prisma.reservation.create({
+    data: {
+      tenantId: agent.tenantId,
+      propertyId: seedProp.id,
+      guestId: seedGuest.id,
+      confirmationNumber: 'WH' + runId.toUpperCase().slice(-6),
+      status: 'checked_in',
+      arrivalDate: new Date(),
+      departureDate: new Date(Date.now() + 86400_000),
+      nights: 1,
+      totalAmount: 500,
+      balance: 0,
+    },
+  });
+  ctx.folio = await prisma.folio.create({
+    data: {
+      tenantId: agent.tenantId,
+      reservationId: seedRes.id,
+      totalCharges: 0,
+      totalPayments: 0,
+      balance: 0,
+    },
+  });
   adminToken = await mkUser('owner', 'a');
   staffToken = await mkUser('staff', 's');
   otherAgent = await mod.registerTestAgent(app);
@@ -170,6 +211,31 @@ describe('P38 developer webhooks (D1+)', () => {
     ).toBe(false);
     expect(svc.verifySignature(newSecret, ctx.secret, null, ts, body, newSig)).toBe(true);
     console.log('P38 S3 OK — rotation grace semantics exact');
+  }, 30000);
+
+  it('S5: folio.charge fires on every posted charge', async () => {
+    const folioSvc = await import('../../src/modules/folios/folios.service.js');
+    const before = captured.length;
+    await folioSvc.postCharge(ctx.folio.tenantId, ctx.folio.id, {
+      type: 'service',
+      description: 'Webhook leg charge',
+      amount: 250,
+      quantity: 1,
+    });
+    const got = await waitFor(async () => {
+      const hit = captured
+        .slice(before)
+        .map((h) => ({ h, p: JSON.parse(h.body) }))
+        .find((x) => x.p.event === 'folio.charge');
+      if (!hit) return false;
+      ctx.chargeHit = hit;
+      return true;
+    });
+    expect(got).toBe(true);
+    const parsed = ctx.chargeHit.p;
+    expect(parsed.data.description).toBe('Webhook leg charge');
+    expect(Number(parsed.data.amount)).toBe(250);
+    console.log('P38 S5 OK — folio.charge event delivered');
   }, 30000);
 
   it('S4: tenant scoping (404) + staff role gate (403)', async () => {
