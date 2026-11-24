@@ -685,7 +685,7 @@ export function GuestCard({ guest, showBack = true }) {
           </div>
         </div>
         {guest.blacklisted && guest.blacklistReason && (
-          <div className="mt-3 rounded-lg border border-danger/20 bg-danger/5 p-3 text-sm text-danger flex items-start gap-2">
+          <div className="mt-3 rounded-lg border border-danger/20 bg-danger/5 p-3 text-sm text-[var(--danger-soft-fg)] flex items-start gap-2">
             <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
             <span>
               <strong>Blacklist reason:</strong> {guest.blacklistReason}

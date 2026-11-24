@@ -64,7 +64,7 @@ export default function FolioOverview() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger">
+        <div className="flex items-center gap-2 rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-[var(--danger-soft-fg)]">
           <AlertCircle className="h-4 w-4" /> {error}
         </div>
       )}

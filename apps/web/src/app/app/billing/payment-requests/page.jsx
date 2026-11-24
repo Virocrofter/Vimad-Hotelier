@@ -159,7 +159,7 @@ export default function PaymentRequestsPage() {
       </div>
 
       {mutations.error && (
-        <div className="rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger">
+        <div className="rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-[var(--danger-soft-fg)]">
           {mutations.error}
         </div>
       )}

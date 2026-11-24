@@ -352,7 +352,7 @@ export default function BillingPage() {
             'flex items-center gap-2 rounded-lg border px-4 py-3 text-sm',
             notice.kind === 'success'
               ? 'border-accent/20 bg-accent/5 text-[var(--accent-soft-fg)]'
-              : 'border-danger/20 bg-danger/5 text-danger'
+              : 'border-danger/20 bg-danger/5 text-[var(--danger-soft-fg)]'
           )}
         >
           {notice.kind === 'success' ? (
@@ -477,7 +477,7 @@ export default function BillingPage() {
 
       {/* Error states */}
       {foliosError && (
-        <div className="flex items-center gap-2 rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger">
+        <div className="flex items-center gap-2 rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-[var(--danger-soft-fg)]">
           <AlertCircle className="h-4 w-4" /> {foliosError}
         </div>
       )}
