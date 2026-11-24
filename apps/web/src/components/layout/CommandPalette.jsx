@@ -25,6 +25,7 @@ import {
   Search,
   TrendingUp,
   Users,
+  Webhook,
 } from 'lucide-react';
 import { apiClient } from '../../api/client';
 import { cn } from '../../lib/utils';
@@ -107,6 +108,13 @@ const ACTIONS = [
     icon: BedDouble,
     to: LINKS.roomPlan,
     keywords: 'rooms tape chart availability grid',
+  },
+  {
+    label: 'Developer Webhooks',
+    perm: 'settings:update',
+    icon: Webhook,
+    to: '/app/developer',
+    keywords: 'webhooks api developer integrations signing',
   },
 ];
 
