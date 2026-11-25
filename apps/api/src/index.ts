@@ -189,6 +189,7 @@ import { startDlqAlertScheduler } from './jobs/dlq-alert.job.js';
 import { accountingRouter } from './modules/accounting/accounting.routes.js';
 // [ADMIN] legacy platform admin — KPIs, health, alerts, reports, jobs, billing
 import { adminRouter } from './modules/admin/admin.routes.js';
+import { integrationsAdminRouter } from './modules/integrations/integrations.admin.routes.js';
 import featureFlagsRouter from './modules/admin/admin.feature-flags.routes.js';
 import { installHeartbeatPatch } from './common/heartbeat.js';
 import { adminHealthRouter } from './modules/admin/admin.health.routes.js';
@@ -539,6 +540,7 @@ async function bootstrap() {
 
   app.use('/admin', adminJobsRouter);
   app.use('/admin', adminReportsRouter);
+  app.use('/v1/admin/integrations', integrationsAdminRouter);
   app.use('/admin', adminRouter);
   app.use('/admin', backupsDrRouter);
   startBackupsDrSchedulers();
