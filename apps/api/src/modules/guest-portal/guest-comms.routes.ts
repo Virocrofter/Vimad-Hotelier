@@ -200,6 +200,18 @@ guestCommsRouter.post(
       message,
     });
 
+    void import('../webhooks/webhooks.service.js')
+      .then((m) =>
+        m.emitWebhookEvent(reservation.tenantId, 'chat.message_received', {
+          threadId: thread.id,
+          reservationId: reservation.id,
+          messageId: message.id,
+          guestName,
+          body: input.body.slice(0, 280),
+        })
+      )
+      .catch(() => {});
+
     return ok(res, { message, idempotentReplay: false });
   })
 );

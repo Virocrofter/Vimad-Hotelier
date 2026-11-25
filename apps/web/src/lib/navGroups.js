@@ -137,6 +137,7 @@ export const NAV_GROUPS = [
       { label: 'Settings', to: '/app/settings' },
       { label: 'Onboarding', to: '/app/onboarding' },
       { label: 'Audit Trail', to: '/app/audit-trail' },
+      { label: 'Developer', to: '/app/developer' },
       { label: 'Users', to: '/app/users' },
       { label: 'Support', to: '/app/support' },
       // Settings becomes a separate mode with its own left nav (4-menu model)
