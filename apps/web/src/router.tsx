@@ -273,6 +273,7 @@ export const router = createBrowserRouter([
       { path: 'support/status', ...page(() => import('./app/app/support/status/page')) },
       { path: 'comms', ...page(() => import('./app/app/comms/page')) },
       { path: 'shift-pack', ...page(() => import('./app/app/shift-pack/page')) },
+      { path: 'vouchers', ...page(() => import('./app/app/vouchers/page')) },
       { path: 'developer', ...page(() => import('./app/app/developer/page')) },
       {
         path: 'sales-catering',

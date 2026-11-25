@@ -116,6 +116,13 @@ const ACTIONS = [
     to: '/app/developer',
     keywords: 'webhooks api developer integrations signing',
   },
+  {
+    label: 'Gift Vouchers',
+    perm: 'settings:update',
+    icon: Ticket,
+    to: '/app/vouchers',
+    keywords: 'gift voucher sell redeem liability refund',
+  },
 ];
 
 const HELP_ITEMS = [
