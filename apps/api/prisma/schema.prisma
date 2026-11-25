@@ -96,6 +96,7 @@ model Tenant {
   webhookEndpoints WebhookEndpoint[]
   integrationInstallations IntegrationInstallation[]
   giftVouchers GiftVoucher[]
+  paymentProofs PaymentProof[]
 }
 
 model User {
@@ -4003,4 +4004,28 @@ model GiftVoucher {
   @@unique([tenantId, code])
   @@index([tenantId, status])
   @@map("gift_vouchers")
+}
+
+model PaymentProof {
+  id              String    @id @default(cuid())
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  reservationId   String
+  amount          Decimal   @db.Decimal(10, 2)
+  currency        String    @default("ZAR")
+  reference       String?
+  note            String?
+  fileId          String?
+  status          String    @default("pending")
+  verifiedById    String?
+  verifiedAt      DateTime?
+  rejectionReason String?
+  verifiedFolioId String?
+  createdById     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([tenantId, reservationId])
+  @@index([tenantId, status])
+  @@map("payment_proofs")
 }
