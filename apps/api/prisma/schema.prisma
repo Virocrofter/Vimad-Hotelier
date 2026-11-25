@@ -260,6 +260,7 @@ model Property {
   liquorLicenceExpiry        DateTime? @db.Date
   popiaInformationOfficerName  String?
   popiaInformationOfficerEmail String?
+  tomsaAccountCode String?
 }
 
 model RoomType {

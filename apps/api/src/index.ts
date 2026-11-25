@@ -152,6 +152,7 @@ import { usersRouter } from './modules/users/users.routes.js';
 import { webhooksRouter } from './modules/webhooks/webhooks.routes.js';
 import { vouchersRouter } from './modules/vouchers/vouchers.routes.js';
 import { agentsRouter } from './modules/agents/agents.routes.js';
+import { tomsaRouter } from './modules/tomsa/tomsa.routes.js';
 // [AUDIT] tenant-scoped audit trail (users > audit logs)
 import { auditLogsRouter } from './modules/audit/audit.routes.js';
 // [G1] Groups module — group blocks, rooming list, master folio
@@ -459,6 +460,7 @@ async function bootstrap() {
   app.use('/v1/webhooks', webhooksRouter);
   app.use('/v1/vouchers', vouchersRouter);
   app.use('/v1/agents', agentsRouter);
+  app.use('/v1/tomsa', tomsaRouter);
   // [AUDIT] tenant-scoped audit trail (auth'd — report:read or audit:read)
   app.use('/v1/audit-logs', auditLogsRouter);
   app.use('/v1/push', pushRouter);

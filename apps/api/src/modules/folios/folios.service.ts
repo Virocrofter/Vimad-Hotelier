@@ -120,7 +120,25 @@ export async function postCharge(
 
   const amount = input.amount * input.quantity;
 
-  const [item] = await prisma.$transaction([
+  // P43 TOMSA: 1% levy auto-appended to accommodation charges when the
+  // property opts in (a levy, not a tax - no VAT interaction).
+  let levyAmount = 0;
+  if (input.type === 'room_charge' && folio.reservationId) {
+    const stayProp = await prisma.reservation.findFirst({
+      where: { id: folio.reservationId },
+      select: { propertyId: true },
+    });
+    const prop = stayProp
+      ? await prisma.property.findFirst({
+          where: { id: stayProp.propertyId },
+          select: { tomsaLevyEnabled: true, tomsaLevyPct: true },
+        })
+      : null;
+    const pct = prop?.tomsaLevyPct ? Number(prop.tomsaLevyPct) : 1;
+    if (prop?.tomsaLevyEnabled) levyAmount = Math.round(amount * (pct / 100) * 100) / 100;
+  }
+
+  const ops = [
     prisma.folioItem.create({
       data: {
         consumedAt: new Date(), // P33: consumed_at stamped at posting
@@ -139,7 +157,36 @@ export async function postCharge(
         balance: { increment: amount },
       },
     }),
-  ]);
+  ];
+  if (levyAmount > 0) {
+    ops.push(
+      prisma.folioItem.create({
+        data: {
+          consumedAt: new Date(),
+          folioId,
+          type: 'tomsa_levy',
+          description: 'TOMSA 1% Tourism Levy',
+          amount: levyAmount,
+          quantity: 1,
+          postedAt: input.postedAt ?? new Date(),
+        },
+      }),
+      prisma.folio.update({
+        where: { id: folioId },
+        data: {
+          totalCharges: { increment: levyAmount },
+          balance: { increment: levyAmount },
+        },
+      })
+    );
+  }
+  const results = await prisma.$transaction(ops);
+  const item = results[0] as {
+    id: string;
+    type: string;
+    amount: unknown;
+    description: string;
+  };
 
   void import('../webhooks/webhooks.service.js')
     .then((m) =>
