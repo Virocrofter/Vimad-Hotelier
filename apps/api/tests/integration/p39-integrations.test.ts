@@ -129,6 +129,29 @@ describe('P39 marketplace (D2)', () => {
     expect(staffCreate.status).toBe(403);
     console.log('P39 S4 OK — scoping + role gate');
   }, 60000);
+
+  it('S5: credential rotation — invalidate then re-enter via Connect', async () => {
+    const rot = await request(app)
+      .post(`/v1/admin/integrations/${ctx.installId}/rotate`)
+      .set(ctx.admin());
+    expect(rot.status).toBe(200);
+    expect(rot.body.data.rotated).toBe(true);
+    expect(rot.body.data.lastSyncStatus).toBe('unverified');
+
+    const row = await prisma.integrationInstallation.findFirst({ where: { id: ctx.installId } });
+    expect(row.credentials).toBeNull();
+
+    const re = await request(app)
+      .post('/v1/admin/integrations/connect')
+      .set(ctx.admin())
+      .send({ provider: 'slack', credentials: { apiToken: 'xoxb-rotated-again' } });
+    expect(re.status).toBe(201);
+    expect(re.body.data.id).toBe(ctx.installId);
+    expect(re.body.data.lastSyncStatus).toBe('ok');
+    const after = await prisma.integrationInstallation.findFirst({ where: { id: ctx.installId } });
+    expect(JSON.stringify(after.credentials)).toContain('xoxb-rotated-again');
+    console.log('P39 S5 OK — rotate → re-enter cycle');
+  }, 60000);
 });
 
 afterAll(async () => {

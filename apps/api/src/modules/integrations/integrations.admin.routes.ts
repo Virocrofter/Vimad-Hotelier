@@ -14,6 +14,7 @@ import {
   sync,
   test,
   updateConfig,
+  rotateCredentials,
 } from './integrations.admin.service.js';
 
 export const integrationsAdminRouter = Router();
@@ -123,6 +124,14 @@ integrationsAdminRouter.patch('/config/:id', async (req, res, next) => {
     if (!parsed.success)
       return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid body' } });
     return res.json({ data: await updateConfig(req.tenantId, idParams(req), parsed.data) });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+integrationsAdminRouter.post('/:id/rotate', async (req, res, next) => {
+  try {
+    return res.json({ data: await rotateCredentials(req.tenantId, String(req.params.id)) });
   } catch (err) {
     return next(err);
   }

@@ -38,6 +38,7 @@ export const INTEGRATION_CATALOG = [
   { key: 'netsuite', name: 'NetSuite', category: 'Data & Analytics', availability: 'planned' },
 ] as const;
 
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 
@@ -176,4 +177,20 @@ export async function updateConfig(
     data: { config: (patch.config ?? undefined) as object | undefined },
   });
   return toPublic(updated);
+}
+
+/* Rotate: invalidate stored credentials and mark the connection unverified.
+ * Re-entry happens through the normal Connect flow (which overwrites). */
+export async function rotateCredentials(tenantId: string, id: string) {
+  const row = await prisma.integrationInstallation.findFirst({ where: { id, tenantId } });
+  if (!row) throw new AppError(404, 'Integration not found', 'NOT_FOUND');
+  const updated = await prisma.integrationInstallation.update({
+    where: { id },
+    data: {
+      credentials: Prisma.DbNull, // Json null (undefined would be a no-op)
+      lastSyncStatus: 'unverified',
+      lastSyncError: 'Credentials rotated — re-enter via Connect',
+    },
+  });
+  return { ...toPublic(updated), rotated: true };
 }
