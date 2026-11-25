@@ -52,6 +52,7 @@ Watch status per endpoint in the portal (live feed) or `GET /v1/webhooks/deliver
 | `reservation.checked_in`  | A reservation checks in                                         |
 | `reservation.checked_out` | A reservation checks out                                        |
 | `folio.charge`            | Any charge posts to a folio                                     |
+| `chat.message_received`   | A guest sends an Inbox message                                  |
 | `test`                    | Fired by the Test button / `POST /v1/webhooks/test/:endpointId` |
 | `*`                       | Subscribe to all current and future events                      |
 
