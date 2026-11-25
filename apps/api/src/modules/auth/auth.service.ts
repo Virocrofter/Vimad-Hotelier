@@ -1,7 +1,7 @@
 /* apps/api/src/modules/auth/auth.service.ts */
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { createHash, randomBytes } from 'crypto';
+import { createHash, createHmac, randomBytes } from 'crypto';
 import { z } from 'zod';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
@@ -150,6 +150,17 @@ export async function login(input: LoginInput) {
   const valid = await bcrypt.compare(input.password, user.passwordHash ?? '');
   if (!valid) {
     throw new AppError(401, 'Invalid credentials', 'UNAUTHORIZED');
+  }
+
+  // P46: 2FA-enabled users get a short-lived pending token instead of a
+  // session; POST /auth/login/2fa completes the second factor.
+  if (user.totpEnabled && user.totpSecret) {
+    const pendingToken = jwt.sign(
+      { userId: user.id, tenantId: user.tenantId, twoFactorPending: true },
+      JWT_SECRET,
+      { expiresIn: '5m' }
+    );
+    return { twoFactorRequired: true, pendingToken };
   }
 
   const token = signToken({
@@ -354,4 +365,148 @@ export async function changePassword(userId: string, currentPassword: string, ne
   ]);
 
   return { success: true };
+}
+
+/* ─── TOTP 2FA (P46) — RFC 6238, SHA-1 / 30s / 6 digits (Authenticator
+ * standard). Hand-rolled on node:crypto — no new dependency. ─── */
+const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+export function base32Encode(buf: Buffer): string {
+  let bits = 0;
+  let value = 0;
+  let out = '';
+  for (const byte of buf) {
+    value = (value << 8) | byte;
+    bits += 8;
+    while (bits >= 5) {
+      out += B32[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) out += B32[(value << (5 - bits)) & 31];
+  return out;
+}
+
+export function base32Decode(input: string): Buffer {
+  let bits = 0;
+  let value = 0;
+  const out: number[] = [];
+  for (const ch of input.toUpperCase().replace(/=+$/, '')) {
+    const idx = B32.indexOf(ch);
+    if (idx === -1) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      out.push((value >>> (bits - 8)) & 0xff);
+      bits -= 8;
+    }
+  }
+  return Buffer.from(out);
+}
+
+export function totpCode(secretB32: string, counter?: number): string {
+  const c = counter ?? Math.floor(Date.now() / 1000 / 30);
+  const msg = Buffer.alloc(8);
+  msg.writeBigUInt64BE(BigInt(c));
+  const hmac = createHmac('sha1', base32Decode(secretB32)).update(msg).digest();
+  const offset = hmac[hmac.length - 1] & 0x0f;
+  const binary =
+    ((hmac[offset] & 0x7f) << 24) |
+    (hmac[offset + 1] << 16) |
+    (hmac[offset + 2] << 8) |
+    hmac[offset + 3];
+  return String(binary % 1_000_000).padStart(6, '0');
+}
+
+export function verifyTotp(secretB32: string, code: string, windowSteps = 1): boolean {
+  const counter = Math.floor(Date.now() / 1000 / 30);
+  for (let w = -windowSteps; w <= windowSteps; w++) {
+    if (totpCode(secretB32, counter + w) === code) return true;
+  }
+  return false;
+}
+
+export async function setupTotp(userId: string) {
+  const secret = base32Encode(randomBytes(20));
+  await prisma.user.update({ where: { id: userId }, data: { totpPendingSecret: secret } });
+  return {
+    secret,
+    otpauthUrl: `otpauth://totp/Vimad:${encodeURIComponent(userId)}?secret=${secret}&issuer=Vimad`,
+  };
+}
+
+export async function enableTotp(userId: string, code: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user?.totpPendingSecret) {
+    throw new AppError(400, 'Run 2FA setup first', 'VALIDATION_ERROR');
+  }
+  if (!verifyTotp(user.totpPendingSecret, code)) {
+    throw new AppError(400, 'Invalid code', 'INVALID_CODE');
+  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { totpSecret: user.totpPendingSecret, totpEnabled: true, totpPendingSecret: null },
+  });
+  await revokeAllUserRefreshTokens(userId, '2fa_enabled');
+  return { enabled: true };
+}
+
+export async function disableTotp(userId: string, code: string) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user?.totpEnabled || !user.totpSecret) {
+    throw new AppError(400, '2FA not enabled', 'VALIDATION_ERROR');
+  }
+  if (!verifyTotp(user.totpSecret, code)) {
+    throw new AppError(400, 'Invalid code', 'INVALID_CODE');
+  }
+  await prisma.user.update({
+    where: { id: userId },
+    data: { totpSecret: null, totpEnabled: false, totpPendingSecret: null },
+  });
+  await revokeAllUserRefreshTokens(userId, '2fa_disabled');
+  return { enabled: false };
+}
+
+/* Complete the second factor: exchange the pending token + TOTP code for a
+ * session. The code is the actual second factor; the pending token carries a
+ * 5-minute window (reuse within it still requires a fresh valid code). */
+export async function verifyTotpLogin(pendingToken: string, code: string) {
+  let payload: { userId?: string; twoFactorPending?: boolean };
+  try {
+    payload = jwt.verify(pendingToken, JWT_SECRET) as {
+      userId?: string;
+      twoFactorPending?: boolean;
+    };
+  } catch {
+    throw new AppError(401, 'Pending session expired — log in again', 'UNAUTHORIZED');
+  }
+  if (!payload.twoFactorPending || !payload.userId) {
+    throw new AppError(401, 'Invalid pending session', 'UNAUTHORIZED');
+  }
+  const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+  if (!user || user.status !== 'active' || !user.totpEnabled || !user.totpSecret) {
+    throw new AppError(401, 'Invalid pending session', 'UNAUTHORIZED');
+  }
+  if (!verifyTotp(user.totpSecret, code)) {
+    throw new AppError(401, 'Invalid code', 'INVALID_CODE');
+  }
+  const token = signToken({
+    userId: user.id,
+    tenantId: user.tenantId,
+    email: user.email,
+    role: user.role,
+  });
+  const refreshToken = await generateRefreshToken(user.id);
+  return {
+    token,
+    refreshToken,
+    user: {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      tenantId: user.tenantId,
+    },
+  };
 }

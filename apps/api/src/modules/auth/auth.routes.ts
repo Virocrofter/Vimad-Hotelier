@@ -18,6 +18,7 @@ import {
   changePasswordSchema,
 } from './auth.service.js';
 import { authMiddleware } from '../auth/auth.middleware.js';
+import { setupTotp, enableTotp, disableTotp, verifyTotpLogin } from './auth.service.js';
 
 extendZodWithOpenApi(z);
 
@@ -291,6 +292,61 @@ authRouter.post(
         (req.validatedBody as { currentPassword: string; newPassword: string }).newPassword
       );
       res.json({ message: 'Password changed successfully. Please log in again.' });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+const TwoFactorLoginSchema = z.object({
+  pendingToken: z.string().min(10),
+  code: z.string().min(6).max(8),
+});
+const TwoFactorCodeSchema = z.object({ code: z.string().min(6).max(8) });
+
+authRouter.post('/login/2fa', validateBody(TwoFactorLoginSchema), async (req, res, next) => {
+  try {
+    const body = req.validatedBody as z.infer<typeof TwoFactorLoginSchema>;
+    const result = await verifyTotpLogin(body.pendingToken, body.code);
+    res.json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+});
+
+authRouter.post('/2fa/setup', authMiddleware, async (req, res, next) => {
+  try {
+    const result = await setupTotp((req as any).auth.user.id);
+    res.json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+});
+
+authRouter.post(
+  '/2fa/enable',
+  authMiddleware,
+  validateBody(TwoFactorCodeSchema),
+  async (req, res, next) => {
+    try {
+      const body = req.validatedBody as z.infer<typeof TwoFactorCodeSchema>;
+      const result = await enableTotp((req as any).auth.user.id, body.code);
+      res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+authRouter.post(
+  '/2fa/disable',
+  authMiddleware,
+  validateBody(TwoFactorCodeSchema),
+  async (req, res, next) => {
+    try {
+      const body = req.validatedBody as z.infer<typeof TwoFactorCodeSchema>;
+      const result = await disableTotp((req as any).auth.user.id, body.code);
+      res.json({ data: result });
     } catch (err) {
       next(err);
     }

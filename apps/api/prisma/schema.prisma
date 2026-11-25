@@ -138,6 +138,10 @@ model User {
   @@map("users")
   agentAccountId  String?
   agentAccount    CorporateAccount? @relation(fields: [agentAccountId], references: [id], onDelete: SetNull)
+  // P46 TOTP two-factor (RFC 6238)
+  totpPendingSecret String?
+  totpSecret        String?
+  totpEnabled       Boolean @default(false)
 }
 
 // ─── C1: Chains — a tenant's properties grouped under one login ───
