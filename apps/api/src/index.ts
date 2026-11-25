@@ -150,6 +150,7 @@ import { chainBillingRouter } from './modules/chain-billing/chain-billing.routes
 // [USERS] tenant staff user management (list/create/update/suspend/audit)
 import { usersRouter } from './modules/users/users.routes.js';
 import { webhooksRouter } from './modules/webhooks/webhooks.routes.js';
+import { vouchersRouter } from './modules/vouchers/vouchers.routes.js';
 // [AUDIT] tenant-scoped audit trail (users > audit logs)
 import { auditLogsRouter } from './modules/audit/audit.routes.js';
 // [G1] Groups module — group blocks, rooming list, master folio
@@ -455,6 +456,7 @@ async function bootstrap() {
   // [USERS] tenant staff management — sits next to RBAC (roles come from /v1/rbac)
   app.use('/v1/users', usersRouter);
   app.use('/v1/webhooks', webhooksRouter);
+  app.use('/v1/vouchers', vouchersRouter);
   // [AUDIT] tenant-scoped audit trail (auth'd — report:read or audit:read)
   app.use('/v1/audit-logs', auditLogsRouter);
   app.use('/v1/push', pushRouter);
