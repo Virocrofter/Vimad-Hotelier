@@ -1,0 +1,1 @@
+-- P45: shift pack reads existing tables; no schema change.
