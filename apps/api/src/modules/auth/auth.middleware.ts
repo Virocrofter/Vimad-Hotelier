@@ -14,6 +14,7 @@ export interface AuthenticatedRequest extends Request {
       email: string;
       role: string;
       tenantId: string;
+      agentAccountId: string | null;
       permissions: string[];
     };
   };
@@ -92,6 +93,7 @@ export async function authMiddleware(req: Request, _res: Response, next: NextFun
           lastName: user.lastName ?? '',
           role: user.role,
           tenantId: user.tenantId,
+          agentAccountId: user.agentAccountId ?? null,
           permissions,
         },
       };
@@ -120,6 +122,7 @@ export async function authMiddleware(req: Request, _res: Response, next: NextFun
           lastName: 'Key',
           role: 'api_key',
           tenantId: context.tenantId,
+          agentAccountId: null,
           permissions: context.scopes,
         },
       };

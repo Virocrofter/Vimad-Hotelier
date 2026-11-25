@@ -135,6 +135,8 @@ model User {
   @@unique([tenantId, email])
   @@index([tenantId])
   @@map("users")
+  agentAccountId  String?
+  agentAccount    CorporateAccount? @relation(fields: [agentAccountId], references: [id], onDelete: SetNull)
 }
 
 // ─── C1: Chains — a tenant's properties grouped under one login ───
@@ -568,6 +570,8 @@ model Reservation {
   @@map("reservations")
   documents         ReservationDocument[]
   lostFoundItems LostFoundItem[]
+  agentAccountId  String?
+  agentAccount    CorporateAccount? @relation(fields: [agentAccountId], references: [id], onDelete: SetNull)
 }
 
 model ReservationStay {
@@ -2085,6 +2089,13 @@ model CorporateAccount {
   @@index([tenantId, scClientId])
   @@index([tenantId, name])
   @@map("corporate_accounts")
+  // D8 travel-agent contract terms
+  isAgent              Boolean   @default(false)
+  commissionPct        Decimal?  @db.Decimal(5, 2)
+  cutoffDays           Int       @default(0)
+  netRateDiscountPct   Decimal?  @db.Decimal(5, 2)
+  agentUsers           User[]
+  agentReservations    Reservation[]
 }
 
 model GuestFollowUp {

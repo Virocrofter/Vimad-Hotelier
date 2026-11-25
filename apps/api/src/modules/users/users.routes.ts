@@ -37,7 +37,9 @@ const createUserSchema = z.object({
   firstName: z.string().min(1).max(100),
   lastName: z.string().min(1).max(100),
   password: z.string().min(8, 'Password must be at least 8 characters').max(128),
-  role: z.enum(['owner', 'admin', 'manager', 'staff', 'housekeeper']).default('staff'),
+  role: z
+    .enum(['owner', 'admin', 'manager', 'staff', 'housekeeper', 'travel_agent'])
+    .default('staff'),
   phone: z.string().max(30).optional(),
 });
 
