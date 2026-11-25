@@ -167,6 +167,34 @@ function ruleScope(rule: RuleRow): { tenantId: string; propertyId?: string } {
 // ─── Context providers: rule.key → candidate fetchers ───
 
 const RULE_PROVIDERS: Record<string, (rule: RuleRow) => Promise<TaskCandidate[]>> = {
+  // P42 — SA compliance expiry: TGCSA certificate + liquor licence renewals
+  // become deduped tasks from 60 days out (open-dedupe per property+field+date).
+  'compliance-expiry-check': async (rule) => {
+    const horizon = addDays(startOfDay(), 60);
+    const properties = await prisma.property.findMany({ where: ruleScope(rule), take: 500 });
+    const out: TaskCandidate[] = [];
+    for (const p of properties) {
+      const checks: Array<{ field: string; date: Date | null; label: string }> = [
+        { field: 'tgcsa', date: p.tgcsaCertificateExpiry, label: 'TGCSA certificate' },
+        { field: 'liquor', date: p.liquorLicenceExpiry, label: 'Liquor licence' },
+      ];
+      for (const c of checks) {
+        if (!c.date || c.date > horizon) continue; // no lower bound: expired stays flagged until renewed
+        out.push({
+          entityType: 'property',
+          entityId: `${p.id}:${c.field}:${c.date.toISOString().slice(0, 10)}`,
+          propertyId: p.id,
+          ctx: {
+            property: p.name,
+            label: c.label,
+            expires: c.date.toISOString().slice(0, 10),
+          },
+        });
+      }
+    }
+    return out;
+  },
+
   // 7.6 — HK auto-triggers (config over the cadence engine):
   // stayover cleans nightly, linen intervals per room (derived from each
   // room's last completed linen task — zero schema cost), Legionella flush

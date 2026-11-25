@@ -15,6 +15,12 @@ export const propertyCreateSchema = z.object({
 
 export const propertyUpdateSchema = propertyCreateSchema.partial().extend({
   autoDepositDays: z.number().int().min(0).max(30).optional(),
+  // SA compliance profile (TGCSA grading, liquor licence, POPIA officer)
+  tgcsaGrade: z.string().max(40).optional(),
+  tgcsaCertificateExpiry: z.string().optional(),
+  liquorLicenceExpiry: z.string().optional(),
+  popiaInformationOfficerName: z.string().max(200).optional(),
+  popiaInformationOfficerEmail: z.string().email().optional(),
 });
 
 export type PropertyCreateInput = z.infer<typeof propertyCreateSchema>;

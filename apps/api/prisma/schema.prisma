@@ -254,6 +254,12 @@ model Property {
   @@index([tenantId])
   @@map("properties")
   lostFoundItems LostFoundItem[]
+  // SA compliance profile (TGCSA grading, liquor licence, POPIA officer)
+  tgcsaGrade                 String?
+  tgcsaCertificateExpiry     DateTime? @db.Date
+  liquorLicenceExpiry        DateTime? @db.Date
+  popiaInformationOfficerName  String?
+  popiaInformationOfficerEmail String?
 }
 
 model RoomType {
