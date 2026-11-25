@@ -52,7 +52,7 @@ export const gdprWorker = createWorker<GdprJobData>(GDPR_QUEUE, async (job) => {
 });
 
 // ─── Export Handler: JSON → Storage → Signed URL → Email ───
-async function handleExport(
+export async function handleExport(
   tenantId: string,
   targetType: string,
   targetId: string,
@@ -129,7 +129,7 @@ async function handleExport(
 }
 
 // ─── Anonymize Handler ───
-async function handleAnonymize(_tenantId: string, targetType: string, targetId: string) {
+export async function handleAnonymize(_tenantId: string, targetType: string, targetId: string) {
   if (targetType === 'guest') {
     await prisma.guest.update({
       where: { id: targetId },
@@ -159,7 +159,7 @@ async function handleAnonymize(_tenantId: string, targetType: string, targetId: 
 }
 
 // ─── Delete Handler (Right to Erasure) ───
-async function handleDelete(_tenantId: string, targetType: string, targetId: string) {
+export async function handleDelete(_tenantId: string, targetType: string, targetId: string) {
   if (targetType === 'guest') {
     await prisma.guest.update({
       where: { id: targetId },
