@@ -4078,3 +4078,70 @@ model FnBOrder {
   @@index([tenantId, propertyId, status])
   @@map("fnb_orders")
 }
+
+model TillCheck {
+  id            String    @id @default(cuid())
+  tenantId      String
+  propertyId    String
+  label         String
+  status        String    @default("open")
+  openedById    String?
+  openedAt      DateTime  @default(now())
+  closedAt      DateTime?
+  totalCharges  Decimal   @default(0) @db.Decimal(10, 2)
+  totalComps    Decimal   @default(0) @db.Decimal(10, 2)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([tenantId, propertyId, status])
+  @@map("till_checks")
+}
+
+model TillCheckItem {
+  id        String   @id @default(cuid())
+  tenantId  String
+  checkId   String
+  productId String?
+  name      String
+  unitPrice Decimal  @db.Decimal(10, 2)
+  quantity  Int      @default(1)
+  comped    Boolean  @default(false)
+  compReason String?
+  reversed  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([checkId])
+  @@map("till_check_items")
+}
+
+model TillPayment {
+  id          String   @id @default(cuid())
+  tenantId    String
+  checkId     String
+  method      String
+  amountMinor Int
+  folioItemId String?
+  createdAt   DateTime @default(now())
+
+  @@index([checkId])
+  @@map("till_payments")
+}
+
+model TillSession {
+  id                String    @id @default(cuid())
+  tenantId          String
+  propertyId        String
+  openedById        String?
+  openedAt          DateTime  @default(now())
+  closedAt          DateTime?
+  openingFloatMinor Int       @default(0)
+  countedCashMinor  Int?
+  expectedCashMinor Int?
+  varianceMinor     Int?
+  status            String    @default("open")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([tenantId, propertyId, status])
+  @@map("till_sessions")
+}
