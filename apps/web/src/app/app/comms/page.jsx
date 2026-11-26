@@ -1,7 +1,19 @@
 /* src/app/app/comms/page.jsx — staff comms desk: chat inbox + review moderation */
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { MessageSquare, Star, CheckCircle2, XCircle, Loader2, RefreshCw, Gift } from 'lucide-react';
+import {
+  MessageSquare,
+  Star,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  RefreshCw,
+  Gift,
+  Bell,
+  AlertTriangle,
+  Flame,
+  Megaphone,
+} from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { commsApi } from '../../../api/comms';
 import { listUpsellProducts } from '../../../api/upsell-api';
@@ -65,6 +77,9 @@ function ChatInbox({ onOpenCard }) {
   const [activeId, setActiveId] = useState(null);
   const [draft, setDraft] = useState('');
   const [offerPicker, setOfferPicker] = useState(false);
+  const [lens, setLens] = useState('open');
+  const [broadcast, setBroadcast] = useState('');
+  const [broadcastDone, setBroadcastDone] = useState(null);
 
   const { data: productsData } = useQuery({
     queryKey: ['upsell-products'],
@@ -73,8 +88,8 @@ function ChatInbox({ onOpenCard }) {
   const offerProducts = productsData ?? [];
 
   const { data: inboxData } = useQuery({
-    queryKey: ['comms-inbox'],
-    queryFn: () => commsApi.inbox('all'),
+    queryKey: ['comms-inbox', lens],
+    queryFn: () => commsApi.inbox(lens),
     refetchInterval: 2500,
   });
 
@@ -119,6 +134,20 @@ function ChatInbox({ onOpenCard }) {
     },
   });
 
+  const escalate = useMutation({
+    mutationFn: ({ id, escalated }) => commsApi.escalate(id, escalated),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['comms-inbox'] }),
+  });
+
+  const sendBroadcast = useMutation({
+    mutationFn: () => commsApi.broadcast(broadcast.trim()),
+    onSuccess: (res) => {
+      setBroadcast('');
+      setBroadcastDone(res?.sent ?? 0);
+      qc.invalidateQueries({ queryKey: ['comms-inbox'] });
+    },
+  });
+
   const setStatus = useMutation({
     mutationFn: (status) => commsApi.setStatus(activeId, status),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['comms-inbox'] }),
@@ -126,6 +155,51 @@ function ChatInbox({ onOpenCard }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[300px_1fr_280px]">
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {['open', 'unread', 'focused', 'all'].map((l) => (
+            <button
+              key={l}
+              onClick={() => setLens(l)}
+              className={`rounded-full px-3 py-1 text-xs font-medium border ${
+                lens === l
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'border-border text-muted-foreground'
+              }`}
+            >
+              {l}
+            </button>
+          ))}
+          <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <Bell className="h-3.5 w-3.5" />
+            {threads.filter((t) => t.sla?.state === 'overdue').length} overdue
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <input
+            value={broadcast}
+            onChange={(e) => setBroadcast(e.target.value)}
+            placeholder="Broadcast to every in-house guest…"
+            className="flex-1 rounded-md border bg-background px-3 py-1.5 text-xs"
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!broadcast.trim() || sendBroadcast.isPending}
+            onClick={() => sendBroadcast.mutate()}
+          >
+            <Megaphone className="mr-1 h-3.5 w-3.5" />
+            {sendBroadcast.isPending ? 'Sending…' : 'Broadcast'}
+          </Button>
+        </div>
+        {broadcastDone !== null && (
+          <p className="text-[11px] text-muted-foreground">
+            Broadcast delivered to {broadcastDone} in-house guest
+            {broadcastDone === 1 ? '' : 's'}.
+          </p>
+        )}
+      </div>
+
       <div className="rounded-lg border divide-y max-h-[70vh] overflow-y-auto">
         {threads.length === 0 && (
           <p className="p-4 text-sm text-muted-foreground">No conversations yet.</p>
@@ -143,6 +217,11 @@ function ChatInbox({ onOpenCard }) {
                   {t.unreadForStaff}
                 </span>
               )}
+              {t.sla?.state === 'overdue' && <AlertTriangle className="h-3.5 w-3.5 text-red-500" />}
+              {t.sla?.state === 'warning' && (
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+              )}
+              {t.escalated && <Flame className="h-3.5 w-3.5 text-orange-500" />}
             </div>
             <p className="text-xs text-muted-foreground truncate">
               {t.lastMessage ? t.lastMessage.body : 'No messages'}
@@ -164,6 +243,16 @@ function ChatInbox({ onOpenCard }) {
                 {active.guestName}{' '}
                 <span className="text-xs text-muted-foreground">· {active.confirmationNumber}</span>
               </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => escalate.mutate({ id: active.id, escalated: !active.escalated })}
+              >
+                <Flame
+                  className={`mr-1 h-3.5 w-3.5 ${active.escalated ? 'text-orange-500' : 'text-muted-foreground'}`}
+                />
+                {active.escalated ? 'De-escalate' : 'Escalate'}
+              </Button>
               <Button
                 size="sm"
                 variant="outline"

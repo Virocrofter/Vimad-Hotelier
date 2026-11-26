@@ -11,6 +11,8 @@ export interface CommsThread {
   unreadForStaff: number;
   lastMessageAt: string;
   lastMessage: { body: string; authorType: string; createdAt: string } | null;
+  sla?: { state: 'ok' | 'warning' | 'overdue'; minutes: number } | null;
+  escalated?: boolean;
 }
 
 export interface CommsMessage {
@@ -50,6 +52,10 @@ export const commsApi = {
       .then((r) => r.data),
   setStatus: (threadId: string, status: 'open' | 'closed') =>
     apiClient.patch(`/comms/chat/threads/${threadId}`, { status }).then((r) => r.data),
+  escalate: (threadId: string, escalated: boolean) =>
+    apiClient.post(`/comms/chat/threads/${threadId}/escalate`, { escalated }).then((r) => r.data),
+  broadcast: (body: string) =>
+    apiClient.post('/comms/chat/broadcast', { body }).then((r) => r.data),
   reviews: (status = 'pending') =>
     apiClient.get('/comms/reviews', { params: { status } }).then((r) => r.data),
   moderateReview: (id: string, status: 'approved' | 'rejected', note?: string) =>
