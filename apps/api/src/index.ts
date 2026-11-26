@@ -159,6 +159,8 @@ import { shiftPackRouter } from './modules/shift-pack/shift-pack.routes.js';
 import { complianceRouter } from './modules/compliance/compliance.routes.js';
 import { readinessRouter } from './modules/onboarding/readiness.routes.js';
 import { stayBannerRouter } from './modules/guest-portal/stay-banner.routes.js';
+import { fnbPublicRouter } from './modules/fnb/fnb.public.routes.js';
+import { fnbStaffRouter } from './modules/fnb/fnb.staff.routes.js';
 import { bookingReadinessRouter } from './modules/booking/readiness.routes.js';
 // [AUDIT] tenant-scoped audit trail (users > audit logs)
 import { auditLogsRouter } from './modules/audit/audit.routes.js';
@@ -433,6 +435,10 @@ async function bootstrap() {
   // [A4] Public booking engine (unauthenticated, per-IP rate limited)
 
   app.use('/v1/public', publicLimiter, publicRouter);
+
+  app.use('/v1/fnb', publicLimiter, fnbPublicRouter);
+
+  app.use('/v1/fnb/staff', fnbStaffRouter);
   // [A5] Tax invoices & receipts (auth'd)
   app.use('/v1/invoices', invoicesRouter);
 

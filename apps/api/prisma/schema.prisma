@@ -4058,3 +4058,23 @@ model SecurityIncident {
   @@index([tenantId, status])
   @@map("security_incidents")
 }
+
+model FnBOrder {
+  id             String   @id @default(cuid())
+  tenantId       String
+  propertyId     String
+  items          Json
+  amount         Decimal  @db.Decimal(10, 2)
+  currency       String   @default("ZAR")
+  status         String   @default("pending")
+  reference      String   @unique
+  paystackId     BigInt?
+  email          String?
+  tableLabel     String?
+  failureReason  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([tenantId, propertyId, status])
+  @@map("fnb_orders")
+}
