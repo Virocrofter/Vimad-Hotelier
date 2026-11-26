@@ -7,7 +7,13 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
-import { newReference, chargeAuthorization, createRefund } from '../../common/paystack.js';
+import {
+  newReference,
+  chargeAuthorization,
+  createRefund,
+  initializeTransaction,
+} from '../../common/paystack.js';
+import { env } from '../../common/env.js';
 
 const toMajor = (minor: number) => Math.round(minor) / 100;
 
@@ -42,6 +48,26 @@ export async function createHold(
       reference: newReference('PAH'),
     },
   });
+}
+
+/* Begin the hold charge on Paystack's hosted page (live leg — the guest
+ * authorizes the card once; the reusable authorization_code comes back in
+ * the verification and attaches via attachAuthorization). */
+export async function beginHold(preauthId: string) {
+  const hold = await prisma.preauth.findUnique({ where: { id: preauthId } });
+  if (!hold) throw new AppError(404, 'Preauth not found', 'NOT_FOUND');
+  if (hold.status !== 'open' || hold.authorizationCode) {
+    throw new AppError(409, `Hold is ${hold.status}`, 'CONFLICT');
+  }
+  const checkout = await initializeTransaction({
+    email: hold.email,
+    amountMinor: hold.amountMinor,
+    currency: hold.currency,
+    reference: hold.reference,
+    callbackUrl: `${env.WEB_URL.replace(/\/$/, '')}/preauth/confirmed`,
+    metadata: { tenantId: hold.tenantId, preauthId: hold.id, kind: 'preauth' },
+  });
+  return { reference: hold.reference, authorizationUrl: checkout.authorization_url };
 }
 
 /* Called from the hold-charge verification (live wiring) once the gateway
