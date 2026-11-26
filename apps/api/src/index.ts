@@ -158,6 +158,7 @@ import { paymentProofsRouter } from './modules/payment-proofs/payment-proofs.rou
 import { shiftPackRouter } from './modules/shift-pack/shift-pack.routes.js';
 import { complianceRouter } from './modules/compliance/compliance.routes.js';
 import { readinessRouter } from './modules/onboarding/readiness.routes.js';
+import { stayBannerRouter } from './modules/guest-portal/stay-banner.routes.js';
 // [AUDIT] tenant-scoped audit trail (users > audit logs)
 import { auditLogsRouter } from './modules/audit/audit.routes.js';
 // [G1] Groups module — group blocks, rooming list, master folio
@@ -470,6 +471,7 @@ async function bootstrap() {
   app.use('/v1/shift-pack', shiftPackRouter);
   app.use('/v1/compliance', complianceRouter);
   app.use('/v1/readiness', readinessRouter);
+  app.use('/v1/guest-portal/banner', stayBannerRouter);
   // [AUDIT] tenant-scoped audit trail (auth'd — report:read or audit:read)
   app.use('/v1/audit-logs', auditLogsRouter);
   app.use('/v1/push', pushRouter);
