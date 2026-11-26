@@ -20,7 +20,7 @@ readinessRouter.get('/', async (req: Request, res: Response, next: NextFunction)
       prisma.property.count({ where: { tenantId } }),
       prisma.roomType.count({ where: { tenantId } }),
       prisma.room.count({ where: { tenantId } }),
-      prisma.ratePlan.count({ where: { tenantId } }),
+      prisma.ratePlan.count({ where: { tenantId, baseRate: { gt: 0 } } }),
       prisma.channelConnection.count({ where: { tenantId } }),
       prisma.payment.count({ where: { tenantId } }),
     ]);

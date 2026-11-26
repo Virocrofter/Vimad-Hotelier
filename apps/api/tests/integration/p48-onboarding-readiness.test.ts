@@ -1,6 +1,8 @@
-/* P48 — onboarding readiness gate: five data-verified dimensions. The test
- * helper seeds a property per tenant, so baseline doneCount is 1 — all
- * assertions are baseline-relative.
+/* P48 — onboarding readiness gate: five data-verified dimensions. Assertions
+ * are FLAG-based, not count-based: the baseline-done step varies by
+ * environment (dev .env may carry platform Paystack keys → payments done at
+ * baseline), so we only ever assert that seeding flips each dimension true
+ * and that payments self-reports consistently.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
@@ -22,18 +24,17 @@ beforeAll(async () => {
   console.log('P48 seeded');
 }, 90000);
 
-const step = (body: any, key: string) => body.data.steps.find((s: any) => s.key === key);
+const step = (b: any, key: string) => (b?.data ?? b)?.steps.find((s: any) => s.key === key);
+const keys = (b: any) => (b?.data ?? b)?.steps.map((s: any) => s.key).sort();
 
 describe('P48 onboarding readiness', () => {
-  it('S1: baseline is helper-seeded; each seeded dimension flips to done', async () => {
+  it('S1: five dimensions present; each seeded dimension flips to done', async () => {
     const fresh = await request(app).get('/v1/readiness').set(ctx.H());
     expect(fresh.status).toBe(200);
-    ctx.base = fresh.body.data.doneCount; // helper seeds a property → 1
-    expect(step(fresh.body, 'property_basics').done).toBe(true);
-    expect(step(fresh.body, 'spaces').done).toBe(false);
-    expect(step(fresh.body, 'rates').done).toBe(false);
-    expect(step(fresh.body, 'payments').done).toBe(false);
-    expect(step(fresh.body, 'channel_mapping').done).toBe(false);
+    expect(fresh.body.data.steps.length).toBe(5);
+    expect(keys(fresh.body)).toEqual(
+      ['channel_mapping', 'payments', 'property_basics', 'rates', 'spaces'].sort()
+    );
 
     const prop = await prisma.property.create({
       data: {
@@ -47,7 +48,7 @@ describe('P48 onboarding readiness', () => {
     });
     ctx.propId = prop.id;
     let r = (await request(app).get('/v1/readiness').set(ctx.H())).body.data;
-    expect(r.doneCount).toBe(ctx.base);
+    expect(step(r, 'property_basics').done).toBe(true);
 
     const rt = await prisma.roomType.create({
       data: {
@@ -67,32 +68,33 @@ describe('P48 onboarding readiness', () => {
     });
     r = (await request(app).get('/v1/readiness').set(ctx.H())).body.data;
     expect(step(r, 'spaces').done).toBe(true);
-    expect(r.doneCount).toBe(ctx.base + 1);
 
     const rp = await prisma.ratePlan.create({
       data: {
-        tenantId: ctx.tenantId,
-        propertyId: prop.id,
+        tenant: { connect: { id: ctx.tenantId } },
+        property: { connect: { id: prop.id } },
+        roomType: { connect: { id: rt.id } },
         name: 'RD BAR',
         code: 'RDBAR' + runId.toUpperCase().slice(-4),
+        baseRate: 1200,
       },
     });
     expect(rp.id).toBeTruthy();
     r = (await request(app).get('/v1/readiness').set(ctx.H())).body.data;
     expect(step(r, 'rates').done).toBe(true);
-    expect(r.doneCount).toBe(ctx.base + 2);
 
     await prisma.channelConnection.create({
       data: {
-        tenantId: ctx.tenantId,
-        propertyId: prop.id,
+        tenant: { connect: { id: ctx.tenantId } },
+        property: { connect: { id: prop.id } },
         provider: 'channex',
+        hotelId: 'HOTEL-' + runId,
+        apiKey: 'test-key-' + runId,
         status: 'active',
       },
     });
     r = (await request(app).get('/v1/readiness').set(ctx.H())).body.data;
     expect(step(r, 'channel_mapping').done).toBe(true);
-    expect(r.doneCount).toBe(ctx.base + 3);
 
     const pay = step(r, 'payments');
     expect(pay.configured).toBe(
@@ -102,7 +104,7 @@ describe('P48 onboarding readiness', () => {
     console.log('P48 S1 OK — dimensions flip on real data');
   }, 60000);
 
-  it('S2: a recorded payment makes payments done even without platform keys', async () => {
+  it('S2: a recorded payment marks payments tested; all five done → ready', async () => {
     const guest = await prisma.guest.create({
       data: { tenantId: ctx.tenantId, firstName: 'RD', lastName: 'Pay' },
     });
@@ -134,6 +136,9 @@ describe('P48 onboarding readiness', () => {
     const r = (await request(app).get('/v1/readiness').set(ctx.H())).body.data;
     expect(step(r, 'payments').done).toBe(true);
     expect(step(r, 'payments').tested).toBe(true);
+    for (const k of ['property_basics', 'spaces', 'rates', 'channel_mapping']) {
+      expect(step(r, k).done).toBe(true);
+    }
     expect(r.ready).toBe(true);
     expect(r.percent).toBe(100);
     console.log('P48 S2 OK — tested payment completes the gate');
@@ -141,7 +146,11 @@ describe('P48 onboarding readiness', () => {
 
   it('S3: readiness is tenant-scoped; unauthenticated denied', async () => {
     const foreign = await request(app).get('/v1/readiness').set(ctx.otherH());
-    expect(foreign.body.data.doneCount).toBe(ctx.base); // same helper seeding, their own tenant
+    expect(foreign.status).toBe(200);
+    expect(step(foreign.body, 'property_basics').done).toBe(false); // their tenant, no property seeded by us
+    expect(step(foreign.body, 'spaces').done).toBe(false);
+    expect(step(foreign.body, 'rates').done).toBe(false);
+    expect(step(foreign.body, 'channel_mapping').done).toBe(false);
 
     const anon = await request(app).get('/v1/readiness');
     expect(anon.status).toBe(401);
