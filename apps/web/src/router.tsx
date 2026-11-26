@@ -287,6 +287,7 @@ export const router = createBrowserRouter([
       { path: 'till', ...page(() => import('./app/app/till/page')) },
       { path: 'kds', ...page(() => import('./app/app/kds/page')) },
       { path: 'floor', ...page(() => import('./app/app/floor/page')) },
+      { path: 'stock', ...page(() => import('./app/app/stock/page')) },
       { path: 'vouchers', ...page(() => import('./app/app/vouchers/page')) },
       { path: 'agent', ...page(() => import('./app/app/agent/page')) },
       { path: 'developer', ...page(() => import('./app/app/developer/page')) },
