@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, KeyRound, Loader2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useStayDetails, getGuestToken } from '../../hooks/useGuestPortalData';
+import StayBanner from './StayBanner';
 import { formatDate } from '../../lib/guest-utils';
 
 export default function GuestPortalPage() {
@@ -78,6 +79,8 @@ export default function GuestPortalPage() {
           {cfg.label}
         </span>
       </div>
+
+      <StayBanner />
 
       {/* Stay Summary */}
       <div className="rounded-lg border border-border p-6">
