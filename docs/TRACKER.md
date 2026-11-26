@@ -12,23 +12,23 @@ This tracker follows the **merged roadmap** (VIMAD-Master-Roadmap-Merged-2026-11
 
 ## Phase board (merged roadmap)
 
-| Phase | Content                 | Status    | Remaining                                                                                              |
-| ----- | ----------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
-| 0     | Baseline + DS-01–03     | ✅ CLOSED | DS-02 hex sweep armed (with parallel-lane scope)                                                       |
-| 1     | Shell residue           | ◐ ~90%    | SH-03 nav-prune decision (→ dock); DS-09/10/11/13/14 policy items                                      |
-| 2     | Exception engine        | ✅ CLOSED | EX-07 was the only commit (−312 lines)                                                                 |
-| 3     | Money completion        | ✅ CLOSED | C6′-V SARS mapping = external (tax practitioner)                                                       |
-| 4     | Reservation workspace   | ✅ CLOSED | 4.1–4.5 content verified; 4.6–4.9 = DS-05/06/07/08, all shipped (DS-07 green 2026-11-24)               |
-| 5     | Wave-1 verification     | ✅ ~85%   | Only E2x-V (Paystack live) + B1-V (Channex) — both EXTERNAL                                            |
-| 6     | C2′ BI hub              | ✅ CLOSED | —                                                                                                      |
-| 7     | HK supervisor + tasks   | ✅ CLOSED | 7.7 findings queued: mobile offline queue, photo-upload endpoint                                       |
-| 8     | API & ecosystem         | ✅ CLOSED | residue: chat-event suite leg · agent Role DB seed · provider adapters (customer-triggered)            |
-| 9     | Guest parity            | ◐         | 9.1 banner ✅ `666d4b6`+`77e8092` · 9.4 verified already-built (live folio+splits) · next 9.3 then 9.6 |     |
-| 10    | Trust/onboarding        | ✅ CLOSED | 2FA `6ae7361` · POPIA `7c3a42e`/`5856e8d` · readiness `6a170a0` · PCI doc v1                           |     |
-| 11    | Chain depth             | ⬜        | Nearly free (schema supports)                                                                          |
-| 12    | F&B gate→cluster        | ⬜        | F5/D6 decision doc (1 day) can start pre-decision                                                      |
-| 13    | Wave-3 + automations v1 | ⬜        | Self-contained 3–4wk engine arc                                                                        |
-| 14    | Last mile → production  | ⬜        | Needs pilot property + (for payments) live keys                                                        |
+| Phase | Content                 | Status         | Remaining                                                                                                                                                                                                            |
+| ----- | ----------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0     | Baseline + DS-01–03     | ✅ CLOSED      | DS-02 hex sweep armed (with parallel-lane scope)                                                                                                                                                                     |
+| 1     | Shell residue           | ◐ ~90%         | SH-03 nav-prune decision (→ dock); DS-09/10/11/13/14 policy items                                                                                                                                                    |
+| 2     | Exception engine        | ✅ CLOSED      | EX-07 was the only commit (−312 lines)                                                                                                                                                                               |
+| 3     | Money completion        | ✅ CLOSED      | C6′-V SARS mapping = external (tax practitioner)                                                                                                                                                                     |
+| 4     | Reservation workspace   | ✅ CLOSED      | 4.1–4.5 content verified; 4.6–4.9 = DS-05/06/07/08, all shipped (DS-07 green 2026-11-24)                                                                                                                             |
+| 5     | Wave-1 verification     | ✅ ~85%        | Only E2x-V (Paystack live) + B1-V (Channex) — both EXTERNAL                                                                                                                                                          |
+| 6     | C2′ BI hub              | ✅ CLOSED      | —                                                                                                                                                                                                                    |
+| 7     | HK supervisor + tasks   | ✅ CLOSED      | 7.7 findings queued: mobile offline queue, photo-upload endpoint                                                                                                                                                     |
+| 8     | API & ecosystem         | ✅ CLOSED      | residue: chat-event suite leg · agent Role DB seed · provider adapters (customer-triggered)                                                                                                                          |
+| 9     | Guest parity            | ◐              | 9.1 banner ✅ `666d4b6`+`77e8092` · 9.4 verified already-built (live folio+splits) · next 9.3 then 9.6                                                                                                               |     |
+| 10    | Trust/onboarding        | ✅ CLOSED      | 2FA `6ae7361` · POPIA `7c3a42e`/`5856e8d` · readiness `6a170a0` · PCI doc v1                                                                                                                                         |     |
+| 11    | Chain depth             | ◐ MOSTLY BUILT | 11.1 ✅ shared guest lookup (this) · 11.4 ✅ verified (getChainRollup + tape + exceptions shipped) · 11.5 ◐ property-level RBAC scoping live (switcher + role assignments) · 11.2 templates + 11.3 cross-sell queued |
+| 12    | F&B gate→cluster        | ⬜             | F5/D6 decision doc (1 day) can start pre-decision                                                                                                                                                                    |
+| 13    | Wave-3 + automations v1 | ⬜             | Self-contained 3–4wk engine arc                                                                                                                                                                                      |
+| 14    | Last mile → production  | ⬜             | Needs pilot property + (for payments) live keys                                                                                                                                                                      |
 
 ## Follow-up queue (non-phase, buildable now)
 
