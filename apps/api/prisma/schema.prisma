@@ -4217,3 +4217,17 @@ model RecipeIngredient {
   @@index([recipeId])
   @@map("recipe_ingredients")
 }
+
+model StockTransfer {
+  id         String   @id @default(cuid())
+  tenantId   String
+  fromItemId String
+  toItemId   String
+  quantity   Decimal  @db.Decimal(10, 3)
+  note       String?
+  actorId    String?
+  createdAt  DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@map("stock_transfers")
+}

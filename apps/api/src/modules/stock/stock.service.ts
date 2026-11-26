@@ -291,3 +291,84 @@ export async function itemPerformance(tenantId: string, propertyId?: string) {
     .map(([productId, v]) => ({ productId, ...v, revenue: Math.round(v.revenue * 100) / 100 }))
     .sort((a, b) => b.revenue - a.revenue);
 }
+
+/* O1 — hotel-wide stores: move stock between outlets. One audit record,
+ * paired ledger movements (out of source, into destination). Overdraw is
+ * blocked — transfers never invent stock. */
+export async function transfer(
+  tenantId: string,
+  input: { fromItemId: string; toItemId: string; quantity: number; note?: string; actorId?: string }
+) {
+  if (!Number.isFinite(input.quantity) || input.quantity <= 0) {
+    throw new AppError(400, 'quantity must be positive', 'VALIDATION_ERROR');
+  }
+  if (input.fromItemId === input.toItemId) {
+    throw new AppError(400, 'Source and destination must differ', 'VALIDATION_ERROR');
+  }
+  const from = await prisma.stockItem.findFirst({ where: { id: input.fromItemId, tenantId } });
+  const to = await prisma.stockItem.findFirst({ where: { id: input.toItemId, tenantId } });
+  if (!from || !to) throw new AppError(404, 'Stock item not found', 'NOT_FOUND');
+
+  const onHand = async (itemId: string) => {
+    const agg = await prisma.stockMovement.aggregate({
+      where: { stockItemId: itemId },
+      _sum: { quantityDelta: true },
+    });
+    return Number(agg._sum.quantityDelta ?? 0);
+  };
+  if ((await onHand(from.id)) < input.quantity) {
+    throw new AppError(409, 'Not enough on hand to transfer', 'OVERDRAW');
+  }
+
+  const record = await prisma.stockTransfer.create({
+    data: {
+      tenantId,
+      fromItemId: from.id,
+      toItemId: to.id,
+      quantity: new Prisma.Decimal(input.quantity),
+      note: input.note ?? null,
+      actorId: input.actorId ?? null,
+    },
+  });
+  await prisma.stockMovement.create({
+    data: {
+      tenantId,
+      stockItemId: from.id,
+      kind: 'transfer_out',
+      quantityDelta: new Prisma.Decimal(-Math.abs(input.quantity)),
+      sourceType: 'transfer',
+      sourceId: record.id,
+      actorId: input.actorId ?? null,
+      note: input.note ?? `To: ${to.name}`,
+    },
+  });
+  await prisma.stockMovement.create({
+    data: {
+      tenantId,
+      stockItemId: to.id,
+      kind: 'transfer_in',
+      quantityDelta: new Prisma.Decimal(Math.abs(input.quantity)),
+      sourceType: 'transfer',
+      sourceId: record.id,
+      actorId: input.actorId ?? null,
+      note: input.note ?? `From: ${from.name}`,
+    },
+  });
+  return { transfer: { ...record, quantity: Number(record.quantity) } };
+}
+
+export async function listTransfers(tenantId: string) {
+  const rows = await prisma.stockTransfer.findMany({
+    where: { tenantId },
+    orderBy: { createdAt: 'desc' },
+    take: 100,
+  });
+  const items = await prisma.stockItem.findMany({ where: { tenantId } });
+  const byId = new Map(items.map((i) => [i.id, i.name]));
+  return rows.map((r) => ({
+    ...r,
+    quantity: Number(r.quantity),
+    fromName: byId.get(r.fromItemId) ?? r.fromItemId,
+    toName: byId.get(r.toItemId) ?? r.toItemId,
+  }));
+}

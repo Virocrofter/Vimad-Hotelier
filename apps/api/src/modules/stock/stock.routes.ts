@@ -12,6 +12,8 @@ import {
   createRecipe,
   listRecipes,
   itemPerformance,
+  transfer,
+  listTransfers,
 } from './stock.service.js';
 
 export const stockRouter = Router();
@@ -146,6 +148,47 @@ stockRouter.post(
     }
   }
 );
+
+stockRouter.post(
+  '/transfer',
+  requirePermission('ticket', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const parsed = z
+        .object({
+          fromItemId: z.string().min(1),
+          toItemId: z.string().min(1),
+          quantity: z.number().positive(),
+          note: z.string().max(300).optional(),
+        })
+        .safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'fromItemId + toItemId + quantity required',
+          },
+        });
+        return;
+      }
+      const data = await transfer(req.tenantId, {
+        ...parsed.data,
+        actorId: (req as any).auth.user.id,
+      });
+      res.status(201).json({ data });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+stockRouter.get('/transfers', requirePermission('ticket', 'read'), async (req, res, next) => {
+  try {
+    res.json({ data: await listTransfers(req.tenantId) });
+  } catch (err) {
+    next(err);
+  }
+});
 
 stockRouter.get('/performance', requirePermission('ticket', 'read'), async (req, res, next) => {
   try {
