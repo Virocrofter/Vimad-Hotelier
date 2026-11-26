@@ -7,6 +7,7 @@ import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 import { logger } from '../../common/logger.js';
 import { logAuditEvent } from '../audit/audit.service.js';
+import { fireTrigger } from '../automations/automation.service.js';
 
 export const HK_STATUSES = ['clean', 'dirty', 'inspected', 'in_progress', 'ready'] as const;
 export const SERVICE_STATUSES = ['active', 'ooo', 'oos'] as const;
@@ -123,6 +124,17 @@ export async function transitionRoom(
       }
     }
   }
+
+  void fireTrigger(tenantId, 'space.status_changed', {
+    roomId: room.id,
+    propertyId: room.propertyId,
+    roomNumber: room.number,
+    housekeepingFrom: input.housekeepingStatus ? room.housekeepingStatus : undefined,
+    housekeepingTo: input.housekeepingStatus,
+    serviceFrom: input.serviceStatus ? room.serviceStatus : undefined,
+    serviceTo: input.serviceStatus,
+    reason: input.reason ?? null,
+  }).catch(() => undefined);
 
   await logAuditEvent({
     tenantId,

@@ -1,5 +1,6 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { prisma } from '../../common/prisma.js';
+import { fireTrigger } from '../automations/automation.service.js';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 import {
@@ -382,6 +383,10 @@ reservationsRouter.post(
       const result = await checkInReservation(req.tenantId, req.params.id, actorOf(req), {
         force: (req.body as { force?: boolean } | undefined)?.force === true,
       });
+      void fireTrigger(req.tenantId, 'reservation.checked_in', {
+        reservationId: req.params.id,
+        actorId: actorOf(req).id,
+      }).catch(() => undefined);
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -397,6 +402,10 @@ reservationsRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await checkOutReservation(req.tenantId, req.params.id, actorOf(req));
+      void fireTrigger(req.tenantId, 'reservation.checked_out', {
+        reservationId: req.params.id,
+        actorId: actorOf(req).id,
+      }).catch(() => undefined);
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -445,6 +454,11 @@ reservationsRouter.post(
         req.body?.reason,
         actorOf(req)
       );
+      void fireTrigger(req.tenantId, 'reservation.cancelled', {
+        reservationId: req.params.id,
+        reason: req.body?.reason ?? null,
+        actorId: actorOf(req).id,
+      }).catch(() => undefined);
       res.json({ data: result });
     } catch (err) {
       next(err);
@@ -478,6 +492,10 @@ reservationsRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await markNoShow(req.tenantId, req.params.id, actorOf(req));
+      void fireTrigger(req.tenantId, 'reservation.no_show', {
+        reservationId: req.params.id,
+        actorId: actorOf(req).id,
+      }).catch(() => undefined);
       res.json({ data: result });
     } catch (err) {
       next(err);
