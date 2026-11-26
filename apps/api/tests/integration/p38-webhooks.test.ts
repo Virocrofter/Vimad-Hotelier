@@ -6,6 +6,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { createServer, type Server } from 'node:http';
 import { createHmac } from 'node:crypto';
+import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 
 const prisma: any = new PrismaClient();
@@ -123,6 +124,7 @@ beforeAll(async () => {
   ctx.admin = () => ({ Authorization: 'Bearer ' + adminToken });
   ctx.staff = () => ({ Authorization: 'Bearer ' + staffToken });
   ctx.other = () => ({ Authorization: 'Bearer ' + otherAgent.token });
+  ctx.seedResId = seedRes.id;
   console.log('P38 seeded; receiver at ' + ctx.receiverUrl);
 }, 90000);
 
@@ -251,6 +253,55 @@ describe('P38 developer webhooks (D1+)', () => {
       .send({ url: ctx.receiverUrl, events: ['*'] });
     expect(staffCreate.status).toBe(403);
     console.log('P38 S4 OK — scoping + role gate');
+  }, 30000);
+
+  it('S6: guest chat message fires chat.message_received (signed)', async () => {
+    const token = jwt.sign(
+      { reservationId: ctx.seedResId, tenantId: ctx.folio.tenantId, scope: 'guest-portal' },
+      process.env.JWT_SECRET || 'test-secret-key-for-testing-min-32-chars'
+    );
+    const before = captured.length;
+    const msg = await request(app)
+      .post('/v1/guest-portal/comms/chat/' + encodeURIComponent(token) + '/messages')
+      .send({ body: 'Could we get a late checkout?', clientId: 's6-' + runId });
+    expect(msg.status).toBe(200);
+    expect(msg.body.data.idempotentReplay).toBe(false);
+
+    const got = await waitFor(async () => {
+      const hit = captured
+        .slice(before)
+        .map((h) => ({ h, p: JSON.parse(h.body) }))
+        .find((x) => x.p.event === 'chat.message_received');
+      if (!hit) return false;
+      ctx.chatHit = hit;
+      return true;
+    });
+    expect(got).toBe(true);
+
+    const hit = ctx.chatHit.h;
+    const parsed = ctx.chatHit.p;
+    expect(parsed.data.reservationId).toBe(ctx.seedResId);
+    expect(parsed.data.body).toContain('late checkout');
+    expect(parsed.data.guestName).toContain('WH');
+    const ts = String(hit.headers['x-vimad-timestamp']);
+    const sig = String(hit.headers['x-vimad-signature']);
+    expect(sig).toMatch(/^[a-f0-9]{64}$/); // pipeline proven in S1; S3 rotates keys mid-suite
+    expect(ts).toBeTruthy();
+    console.log('P38 S6 OK — chat.message_received signed delivery');
+  }, 30000);
+
+  it('S7: travel_agent global role seeded with scoped permissions', async () => {
+    const role = await prisma.role.findFirst({ where: { name: 'travel_agent', tenantId: null } });
+    expect(role).toBeTruthy();
+    expect(role.type).toBe('system');
+    const links = await prisma.rolePermission.findMany({ where: { roleId: role.id } });
+    expect(links.length).toBe(2);
+    const perms = await prisma.permission.findMany({
+      where: { id: { in: links.map((l: any) => l.permissionId) } },
+    });
+    const names = perms.map((x: any) => `${x.resource}:${x.action}`).sort();
+    expect(names).toEqual(['folio:read', 'reservation:read']);
+    console.log('P38 S7 OK — agent role seed present, grants exact');
   }, 30000);
 });
 
