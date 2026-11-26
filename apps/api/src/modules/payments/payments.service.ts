@@ -18,6 +18,7 @@ import {
 import { sendPaymentReceipt } from '../notifications/transactional.service.js';
 // [A5] immutable SARS receipt on every successful posting
 import { recordReceipt } from '../invoices/invoices.service.js';
+import { fireTrigger } from '../automations/automation.service.js';
 
 // ─── Schemas ───
 
@@ -349,6 +350,15 @@ export async function verifyPaymentByReference(tenantId: string, reference: stri
     return prisma.payment.findUnique({ where: { id: payment.id } });
   }
 
+  if (txData.status === 'failed') {
+    void fireTrigger(tenantId, 'payment.failed', {
+      paymentId: payment.id,
+      reference: payment.reference,
+      amountMinor: payment.amountMinor,
+      reservationId: payment.reservationId,
+      failureReason: txData.gateway_response ?? txData.message ?? 'verification failed',
+    }).catch(() => undefined);
+  }
   return prisma.payment.update({
     where: { id: payment.id },
     data: {
@@ -413,6 +423,13 @@ export async function chargeSavedCard(
     return updated;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
+    void fireTrigger(tenantId, 'payment.failed', {
+      paymentId: payment.id,
+      reference: payment.reference,
+      amountMinor: payment.amountMinor,
+      reservationId: payment.reservationId,
+      failureReason: message.slice(0, 500),
+    }).catch(() => undefined);
     return prisma.payment.update({
       where: { id: payment.id },
       data: { status: 'failed', failureReason: message.slice(0, 500) },

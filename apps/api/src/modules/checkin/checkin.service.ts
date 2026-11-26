@@ -3,6 +3,7 @@ import PDFDocument from 'pdfkit';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 import { putFile, getSignedDownloadUrl } from '../../common/storage.js';
+import { fireTrigger } from '../automations/automation.service.js';
 
 const sod = (d: Date) => {
   const x = new Date(d);
@@ -148,6 +149,11 @@ export async function confirmDeposit(tenantId: string, reference: string) {
     where: { tenantId, depositReference: reference },
     data: { depositRequired: false, status: 'signed' },
   });
+  void fireTrigger(tenantId, 'deposit.paid', {
+    reference,
+    reservationId: pr.reservationId,
+    amountMinor: pr.amountMinor,
+  }).catch(() => undefined);
   return { confirmed: true };
 }
 
@@ -325,6 +331,11 @@ export async function approveSession(tenantId: string, actorId: string, sessionI
     entityId: s.id,
     metadata: { actorId },
     severity: 'info',
+  }).catch(() => undefined);
+  void fireTrigger(tenantId, 'checkin.approved', {
+    sessionId: s.id,
+    reservationId: s.reservationId,
+    guestId: s.guestId,
   }).catch(() => undefined);
   return updated;
 }
