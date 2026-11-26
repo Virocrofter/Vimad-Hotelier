@@ -4145,3 +4145,19 @@ model TillSession {
   @@index([tenantId, propertyId, status])
   @@map("till_sessions")
 }
+
+model FnBTable {
+  id         String   @id @default(cuid())
+  tenantId   String
+  propertyId String
+  label      String
+  area       String?
+  seats      Int?
+  status     String   @default("free")
+  checkId    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId, propertyId, status])
+  @@map("fnb_tables")
+}

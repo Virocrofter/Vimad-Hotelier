@@ -161,6 +161,7 @@ import { readinessRouter } from './modules/onboarding/readiness.routes.js';
 import { stayBannerRouter } from './modules/guest-portal/stay-banner.routes.js';
 import { fnbPublicRouter } from './modules/fnb/fnb.public.routes.js';
 import { fnbStaffRouter } from './modules/fnb/fnb.staff.routes.js';
+import { fnbTablesRouter } from './modules/fnb/fnb.tables.routes.js';
 import { tillRouter } from './modules/till/till.routes.js';
 import { bookingReadinessRouter } from './modules/booking/readiness.routes.js';
 // [AUDIT] tenant-scoped audit trail (users > audit logs)
@@ -440,6 +441,7 @@ async function bootstrap() {
   app.use('/v1/fnb', publicLimiter, fnbPublicRouter);
 
   app.use('/v1/fnb/staff', fnbStaffRouter);
+  app.use('/v1/fnb/tables', fnbTablesRouter);
   app.use('/v1/till', tillRouter);
   // [A5] Tax invoices & receipts (auth'd)
   app.use('/v1/invoices', invoicesRouter);
