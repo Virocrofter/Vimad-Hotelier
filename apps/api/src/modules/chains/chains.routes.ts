@@ -19,6 +19,7 @@ import {
   setCurrentProperty,
   chainCreateSchema,
   chainUpdateSchema,
+  sharedArrivals,
 } from './chains.service.js';
 
 extendZodWithOpenApi(z);
@@ -200,6 +201,20 @@ chainsRouter.patch(
         req.validatedBody as z.infer<typeof chainUpdateSchema>
       );
       res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+chainsRouter.get(
+  '/:id/shared-arrivals',
+  authMiddleware,
+  requirePermission('property', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const days = Number((req.query as { days?: string }).days ?? 3);
+      res.json({ data: await sharedArrivals(auth(req).tenantId, req.params.id, days) });
     } catch (err) {
       next(err);
     }

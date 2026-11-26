@@ -152,3 +152,68 @@ export async function setCurrentProperty(
   });
   return { currentPropertyId: propertyId };
 }
+
+/* 11.1 — chain-shared guest lookup: who is arriving at the chain in the next
+ * N days, and have they stayed at a sister property before? Pure query over
+ * the tenant-scoped guest/reservation data — no schema cost. */
+export async function sharedArrivals(tenantId: string, chainId: string, days: number) {
+  const chain = await prisma.chain.findFirst({ where: { id: chainId, tenantId } });
+  if (!chain) throw new AppError(404, 'Chain not found', 'NOT_FOUND');
+
+  const windowDays = Math.min(Math.max(days || 3, 1), 30);
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start.getTime() + windowDays * 86_400_000);
+
+  const properties = await prisma.property.findMany({
+    where: { tenantId, chainId: chain.id },
+    select: { id: true, name: true },
+  });
+  const propertyIds = properties.map((p) => p.id);
+  const nameById = new Map(properties.map((p) => [p.id, p.name]));
+  if (propertyIds.length === 0)
+    return { chain: { id: chain.id, name: chain.name }, windowDays, arrivals: [] };
+
+  const arrivals = await prisma.reservation.findMany({
+    where: {
+      tenantId,
+      propertyId: { in: propertyIds },
+      status: { in: ['confirmed', 'checked_in'] },
+      arrivalDate: { gte: start, lte: end },
+    },
+    include: { guest: { select: { id: true, firstName: true, lastName: true, email: true } } },
+    orderBy: { arrivalDate: 'asc' },
+    take: 200,
+  });
+
+  const rows = await Promise.all(
+    arrivals.map(async (r) => {
+      const previousStays = await prisma.reservation.count({
+        where: {
+          tenantId,
+          propertyId: { in: propertyIds.filter((id) => id !== r.propertyId) },
+          guestId: r.guestId,
+          status: { notIn: ['cancelled'] },
+        },
+      });
+      return {
+        guestId: r.guest.id,
+        guestName: `${r.guest.firstName} ${r.guest.lastName}`,
+        email: r.guest.email,
+        confirmationNumber: r.confirmationNumber,
+        status: r.status,
+        arrivalDate: r.arrivalDate,
+        propertyId: r.propertyId,
+        propertyName: nameById.get(r.propertyId) ?? r.propertyId,
+        returning: previousStays > 0,
+        previousStaysAtSisters: previousStays,
+      };
+    })
+  );
+
+  return {
+    chain: { id: chain.id, name: chain.name },
+    windowDays,
+    arrivals: rows,
+  };
+}
