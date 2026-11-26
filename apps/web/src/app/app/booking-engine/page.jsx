@@ -7,6 +7,7 @@ import { Copy, Check, Globe, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProperties } from '../../../hooks/useProperties';
+import BookingReadiness from './BookingReadiness';
 import { apiGet } from '../../../api/client';
 import { formatCurrency } from '../../../lib/guest-utils';
 
@@ -74,6 +75,8 @@ export default function BookingEnginePage() {
           Your bookable website widget — embed snippet and a live test of what guests see.
         </p>
       </div>
+
+      <BookingReadiness propertyId={property?.id} propertyCode={code} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
