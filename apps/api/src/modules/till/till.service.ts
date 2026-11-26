@@ -5,6 +5,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
+import { applySale } from '../stock/stock.service.js';
 
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -186,6 +187,13 @@ export async function closeCheck(
       data: { tenantId, checkId, method: p.method, amountMinor: p.amountMinor, folioItemId },
     });
   }
+  // F6: deduct recipe-linked stock for everything rung up on this check.
+  const soldLines = await prisma.tillCheckItem.findMany({
+    where: { checkId, reversed: false, comped: false },
+    select: { productId: true, quantity: true },
+  });
+  await applySale(tenantId, 'till_check', checkId, soldLines);
+
   const closed = await prisma.tillCheck.update({
     where: { id: checkId },
     data: { status: 'closed', closedAt: new Date() },

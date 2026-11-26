@@ -4161,3 +4161,59 @@ model FnBTable {
   @@index([tenantId, propertyId, status])
   @@map("fnb_tables")
 }
+
+model StockItem {
+  id          String   @id @default(cuid())
+  tenantId    String
+  propertyId  String
+  name        String
+  unit        String   @default("ea")
+  parLevel    Decimal? @db.Decimal(10, 2)
+  costPerUnit Decimal? @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, propertyId])
+  @@map("stock_items")
+}
+
+model StockMovement {
+  id            String   @id @default(cuid())
+  tenantId      String
+  stockItemId   String
+  kind          String
+  quantityDelta Decimal  @db.Decimal(10, 3)
+  unitCost      Decimal? @db.Decimal(10, 2)
+  note          String?
+  sourceType    String?
+  sourceId      String?
+  actorId       String?
+  createdAt     DateTime @default(now())
+
+  @@index([tenantId, stockItemId, createdAt])
+  @@map("stock_movements")
+}
+
+model Recipe {
+  id         String   @id @default(cuid())
+  tenantId   String
+  propertyId String
+  name       String
+  productId  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId, productId])
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id          String   @id @default(cuid())
+  recipeId    String
+  stockItemId String
+  quantity    Decimal  @db.Decimal(10, 3)
+  createdAt   DateTime @default(now())
+
+  @@index([recipeId])
+  @@map("recipe_ingredients")
+}

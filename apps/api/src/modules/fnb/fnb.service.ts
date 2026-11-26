@@ -7,6 +7,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../../common/prisma.js';
 import { AppError } from '../../common/errors.js';
 import { env } from '../../common/env.js';
+import { applySale, applyRestock } from '../stock/stock.service.js';
 import { initializeTransaction, verifyTransaction, createRefund } from '../../common/paystack.js';
 
 const toMinor = (major: number) => Math.round(major * 100);
@@ -91,6 +92,24 @@ export async function createOrder(
   };
 }
 
+/* The single settle path: claim pending → paid (idempotent) and deduct
+ * recipe-linked stock once. Called by verifyOrderPayment after gateway
+ * confirmation; exported so suites exercise it without the network. */
+export async function claimPaid(orderId: string, paystackId?: bigint) {
+  const order = await prisma.fnBOrder.findUnique({ where: { id: orderId } });
+  if (!order) throw new AppError(404, 'Order not found', 'NOT_FOUND');
+  if (order.status === 'paid') return order;
+  const claim = await prisma.fnBOrder.updateMany({
+    where: { id: order.id, status: 'pending' },
+    data: { status: 'paid', ...(paystackId ? { paystackId } : {}), failureReason: null },
+  });
+  if (claim.count > 0) {
+    const lines = order.items as Array<{ productId?: string; quantity: number }>;
+    await applySale(order.tenantId, 'fnb_order', order.id, lines);
+  }
+  return prisma.fnBOrder.findUnique({ where: { id: order.id } });
+}
+
 /* Begin hosted payment (live leg — gated on platform Paystack keys like E2x). */
 export async function beginPayment(orderId: string, email: string) {
   const order = await prisma.fnBOrder.findUnique({ where: { id: orderId } });
@@ -117,12 +136,7 @@ export async function verifyOrderPayment(reference: string) {
 
   const txData = await verifyTransaction(reference);
   if (txData.status === 'success' && txData.amount === toMinor(Number(order.amount))) {
-    const claim = await prisma.fnBOrder.updateMany({
-      where: { id: order.id, status: 'pending' },
-      data: { status: 'paid', paystackId: BigInt(txData.id), failureReason: null },
-    });
-    if (claim.count === 0) return prisma.fnBOrder.findUnique({ where: { id: order.id } });
-    return prisma.fnBOrder.findUnique({ where: { id: order.id } });
+    return claimPaid(order.id, BigInt(txData.id));
   }
   return prisma.fnBOrder.update({
     where: { id: order.id },
@@ -177,6 +191,8 @@ export async function refund(tenantId: string, id: string, reason?: string) {
     where: { id },
     data: { status: 'refunded', failureReason: reason ?? null },
   });
+  const refundLines = order.items as Array<{ productId?: string; quantity: number }>;
+  await applyRestock(tenantId, 'fnb_order', order.id, refundLines);
   return { order: updated, refundId: refundResult.refundId };
 }
 
