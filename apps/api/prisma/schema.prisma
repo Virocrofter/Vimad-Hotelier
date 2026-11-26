@@ -4291,3 +4291,25 @@ model AutomationStorage {
   @@unique([tenantId, key])
   @@map("automation_storage")
 }
+
+model Preauth {
+  id                         String    @id @default(cuid())
+  tenantId                   String
+  propertyId                 String
+  reservationId              String
+  email                      String
+  amountMinor                Int
+  currency                   String    @default("ZAR")
+  status                     String    @default("open")
+  reference                  String    @unique
+  authorizationCode          String?
+  authorizationTransactionId BigInt?
+  captureReference           String?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+  capturedAt                 DateTime?
+  voidedAt                   DateTime?
+
+  @@index([tenantId, reservationId, status])
+  @@map("preauths")
+}
