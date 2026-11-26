@@ -114,6 +114,16 @@ export const router = createBrowserRouter([
     lazy: async () => ({ Component: (await import('./app/booking/cancel/page')).default }),
     errorElement: <RouterError />,
   },
+  {
+    path: '/fnb/:code',
+    lazy: async () => ({ Component: (await import('./app/fnb/page')).default }),
+    errorElement: <RouterError />,
+  },
+  {
+    path: '/fnb/confirmed',
+    lazy: async () => ({ Component: (await import('./app/fnb/confirmed/page')).default }),
+    errorElement: <RouterError />,
+  },
 
   {
     path: '/demo-access/enter',
@@ -273,6 +283,7 @@ export const router = createBrowserRouter([
       { path: 'support/status', ...page(() => import('./app/app/support/status/page')) },
       { path: 'comms', ...page(() => import('./app/app/comms/page')) },
       { path: 'shift-pack', ...page(() => import('./app/app/shift-pack/page')) },
+      { path: 'fnb', ...page(() => import('./app/app/fnb/page')) },
       { path: 'vouchers', ...page(() => import('./app/app/vouchers/page')) },
       { path: 'agent', ...page(() => import('./app/app/agent/page')) },
       { path: 'developer', ...page(() => import('./app/app/developer/page')) },
