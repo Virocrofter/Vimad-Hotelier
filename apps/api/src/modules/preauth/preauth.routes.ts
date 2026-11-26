@@ -3,9 +3,24 @@ import { Router } from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
-import { createHold, capture, voidHold, listHolds } from './preauth.service.js';
+import {
+  createHold,
+  capture,
+  voidHold,
+  listHolds,
+  verifyHoldByReference,
+} from './preauth.service.js';
 
 export const preauthRouter = Router();
+
+/* Public: the guest's browser returns here from Paystack's hosted page. */
+preauthRouter.get('/verify/:reference', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.json({ data: await verifyHoldByReference(String(req.params.reference)) });
+  } catch (err) {
+    next(err);
+  }
+});
 
 preauthRouter.use(authMiddleware, tenantScope);
 

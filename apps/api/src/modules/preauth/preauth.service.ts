@@ -12,6 +12,7 @@ import {
   chargeAuthorization,
   createRefund,
   initializeTransaction,
+  verifyTransaction,
 } from '../../common/paystack.js';
 import { env } from '../../common/env.js';
 
@@ -53,6 +54,28 @@ export async function createHold(
 /* Begin the hold charge on Paystack's hosted page (live leg — the guest
  * authorizes the card once; the reusable authorization_code comes back in
  * the verification and attaches via attachAuthorization). */
+
+/* Public verify for the hosted hold charge's return (the guest's browser
+ * hits this after Paystack redirects). Idempotent — a repeated verify
+ * returns the already-attached hold. */
+export async function verifyHoldByReference(reference: string) {
+  const hold = await prisma.preauth.findFirst({ where: { reference } });
+  if (!hold) throw new AppError(404, 'Preauth not found', 'NOT_FOUND');
+  if (hold.authorizationCode) return hold;
+  const txData = await verifyTransaction(reference);
+  if (txData.status === 'success' && txData.amount === hold.amountMinor) {
+    const code = txData.authorization?.authorization_code;
+    if (!code) {
+      throw new AppError(409, 'Gateway returned no reusable authorization', 'NO_AUTHORIZATION');
+    }
+    return attachAuthorization(hold.id, code, txData.id);
+  }
+  throw new AppError(
+    409,
+    txData.gateway_response ?? 'Hold charge not successful',
+    'HOLD_NOT_SUCCESSFUL'
+  );
+}
 export async function beginHold(preauthId: string) {
   const hold = await prisma.preauth.findUnique({ where: { id: preauthId } });
   if (!hold) throw new AppError(404, 'Preauth not found', 'NOT_FOUND');

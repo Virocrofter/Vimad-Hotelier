@@ -359,6 +359,15 @@ export async function verifyPaymentByReference(tenantId: string, reference: stri
       failureReason: txData.gateway_response ?? txData.message ?? 'verification failed',
     }).catch(() => undefined);
   }
+  if (txData.status === 'failed') {
+    void fireTrigger(tenantId, 'payment.failed', {
+      paymentId: payment.id,
+      reference: payment.reference,
+      amountMinor: payment.amountMinor,
+      reservationId: payment.reservationId,
+      failureReason: txData.gateway_response ?? txData.message ?? 'verification failed',
+    }).catch(() => undefined);
+  }
   return prisma.payment.update({
     where: { id: payment.id },
     data: {
