@@ -4231,3 +4231,63 @@ model StockTransfer {
   @@index([tenantId, createdAt])
   @@map("stock_transfers")
 }
+
+model AutomationWorkflow {
+  id          String    @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  triggerType String
+  eventKey    String?
+  cronMinutes Int?
+  propertyId  String?
+  isActive    Boolean   @default(true)
+  lastFiredAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([tenantId, isActive])
+  @@map("automation_workflows")
+}
+
+model AutomationStep {
+  id           String   @id @default(cuid())
+  tenantId     String
+  workflowId   String
+  parentStepId String?
+  type         String
+  config       Json
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([workflowId, sortOrder])
+  @@map("automation_steps")
+}
+
+model AutomationRun {
+  id             String    @id @default(cuid())
+  tenantId       String
+  workflowId     String
+  status         String    @default("running")
+  triggerPayload Json?
+  executionTrace Json      @default("[]")
+  progress       Int       @default(0)
+  resumeAt       DateTime?
+  startedAt      DateTime  @default(now())
+  finishedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([tenantId, workflowId, createdAt])
+  @@map("automation_runs")
+}
+
+model AutomationStorage {
+  id        String   @id @default(cuid())
+  tenantId  String
+  key       String
+  value     Json?
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, key])
+  @@map("automation_storage")
+}
