@@ -140,7 +140,7 @@ const FLOW: Record<string, string[]> = {
   pending: ['cancelled'],
   paid: ['preparing', 'refunded'],
   preparing: ['served', 'cancelled'],
-  served: [],
+  served: ['preparing'], // F4 recall: a served order can bounce back to the pass
   cancelled: [],
   failed: [],
   refunded: [],

@@ -166,6 +166,27 @@ describe('P53 F&B ordering (F3)', () => {
     expect([401, 403]).toContain(foreign.status);
     console.log('P53 S4 OK — refund guards + scoping');
   }, 60000);
+
+  it('S5: recall bounces a served order back to the pass (F4)', async () => {
+    const recall = await request(app)
+      .post(`/v1/fnb/staff/orders/${ctx.orderId}/status`)
+      .set(ctx.staff())
+      .send({ status: 'preparing' });
+    expect(recall.status).toBe(200);
+    expect(recall.body.data.status).toBe('preparing');
+
+    const back = await request(app)
+      .post(`/v1/fnb/staff/orders/${ctx.orderId}/status`)
+      .set(ctx.staff())
+      .send({ status: 'served' });
+    expect(back.status).toBe(200);
+
+    const queue = await request(app).get('/v1/fnb/staff/orders?status=preparing').set(ctx.staff());
+    expect(queue.body.data.some((o: any) => o.id === ctx.orderId)).toBe(false);
+    const servedQ = await request(app).get('/v1/fnb/staff/orders?status=served').set(ctx.staff());
+    expect(servedQ.body.data.some((o: any) => o.id === ctx.orderId)).toBe(true);
+    console.log('P53 S5 OK — recall + board membership');
+  }, 60000);
 });
 
 afterAll(async () => {
