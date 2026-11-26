@@ -212,6 +212,17 @@ guestCommsRouter.post(
       )
       .catch(() => {});
 
+    void import('../automations/automation.service.js')
+      .then((m) =>
+        m.fireTrigger(reservation.tenantId, 'chat.message_received', {
+          threadId: thread.id,
+          reservationId: reservation.id,
+          guestName,
+          body: input.body.slice(0, 280),
+        })
+      )
+      .catch(() => {});
+
     return ok(res, { message, idempotentReplay: false });
   })
 );
