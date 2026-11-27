@@ -23,6 +23,7 @@ import {
   MessagesSquare,
   MoonStar,
   Search,
+  Ticket,
   TrendingUp,
   Users,
   Webhook,
