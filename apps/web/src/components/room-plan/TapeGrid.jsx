@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { ChevronDown, ChevronRight, AlertTriangle, Lock } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import ReservationBlock from './ReservationBlock';
@@ -45,6 +45,11 @@ function buildSegments(stays, from, to) {
     }
   }
   return segs;
+}
+
+function dragResCurrentRoom(segments, resId) {
+  const segs = segments.filter((s) => s.reservationId === resId);
+  return segs.length ? segs[0].roomId : null;
 }
 
 export default function TapeGrid({
@@ -151,17 +156,17 @@ export default function TapeGrid({
     return i;
   };
 
-  const hoverTimer = useMemo(() => ({ t: null }), []);
+  const hoverTimer = useRef({ t: null });
 
   const showHover = (e, reservationId) => {
-    clearTimeout(hoverTimer.t);
-    hoverTimer.t = setTimeout(() => {
+    clearTimeout(hoverTimer.current.t);
+    hoverTimer.current.t = setTimeout(() => {
       setHover({ x: e.clientX, y: e.clientY, reservationId });
     }, 450);
   };
   const hideHover = () => {
-    clearTimeout(hoverTimer.t);
-    hoverTimer.t = setTimeout(() => setHover(null), 200);
+    clearTimeout(hoverTimer.current.t);
+    hoverTimer.current.t = setTimeout(() => setHover(null), 200);
   };
 
   const dayHeaderCell = (day) => {
@@ -306,7 +311,7 @@ export default function TapeGrid({
             e.preventDefault();
             setDragOverRoomId(null);
             const id = e.dataTransfer.getData('text/res-id');
-            if (id && room.id !== dragResCurrentRoom(id)) onMoveReservation(id, room.id);
+            if (id && room.id !== dragResCurrentRoom(segments, id)) onMoveReservation(id, room.id);
             setDragResId(null);
           }}
         >
@@ -419,11 +424,6 @@ export default function TapeGrid({
     }
   }
 
-  function dragResCurrentRoom(resId) {
-    const segs = segments.filter((s) => s.reservationId === resId);
-    return segs.length ? segs[0].roomId : null;
-  }
-
   return (
     <div className="relative flex-1 overflow-auto rounded-lg border bg-card">
       <div style={{ width: LABEL_W + colCount * dayW + 20 }}>
@@ -449,7 +449,7 @@ export default function TapeGrid({
         />
       )}
       {hover && resById.get(hover.reservationId) && (
-        <div onMouseEnter={() => clearTimeout(hoverTimer.t)} onMouseLeave={hideHover}>
+        <div onMouseEnter={() => clearTimeout(hoverTimer.current.t)} onMouseLeave={hideHover}>
           <ReservationPopover
             reservation={resById.get(hover.reservationId)}
             currency={property.currency}

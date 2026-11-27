@@ -2,7 +2,7 @@
  * Administration → Properties: chain cards, every property in the tenant,
  * and per-row chain assignment. This is the chain-admin home surface.
  */
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Building2, Link2, Plus, RefreshCw } from 'lucide-react';
 import { listChains, createChain, attachProperty, detachProperty } from '../../../api/chains';
@@ -14,14 +14,15 @@ import { apiClient } from '../../../api/client';
 function AutoDepositCell({ property }) {
   const [days, setDays] = useState(property.autoDepositDays ?? 0);
   const [state, setState] = useState('idle'); // idle | saving | saved | error
+  const lastSavedRef = useRef(property.autoDepositDays ?? 0);
   const save = async (value) => {
     const n = Math.max(0, Math.min(30, Math.round(Number(value) || 0)));
     setDays(n);
-    if (n === (property.autoDepositDays ?? 0)) return;
+    if (n === lastSavedRef.current) return;
     setState('saving');
     try {
       await apiClient.patch(`/properties/${property.id}`, { autoDepositDays: n });
-      property.autoDepositDays = n;
+      lastSavedRef.current = n;
       setState('saved');
       setTimeout(() => setState('idle'), 1500);
     } catch {
