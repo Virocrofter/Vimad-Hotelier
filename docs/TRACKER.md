@@ -1,6 +1,6 @@
 # VIMAD TRACKER — the living plan of record (update at the end of every session)
 
-Last updated: 2026-11-26 · code state: `77e8092` (Phases 8 & 10 CLOSED; 9.1 shipped end-to-end; 9.4 verified already-built)
+Last updated: 2026-11-27 · code state: `b3c1f0e` (Phases 11/12/13 done; D-1 closed; RC baseline recorded)
 
 ## How to read this (numbering — three schemes collide, this tracker uses ONE)
 
@@ -27,7 +27,7 @@ This tracker follows the **merged roadmap** (VIMAD-Master-Roadmap-Merged-2026-11
 | 10    | Trust/onboarding        | ✅ CLOSED      | 2FA `6ae7361` · POPIA `7c3a42e`/`5856e8d` · readiness `6a170a0` · PCI doc v1                                                                                                                                         |     |
 | 11    | Chain depth             | ◐ MOSTLY BUILT | 11.1 ✅ shared guest lookup (this) · 11.4 ✅ verified (getChainRollup + tape + exceptions shipped) · 11.5 ◐ property-level RBAC scoping live (switcher + role assignments) · 11.2 templates + 11.3 cross-sell queued |
 | 12    | F&B gate→cluster        | ⬜             | F5/D6 decision doc (1 day) can start pre-decision                                                                                                                                                                    |
-| 13    | Wave-3 + automations v1 | ⬜             | Self-contained 3–4wk engine arc                                                                                                                                                                                      |
+| 13    | Wave-3 + automations v1 | ✅ ENGINE DONE | automations v1 (engine + full trigger surface) shipped; wave-3 demand items remain by design                                                                                                                         |
 | 14    | Last mile → production  | ⬜             | Needs pilot property + (for payments) live keys                                                                                                                                                                      |
 
 ## Follow-up queue (non-phase, buildable now)
@@ -37,7 +37,7 @@ This tracker follows the **merged roadmap** (VIMAD-Master-Roadmap-Merged-2026-11
 3. SA bundle: compliance `a9253f3` · TOMSA `f003eb3` · EFT POP `9468620` · shift pack `9a98a6b` — all shipped; full offline mode stays post-pilot
 4. RoomBoard reservation overlay (the true tape-chart check-in trigger)
 5. Preauth infrastructure — schema + hold lifecycle, buildable in Paystack TEST mode
-6. RC sweep — ~53 react-compiler findings (gate-aligned: classic rules only until swept)
+6. RC sweep — BASELINE 2026-11-27: batch 1 (static-components ×7) CLOSED `b3c1f0e`. Remaining 92 real findings: set-state-in-effect ×67, purity ×7, immutability ×4, preserve-manual-memo ×5, memo-deps ×5+1, incompatible-library ×2, invariant ×1 (×21 'unused disables' are false positives under a compiler-only config). Dedicated half-day session, rule-by-rule with files in hand, ending with the compiler rules promoted into the gate
 7. E1x-V extras + E5-V/H3-V/C8′/C4′a/C5′/B3-K — suites all green in rotation
 8. Housekeeping: deploy-prod config (90s fails), security-scan failure, guest-portal verify-page interval bug
 
