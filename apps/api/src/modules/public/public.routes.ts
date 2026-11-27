@@ -15,6 +15,8 @@ import {
   unsubscribeByToken,
 } from './public.service.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
+import { prisma } from '../../common/prisma.js';
+import { AppError } from '../../common/errors.js';
 
 export const publicRouter = Router();
 
@@ -63,6 +65,54 @@ publicRouter.post(
     try {
       const result = await cancelPublicBooking(req.validatedBody as any);
       res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+/* 11.3 — cross-sell: sister properties of the chain with availability
+ * for the guest's dates (sold-out → book at our sister property). */
+publicRouter.get(
+  '/chain/:code/sisters',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const q = req.query as Record<string, string>;
+      const current = await prisma.property.findFirst({ where: { code: String(req.params.code) } });
+      if (!current) throw new AppError(404, 'Property not found', 'NOT_FOUND');
+      if (!current.chainId) {
+        res.json({ data: { sisters: [] } });
+        return;
+      }
+
+      const siblings = await prisma.property.findMany({
+        where: { tenantId: current.tenantId, chainId: current.chainId, id: { not: current.id } },
+        take: 10,
+      });
+      const { getAvailability } = await import('./public.service.js');
+      const out = [];
+      for (const sib of siblings) {
+        const avail = await getAvailability(sib.code, {
+          checkIn: q.checkIn ?? '',
+          checkOut: q.checkOut ?? '',
+          adults: Number(q.adults ?? 2),
+          children: Number(q.children ?? 0),
+        });
+        const cheapest = avail.roomTypes.reduce(
+          (m, r) => Math.min(m, r.total ?? Infinity),
+          Infinity
+        );
+        if (!Number.isFinite(cheapest)) continue;
+        out.push({
+          code: sib.code,
+          name: sib.name,
+          imageKey: sib.imageKey ?? null,
+          cheapestTotal: cheapest,
+          roomTypes: avail.roomTypes.length,
+        });
+      }
+      out.sort((a, b) => a.cheapestTotal - b.cheapestTotal);
+      res.json({ data: { sisters: out } });
     } catch (err) {
       next(err);
     }

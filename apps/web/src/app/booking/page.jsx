@@ -60,6 +60,7 @@ export default function BookingPage() {
   const [error, setError] = useState(null);
   const [booking, setBooking] = useState(null);
   const [menu, setMenu] = useState(null);
+  const [sisters, setSisters] = useState(null);
 
   useEffect(() => {
     publicBookingApi
@@ -76,6 +77,20 @@ export default function BookingPage() {
       .catch(() => setMenu(null));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
+
+  // 11.3: sold out → sister properties of the chain (cross-sell).
+  useEffect(() => {
+    if (step !== 'rooms' || !roomTypes || roomTypes.length > 0) {
+      setSisters(null);
+      return;
+    }
+    const qs = new URLSearchParams({ checkIn, checkOut, adults: String(adults) });
+    fetch(`/v1/public/chain/${encodeURIComponent(code)}/sisters?${qs}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => setSisters(b?.data?.sisters ?? []))
+      .catch(() => setSisters([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, roomTypes]);
 
   const search = async () => {
     setError(null);
@@ -276,6 +291,40 @@ export default function BookingPage() {
                     <p className="mt-2 text-sm font-semibold">{fmtMoney(item.price)}</p>
                   </div>
                 </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {step === 'rooms' && roomTypes?.length === 0 && sisters?.length > 0 && (
+          <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+            <h2 className="text-xl font-semibold text-text-primary">Also available nearby</h2>
+            <p className="mt-1 text-sm text-text-secondary">
+              {property.name} is sold out for your dates — our sister properties have space:
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {sisters.map((sib) => (
+                <a
+                  key={sib.code}
+                  href={`/book/${encodeURIComponent(sib.code)}?checkIn=${encodeURIComponent(checkIn)}&checkOut=${encodeURIComponent(checkOut)}&adults=${adults}`}
+                  className="overflow-hidden rounded-2xl border border-border bg-background transition-shadow hover:shadow-md"
+                >
+                  {sib.imageKey ? (
+                    <img
+                      src={`/v1/public/image/${encodeURIComponent(sib.imageKey)}`}
+                      alt={sib.name}
+                      className="h-32 w-full object-cover"
+                    />
+                  ) : null}
+                  <div className="p-4">
+                    <p className="font-semibold text-text-primary">{sib.name}</p>
+                    <p className="mt-1 text-sm text-text-secondary">
+                      from {fmtMoney(sib.cheapestTotal)} · {sib.roomTypes} option
+                      {sib.roomTypes === 1 ? '' : 's'}
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-secondary">Book at {sib.name} →</p>
+                  </div>
+                </a>
               ))}
             </div>
           </section>

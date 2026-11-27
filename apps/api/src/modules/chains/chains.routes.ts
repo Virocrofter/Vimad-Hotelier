@@ -207,6 +207,84 @@ chainsRouter.patch(
   }
 );
 
+/* 11.2 — chain templates: corporate rate/policy/message payloads. */
+chainsRouter.get(
+  '/:id/templates',
+  authMiddleware,
+  requirePermission('property', 'read'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { listTemplates } = await import('./chain-templates.js');
+      res.json({ data: await listTemplates(auth(req).tenantId, req.params.id) });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+chainsRouter.post(
+  '/:id/templates',
+  authMiddleware,
+  requirePermission('property', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = (req.body ?? {}) as {
+        name?: string;
+        type?: string;
+        payload?: Record<string, unknown>;
+      };
+      if (
+        !body.name?.trim() ||
+        !['rate', 'policy', 'messages'].includes(String(body.type)) ||
+        !body.payload
+      ) {
+        return res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'name + type(rate|policy|messages) + payload required',
+          },
+        });
+      }
+      const { createTemplate } = await import('./chain-templates.js');
+      const data = await createTemplate(auth(req).tenantId, {
+        chainId: req.params.id,
+        name: body.name.trim(),
+        type: body.type as 'rate' | 'policy' | 'messages',
+        payload: body.payload,
+      });
+      return res.status(201).json({ data });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+chainsRouter.post(
+  '/:id/templates/:templateId/push',
+  authMiddleware,
+  requirePermission('property', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const propertyIds = ((req.body ?? {}) as { propertyIds?: string[] }).propertyIds ?? [];
+      if (!Array.isArray(propertyIds) || propertyIds.length === 0) {
+        return res
+          .status(400)
+          .json({ error: { code: 'VALIDATION_ERROR', message: 'propertyIds[] required' } });
+      }
+      const { pushTemplate } = await import('./chain-templates.js');
+      const data = await pushTemplate(
+        auth(req).tenantId,
+        req.params.id,
+        req.params.templateId,
+        propertyIds
+      );
+      return res.json({ data });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
 chainsRouter.get(
   '/:id/shared-arrivals',
   authMiddleware,

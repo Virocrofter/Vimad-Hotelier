@@ -277,6 +277,7 @@ model Property {
   tomsaAccountCode String?
   // Bank details / footer text printed on invoices (EFT + POP flows)
   invoiceFooter String? @db.Text
+  imageKey String?
 }
 
 model RoomType {
@@ -4327,4 +4328,18 @@ model Preauth {
 
   @@index([tenantId, reservationId, status])
   @@map("preauths")
+}
+
+model ChainTemplate {
+  id        String   @id @default(cuid())
+  tenantId  String
+  chainId   String
+  name      String
+  type      String
+  payload   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, chainId])
+  @@map("chain_templates")
 }
