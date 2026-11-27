@@ -1,12 +1,15 @@
 /* apps/api/src/modules/payments/payments.routes.ts */
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+import { prisma } from '../../common/prisma.js';
 import { z } from 'zod';
 import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
 import { validateBody, validateQuery } from '../../common/validate.js';
 import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
 import { env } from '../../common/env.js';
 import { paystackTenantScope } from '../../common/paystack-scope.js';
+import { invalidatePaystackScope } from '../../common/paystack-scope.js';
+import { encryptSecret } from '../../common/secrets.js';
 import { beginPennyTest, verifyPennyTestByReference } from './penny-test.service.js';
 import {
   initializePaymentSchema,
@@ -89,6 +92,74 @@ paymentsRouter.post(
         String((req as any).auth?.user?.email ?? `owner+${req.tenantId}@example.com`)
       );
       res.status(201).json({ data });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+paymentsRouter.put(
+  '/tenant-keys',
+  requirePermission('folio', 'payment'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const role = String((req as any).auth?.user?.role ?? '');
+      if (role !== 'owner' && role !== 'admin') {
+        res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Owner/admin only' } });
+        return;
+      }
+      const parsed = z
+        .object({ secretKey: z.string().min(10), publicKey: z.string().min(5) })
+        .safeParse(req.body);
+      if (!parsed.success) {
+        res
+          .status(400)
+          .json({ error: { code: 'VALIDATION_ERROR', message: 'secretKey + publicKey required' } });
+        return;
+      }
+      await prisma.tenant.update({
+        where: { id: req.tenantId },
+        data: {
+          paystackSecretEnc: encryptSecret(parsed.data.secretKey),
+          paystackPublicKey: parsed.data.publicKey,
+          pennyTestAt: null, // keys changed → re-run the penny test
+        },
+      });
+      invalidatePaystackScope(req.tenantId);
+      res.json({ data: { connected: true } });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+paymentsRouter.get(
+  '/tenant-keys',
+  requirePermission('folio', 'payment'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const role = String((req as any).auth?.user?.role ?? '');
+      if (role !== 'owner' && role !== 'admin') {
+        res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Owner/admin only' } });
+        return;
+      }
+      const tenant = await prisma.tenant.findFirst({
+        where: { id: req.tenantId },
+        select: {
+          paystackSecretEnc: true,
+          paystackPublicKey: true,
+          pennyTestAt: true,
+          pennyTestReference: true,
+        },
+      });
+      res.json({
+        data: {
+          connected: Boolean(tenant?.paystackSecretEnc),
+          publicKey: tenant?.paystackPublicKey ?? null,
+          pennyTestAt: tenant?.pennyTestAt ?? null,
+          pennyTestReference: tenant?.pennyTestReference ?? null,
+        },
+      });
     } catch (err) {
       next(err);
     }

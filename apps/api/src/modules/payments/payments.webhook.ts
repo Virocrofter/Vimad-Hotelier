@@ -5,7 +5,8 @@
 import { Router, type Request, type Response } from 'express';
 import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
-import { verifyWebhookSignature } from '../../common/paystack.js';
+import { verifyWebhookSignature, withPaystackCredentials } from '../../common/paystack.js';
+import { getTenantPaystackCredentials } from '../../common/tenant-paystack.js';
 import { enqueue } from '../../common/queue.js';
 import { logger } from '../../common/logger.js';
 import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
@@ -33,11 +34,32 @@ registry.registerPath({
   },
 });
 
-paymentsWebhookRouter.post('/', (req: Request, res: Response) => {
+paymentsWebhookRouter.post('/', async (req: Request, res: Response) => {
   const rawBody = (req as any).rawBody as Buffer | undefined;
   const signature = req.get('x-paystack-signature');
 
-  if (!rawBody || !verifyWebhookSignature(rawBody, signature)) {
+  // D-1: resolve the tenant from the transaction metadata FIRST, then verify
+  // the HMAC with THAT account's secret — each hotel's Paystack signs with
+  // their own key. Platform events (no tenant scope) keep the env fallback.
+  let tenantCreds: Awaited<ReturnType<typeof getTenantPaystackCredentials>> = null;
+  if (rawBody) {
+    try {
+      const parsed = JSON.parse(rawBody.toString('utf-8')) as {
+        data?: { metadata?: { tenantId?: string } | null };
+      };
+      const tenantId = parsed?.data?.metadata?.tenantId ?? null;
+      if (tenantId) tenantCreds = await getTenantPaystackCredentials(tenantId);
+    } catch {
+      tenantCreds = null;
+    }
+  }
+
+  if (
+    !rawBody ||
+    !(await withPaystackCredentials(tenantCreds, async () =>
+      verifyWebhookSignature(rawBody, signature)
+    ))
+  ) {
     logger.warn({ ip: req.ip }, 'Paystack webhook rejected — bad signature');
     res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Invalid signature' } });
     return;
