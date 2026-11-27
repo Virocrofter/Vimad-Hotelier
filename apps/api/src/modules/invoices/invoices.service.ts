@@ -126,6 +126,7 @@ export async function issueTaxInvoice(tenantId: string, input: z.infer<typeof is
       amountPaid,
       propertyName: property.name,
       propertyVatNo: (property as { vatNumber?: string | null }).vatNumber ?? null,
+      invoiceFooter: (property as { invoiceFooter?: string | null }).invoiceFooter ?? null,
       guestName: guest ? `${guest.firstName} ${guest.lastName}` : 'Guest',
       guestEmail: guest?.email ?? null,
       items: { create: items },
@@ -181,6 +182,8 @@ export async function recordReceipt(paymentId: string) {
       amountPaid: amountIncl,
       propertyName: reservation.property.name,
       propertyVatNo: (reservation.property as { vatNumber?: string | null }).vatNumber ?? null,
+      invoiceFooter:
+        (reservation.property as { invoiceFooter?: string | null }).invoiceFooter ?? null,
       guestName: reservation.guest
         ? `${reservation.guest.firstName} ${reservation.guest.lastName}`
         : 'Guest',
@@ -270,6 +273,7 @@ export async function issueCreditNote(
         amountPaid: 0,
         propertyName: original.propertyName,
         propertyVatNo: original.propertyVatNo,
+        invoiceFooter: original.invoiceFooter,
         guestName: original.guestName,
         guestEmail: original.guestEmail,
         items: { create: items },

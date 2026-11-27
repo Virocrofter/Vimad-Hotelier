@@ -21,6 +21,7 @@ export const propertyUpdateSchema = propertyCreateSchema.partial().extend({
   liquorLicenceExpiry: z.string().optional(),
   popiaInformationOfficerName: z.string().max(200).optional(),
   popiaInformationOfficerEmail: z.string().email().optional(),
+  invoiceFooter: z.string().max(1000).optional(),
   tomsaLevyEnabled: z.boolean().optional(),
   tomsaAccountCode: z.string().max(20).optional(),
   tomsaLevyPct: z.number().min(0).max(25).optional(),

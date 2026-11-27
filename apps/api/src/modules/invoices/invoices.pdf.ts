@@ -145,6 +145,16 @@ export async function renderInvoicePdf(invoiceId: string): Promise<string> {
       );
     }
 
+    // ─── Property footer / bank block (EFT details for the POP flow) ───
+    if (invoice.invoiceFooter && y < 700) {
+      doc.moveTo(50, 715).lineTo(545, 715).strokeColor(COL.line).stroke();
+      doc
+        .fontSize(8)
+        .fillColor(COL.ink)
+        .font('Helvetica')
+        .text(invoice.invoiceFooter, 50, 722, { width: 495, lineGap: 1 });
+    }
+
     doc
       .fontSize(8)
       .fillColor(COL.muted)

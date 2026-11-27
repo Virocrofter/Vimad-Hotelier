@@ -275,6 +275,8 @@ model Property {
   popiaInformationOfficerName  String?
   popiaInformationOfficerEmail String?
   tomsaAccountCode String?
+  // Bank details / footer text printed on invoices (EFT + POP flows)
+  invoiceFooter String? @db.Text
 }
 
 model RoomType {
@@ -1398,6 +1400,8 @@ model TaxInvoice {
   @@index([folioId])
   @@index([reservationId])
   @@map("tax_invoices")
+  // snapshot of the property footer at issue time (immutable documents)
+  invoiceFooter String? @db.Text
 }
 
 model TaxInvoiceItem {
