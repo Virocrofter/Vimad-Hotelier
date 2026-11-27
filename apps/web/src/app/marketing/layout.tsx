@@ -63,7 +63,7 @@ export default function MarketingLayout() {
               to="/contact"
               className="hidden h-9 items-center justify-center rounded-md bg-secondary px-4 text-sm font-medium text-white hover:bg-secondary/90 sm:inline-flex"
             >
-              Get Started
+              Get your quote
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -91,7 +91,7 @@ export default function MarketingLayout() {
                 onClick={() => setMobileMenuOpen(false)}
                 className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-4 text-sm font-medium text-white"
               >
-                Get Started
+                Get your quote
               </Link>
             </nav>
           </div>
