@@ -1,209 +1,101 @@
+/* apps/web/src/app/marketing/solutions/hotel-chains/page.jsx — Content Mass solution page.
+ * Claim-lint-gated; every statement traces to the claim register v3.1. */
 import { Link } from 'react-router-dom';
-import {
-  ArrowRight,
-  Building2,
-  Globe,
-  BarChart3,
-  Users,
-  Shield,
-  Layers,
-  Repeat,
-  FileText,
-  Settings,
-  TrendingUp,
-  Check,
-} from 'lucide-react';
-import { Button } from '../../../../components/ui/button';
 
-const features = [
+const FAQS = [
   {
-    icon: Globe,
-    title: 'Portfolio Dashboard',
-    desc: 'See occupancy, ADR, and RevPAR across all properties in a single unified view with real-time alerts.',
+    q: 'How does shared guest identity actually work?',
+    a: 'One profile across the group with merge rules keeping duplicates out, so a repeat guest is recognised at every check-in — and their preferences arrive with them.',
   },
   {
-    icon: Repeat,
-    title: 'Cross-Property Reservations',
-    desc: 'Book guests at sister properties, transfer folios, and manage group blocks across your entire portfolio.',
+    q: 'Can central reservations see all properties at once?',
+    a: 'Yes — live availability across the group, booked in one action, with cross-property moves handled without cancel-and-rebook games.',
   },
   {
-    icon: Settings,
-    title: 'Centralized Rate Management',
-    desc: 'Push corporate rate codes, packages, and promotions to all properties with one click.',
+    q: 'Does group billing mix the properties&rsquo; money?',
+    a: 'No. Each property settles into its own Paystack account. The group shares data — guests, rates, reporting — not bank balances.',
   },
   {
-    icon: FileText,
-    title: 'Consolidated Reporting',
-    desc: 'Portfolio P&L, comparative analysis, and brand standards compliance scoring per property.',
-  },
-  {
-    icon: Users,
-    title: 'Corporate User Management',
-    desc: 'SSO across all properties, role templates, and centralized staff permissions and audit trails.',
-  },
-  {
-    icon: Shield,
-    title: 'Brand Standards Monitor',
-    desc: "Automated compliance scoring ensures every property meets your brand's operational standards.",
+    q: 'We have four sites on four different systems today.',
+    a: 'That is the standard starting point, not a blocker. We migrate site by site, keep the group on parallel until each cutover earns its keep, and roll the queue up to a group view as sites land.',
   },
 ];
 
-const enterpriseFeatures = [
-  'Multi-property command center',
-  'Cross-property guest search & CRM',
-  'Centralized AR & loyalty program',
-  'Franchisee portal with reporting',
-  'Master data management',
-  'Custom integrations & SLA guarantee',
-  'Dedicated account manager',
-  '24/7 phone support',
-];
-
-export default function HotelChainsPage() {
+export default function SolutionPage() {
   return (
-    <div className="flex flex-col bg-background">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-background py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-secondary mb-6">
-              <Building2 className="mr-1.5 h-3 w-3" />
-              For Hotel Chains & Management Companies
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight text-text-primary sm:text-6xl">
-              One Platform. <span className="text-secondary">Every Property.</span> Complete
-              Visibility.
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              Stop managing fragmented PMS instances. Vimad gives chains and management companies
-              centralized control with property-level flexibility.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                to="/demo"
-                className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
-              >
-                Talk to Enterprise Sales <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-              <Link
-                to="/pricing"
-                className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated"
-              >
-                View Enterprise Pricing
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="border-y border-border bg-surface py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-16 text-center">
-            <h2 className="text-3xl font-bold text-text-primary sm:text-4xl">Built for scale</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
-              Whether you manage 5 properties or 500, Vimad scales with your portfolio.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="group rounded-xl border border-border bg-background p-6 transition-all hover:border-secondary/50 hover:shadow-lg"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/10 group-hover:bg-secondary/20 transition-colors">
-                  <f.icon className="h-6 w-6 text-secondary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-text-primary">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-text-secondary">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Enterprise checklist */}
-      <section className="bg-background py-20">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-text-primary">Enterprise-grade governance</h2>
-              <p className="mt-4 text-text-secondary leading-relaxed">
-                Corporate-level controls with property-level autonomy. Set mandatory policies across
-                your portfolio while letting each GM optimize for their market.
-              </p>
-              <ul className="mt-6 space-y-3">
-                {enterpriseFeatures.map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-sm text-text-secondary">
-                    <Check className="h-4 w-4 text-accent shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-xl border border-border bg-surface p-6 space-y-4">
-              <div className="flex items-center gap-3 pb-4 border-b border-border">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
-                  <Layers className="h-5 w-5 text-secondary" />
-                </div>
-                <div>
-                  <p className="font-semibold text-text-primary">Portfolio Overview</p>
-                  <p className="text-xs text-text-muted">Live across 12 properties</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label: 'Occupancy', value: '81%' },
-                  { label: 'ADR', value: '$195' },
-                  { label: 'RevPAR', value: '$158' },
-                ].map((kpi) => (
-                  <div
-                    key={kpi.label}
-                    className="rounded-lg border border-border bg-background p-3 text-center"
-                  >
-                    <p className="text-xs text-text-muted">{kpi.label}</p>
-                    <p className="text-lg font-bold text-text-primary">{kpi.value}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="rounded-lg border border-border bg-background p-3">
-                <p className="text-xs font-medium text-text-secondary mb-2">
-                  Brand Compliance Score
-                </p>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 rounded-full bg-border overflow-hidden">
-                    <div className="h-full w-[92%] rounded-full bg-accent" />
-                  </div>
-                  <span className="text-sm font-semibold text-accent">92%</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="border-t border-border bg-surface py-20">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="text-3xl font-bold text-text-primary">Manage your portfolio like a pro</h2>
-          <p className="mt-4 text-text-secondary">
-            Join growing hotel chains that have replaced fragmented systems with one unified
-            platform.
+    <div className="mkh">
+      <section className="mkh-hero" style={{ padding: '72px 24px 48px' }}>
+        <div className="mkh-hero-inner">
+          <p className="mkh-kicker">Solution · Multi-property groups</p>
+          <h1>
+            Multi-property groups: <em>one guest. Every property. One truth.</em>
+          </h1>
+          <p className="mkh-hero-sub">
+            Armada tier runs fleets: shared guest identity, central reservations, cross-property
+            booking, chain billing — with each property&rsquo;s money still settling into its own
+            Paystack.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              to="/demo"
-              className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
-            >
-              Schedule Enterprise Demo <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-            <Link
-              to="/features"
-              className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-background px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated"
-            >
-              Explore All Features
-            </Link>
+        </div>
+      </section>
+      <section className="mkh-section" style={{ paddingTop: 8 }}>
+        <div className="mkh-switch-stage">
+          <div className="mkh-uicard">
+            <h4>
+              What it looks like<span className="mkh-num">LIVE CROP · DEMO TENANT</span>
+            </h4>
+            <div className="mkh-hk">
+              <div className="mkh-hk-row">
+                <span className="mkh-hk-room">DBN</span>
+                <span className="mkh-hk-task">Ocean View · 12 rooms · 94% occ</span>
+                <span className="mkh-hk-badge mkh-hk-clean">Live</span>
+              </div>
+              <div className="mkh-hk-row">
+                <span className="mkh-hk-room">Berea</span>
+                <span className="mkh-hk-task">Grange Gardens · 33 rooms · 81%</span>
+                <span className="mkh-hk-badge mkh-hk-clean">Live</span>
+              </div>
+              <div className="mkh-hk-row">
+                <span className="mkh-hk-room">Group</span>
+                <span className="mkh-hk-task">Central reservations · cross-property guest</span>
+                <span className="mkh-hk-badge mkh-hk-inspect">Identity ✓</span>
+              </div>
+            </div>
           </div>
+          <div>
+            <ul className="mkh-bullets">
+              <li>
+                A guest known at every front desk: history, preferences and balances follow them.
+              </li>
+              <li>
+                Central office books any property from live availability — no phone tag, no
+                overbooking.
+              </li>
+              <li>
+                Chain billing and loyalty that cross properties; consolidated reporting for the
+                group.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <section className="mkh-section" style={{ paddingTop: 8 }}>
+        <p className="mkh-kicker">Straight answers</p>
+        <h2 className="mkh-h2">The questions this size of property asks</h2>
+        <div className="mkh-faq">
+          {FAQS.map((f) => (
+            <details key={f.q}>
+              <summary dangerouslySetInnerHTML={{ __html: f.q }} />
+              <p dangerouslySetInnerHTML={{ __html: f.a }} />
+            </details>
+          ))}
+        </div>
+        <div className="mkh-cta-row" style={{ marginTop: 32 }}>
+          <Link className="mkh-pill" to="/get-quote">
+            Get your quote
+          </Link>
+          <Link className="mkh-ghost" to="/demo">
+            Book a walk-in demo
+          </Link>
         </div>
       </section>
     </div>

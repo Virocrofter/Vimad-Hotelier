@@ -13,22 +13,6 @@
       "until": "Field & Measure: real named pilot case studies",
       "rules": "all"
     },
-    "apps/web/src/app/marketing/solutions/page.jsx": {
-      "until": "Content Mass: solution/role pages",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/solutions/boutique-hotels/page.jsx": {
-      "until": "Content Mass: solution pages",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/solutions/contactless-checkin/page.jsx": {
-      "until": "Content Mass: solution pages",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/solutions/hotel-chains/page.jsx": {
-      "until": "Content Mass: Armada page absorbs this",
-      "rules": "all"
-    },
     "apps/web/src/app/marketing/privacy/page.jsx": {
       "until": "Legal-docs swap: real POPIA policy replaces template",
       "rules": "all"
