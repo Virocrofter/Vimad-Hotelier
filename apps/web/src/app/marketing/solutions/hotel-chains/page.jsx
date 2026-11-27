@@ -41,7 +41,7 @@ export default function SolutionPage() {
         <div className="mkh-switch-stage">
           <div className="mkh-uicard">
             <h4>
-              What it looks like<span className="mkh-num">LIVE CROP · DEMO TENANT</span>
+              What it looks like<span className="mkh-num">SAMPLE DATA · SHIPPED FEATURES</span>
             </h4>
             <div className="mkh-hk">
               <div className="mkh-hk-row">

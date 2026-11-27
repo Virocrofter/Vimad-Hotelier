@@ -38,7 +38,7 @@ export default function ModulePage() {
         <div className="mkh-switch-stage">
           <div className="mkh-uicard">
             <h4>
-              F&B and QR Order & Pay<span className="mkh-num">LIVE CROP · DEMO TENANT</span>
+              F&B and QR Order & Pay<span className="mkh-num">SAMPLE DATA · SHIPPED FEATURES</span>
             </h4>
             <div className="mkh-checkin">
               <div className="row">

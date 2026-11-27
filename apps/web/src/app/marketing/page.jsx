@@ -11,7 +11,7 @@ const MODULES = [
     tab: 'Front Desk',
     ui: 'tape',
     title: 'Tape chart & check-in',
-    sub: 'LIVE CROP · DEMO TENANT',
+    sub: 'SAMPLE DATA · SHIPPED FEATURES',
     bullets: [
       'Walk-ins to checked-in in under 45 seconds, key issued, deposit held.',
       'Rate overrides in three clicks — every change logged with a guardrail check.',
@@ -57,7 +57,7 @@ const LEAKS = [
   {
     num: '01',
     title: 'Money',
-    body: 'Two direct bookings a month cover the fee — the other thirty shouldn’t pay for someone’s yacht. 0% booking widget plus a verified upsell loop.',
+    body: 'Two direct bookings a month typically cover the fee — the other thirty shouldn’t pay for someone’s yacht. 0% booking widget plus a verified upsell loop.',
   },
   {
     num: '02',
