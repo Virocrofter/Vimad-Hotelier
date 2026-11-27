@@ -129,6 +129,38 @@ publicRouter.get('/image/:key', async (req: Request, res: Response, next: NextFu
   }
 });
 
+/* GET /theme/:code — white-label theme for the /book/:code widget (DS-12).
+ * Public by design (the widget is guest-facing); 404 when no active theme. */
+publicRouter.get('/theme/:code', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { prisma } = await import('../../common/prisma.js');
+    const property = await prisma.property.findFirst({ where: { code: String(req.params.code) } });
+    if (!property)
+      throw new (await import('../../common/errors.js')).AppError(
+        404,
+        'Property not found',
+        'NOT_FOUND'
+      );
+    const theme = await prisma.tenantTheme.findFirst({
+      where: { tenantId: property.tenantId, isActive: true },
+    });
+    if (!theme) {
+      res.status(404).json({ error: { code: 'NOT_FOUND', message: 'No active theme' } });
+      return;
+    }
+    res.json({
+      data: {
+        accent: theme.accent,
+        ring: theme.ring ?? theme.accent,
+        radiusPx: theme.radiusPx ?? null,
+        logoKey: theme.logoKey ?? null,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 /* GET /marketing/unsubscribe?token= — one-click unsubscribe, no login (E5) */
 publicRouter.get(
   '/marketing/unsubscribe',

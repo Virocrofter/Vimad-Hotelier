@@ -4343,3 +4343,16 @@ model ChainTemplate {
   @@index([tenantId, chainId])
   @@map("chain_templates")
 }
+
+model TenantTheme {
+  id        String   @id @default(cuid())
+  tenantId  String   @unique
+  accent    String
+  ring      String?
+  radiusPx  Int?
+  logoKey   String?
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+
+  @@map("tenant_themes")
+}

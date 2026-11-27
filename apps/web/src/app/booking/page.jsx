@@ -60,6 +60,7 @@ export default function BookingPage() {
   const [error, setError] = useState(null);
   const [booking, setBooking] = useState(null);
   const [menu, setMenu] = useState(null);
+  const [theme, setTheme] = useState(null);
   const [sisters, setSisters] = useState(null);
 
   useEffect(() => {
@@ -67,6 +68,16 @@ export default function BookingPage() {
       .property(code)
       .then(setProperty)
       .catch((e) => setError(e.message));
+  }, [code]);
+
+  // DS-12: white-label theme — overrides the design-system CSS vars on this
+  // page's root only (accent → --primary/--accent, ring, radius, logo).
+  useEffect(() => {
+    fetch(`/v1/public/theme/${encodeURIComponent(code)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => setTheme(b?.data ?? null))
+      .catch(() => setTheme(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   // P65: menu/experiences for the hotel page (same catalog the QR menu uses).
@@ -160,13 +171,33 @@ export default function BookingPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-text-primary">
+    <div
+      className="min-h-screen bg-background text-text-primary"
+      style={
+        theme
+          ? {
+              '--primary': theme.accent,
+              '--accent': theme.accent,
+              '--ring': theme.ring ?? theme.accent,
+              ...(theme.radiusPx != null ? { '--radius': `${theme.radiusPx}px` } : {}),
+            }
+          : undefined
+      }
+    >
       {/* ─── Header ─── */}
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
-          <Link to="/" className="text-lg font-bold tracking-tight">
-            vimad
-          </Link>
+          {theme?.logoKey ? (
+            <img
+              src={`/v1/public/image/${encodeURIComponent(theme.logoKey)}`}
+              alt={property?.name ?? 'logo'}
+              className="h-8 w-auto"
+            />
+          ) : (
+            <Link to="/" className="text-lg font-bold tracking-tight">
+              vimad
+            </Link>
+          )}
           {property && (
             <div className="text-right">
               <div className="text-sm font-semibold">{property.name}</div>
