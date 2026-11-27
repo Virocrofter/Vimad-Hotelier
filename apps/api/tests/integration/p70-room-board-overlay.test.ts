@@ -1,5 +1,5 @@
-/* P70 — room-board occupant payload carries reservationId + folio balance,
- * so the tape-chart overlay renders money status without a second hop. */
+/* P70 — room-board occupant payload carries reservationId + folio balance
+ * (the tape-chart overlay's data source). Drawer parity included. */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { PrismaClient } from '@prisma/client';
@@ -14,7 +14,7 @@ beforeAll(async () => {
   app = mod.buildTestApp?.() ?? mod.app;
   const agent = await mod.registerTestAgent(app);
   ctx.tenantId = agent.tenantId;
-  ctx.H = { Authorization: 'Bearer ' + agent.token };
+  ctx.H = () => ({ Authorization: 'Bearer ' + agent.token });
 
   ctx.prop = await prisma.property.create({
     data: {

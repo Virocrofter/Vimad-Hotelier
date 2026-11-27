@@ -111,6 +111,7 @@ function roomView(room: any, ctx: RoomCtx) {
           guestName: `${s.reservation.guest.firstName} ${s.reservation.guest.lastName}`,
           status: s.reservation.status,
           date: s.date,
+          balance: s.reservation.folios?.[0] ? Number(s.reservation.folios[0].balance) : null,
         }
       : null;
   return {
@@ -176,7 +177,9 @@ async function loadCtx(
     }),
     prisma.reservationStay.findMany({
       where: { roomId: { in: roomIds }, date: { gte: b.start } },
-      include: { reservation: { include: { guest: true } } },
+      include: {
+        reservation: { include: { guest: true, folios: { select: { balance: true }, take: 1 } } },
+      },
       orderBy: { date: 'asc' },
       take: 1000,
     }),
