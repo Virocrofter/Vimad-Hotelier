@@ -65,6 +65,59 @@ function localTotals(f, guests) {
   return { subtotal, gratuity, vat, grand: subtotal + gratuity + vat };
 }
 
+function Sel({
+  icon: Icon,
+  label,
+  value,
+  onChange,
+  options,
+  renderPrice,
+  overrideKey,
+  locked,
+  form,
+  setForm,
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <label className="text-xs font-medium text-text-muted flex items-center gap-1">
+          <Icon size={12} /> {label}
+        </label>
+        {overrideKey && value && (
+          <input
+            className="input w-24 h-6 text-xs"
+            placeholder="override R"
+            value={form.priceOverrides[overrideKey] ?? ''}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                priceOverrides: {
+                  ...form.priceOverrides,
+                  [overrideKey]: e.target.value === '' ? undefined : Number(e.target.value),
+                },
+              })
+            }
+          />
+        )}
+      </div>
+      <select
+        className="input w-full"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={locked}
+      >
+        <option value="">— None —</option>
+        {options.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.name}
+            {renderPrice ? ` (${renderPrice(o)})` : ''}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function BeoEditor({ beoId, eventId, onDone }) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -181,55 +234,6 @@ function BeoEditor({ beoId, eventId, onDone }) {
   const setDecorLine = (i, patch) =>
     setForm({ ...form, decor: form.decor.map((d, idx) => (idx === i ? { ...d, ...patch } : d)) });
 
-  const Sel = ({
-    icon: Icon,
-    label,
-    value,
-    onChange,
-    options,
-    renderPrice,
-    overrideKey,
-    locked,
-  }) => (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <label className="text-xs font-medium text-text-muted flex items-center gap-1">
-          <Icon size={12} /> {label}
-        </label>
-        {overrideKey && value && (
-          <input
-            className="input w-24 h-6 text-xs"
-            placeholder="override R"
-            value={form.priceOverrides[overrideKey] ?? ''}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                priceOverrides: {
-                  ...form.priceOverrides,
-                  [overrideKey]: e.target.value === '' ? undefined : Number(e.target.value),
-                },
-              })
-            }
-          />
-        )}
-      </div>
-      <select
-        className="input w-full"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={locked}
-      >
-        <option value="">— None —</option>
-        {options.map((o) => (
-          <option key={o.id} value={o.id}>
-            {o.name}
-            {renderPrice ? ` (${renderPrice(o)})` : ''}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-
   return (
     <div className="space-y-6">
       <button
@@ -314,6 +318,8 @@ function BeoEditor({ beoId, eventId, onDone }) {
             <h2 className="font-semibold">Space, Setup & Packages</h2>
             <div className="grid grid-cols-2 gap-3">
               <Sel
+                form={form}
+                setForm={setForm}
                 icon={MapPin}
                 label="Venue"
                 value={form.venueId}
@@ -324,6 +330,8 @@ function BeoEditor({ beoId, eventId, onDone }) {
                 renderPrice={(o) => fmt(Number(o.rentalPrice))}
               />
               <Sel
+                form={form}
+                setForm={setForm}
                 icon={LayoutGrid}
                 label="Setup Style"
                 value={form.setupId}
@@ -334,6 +342,8 @@ function BeoEditor({ beoId, eventId, onDone }) {
                 renderPrice={(o) => fmt(Number(o.price))}
               />
               <Sel
+                form={form}
+                setForm={setForm}
                 icon={Utensils}
                 label="Menu (per person)"
                 value={form.menuId}
@@ -344,6 +354,8 @@ function BeoEditor({ beoId, eventId, onDone }) {
                 renderPrice={(o) => fmt(Number(o.pricePerPerson))}
               />
               <Sel
+                form={form}
+                setForm={setForm}
                 icon={Mic}
                 label="AV Package"
                 value={form.avId}

@@ -9,6 +9,55 @@ const fmt = (n) =>
   `R ${Number(n).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const time = (d) => new Date(d).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
 
+function Column({ title, icon, list, accent, actions }) {
+  return (
+    <section className="flex-1 rounded-2xl border border-border bg-surface p-3">
+      <h2
+        className={`mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide ${accent}`}
+      >
+        {icon} {title} <span className="ml-auto text-text-muted">{list.length}</span>
+      </h2>
+      <div className="space-y-3">
+        {list.length === 0 && (
+          <p className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-text-muted">
+            Nothing here
+          </p>
+        )}
+        {list.map((o) => (
+          <article key={o.id} className="rounded-xl border border-border bg-background p-4">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-xs text-text-muted">{o.reference}</span>
+              <span className="text-[11px] text-text-muted">{time(o.createdAt)}</span>
+            </div>
+            {o.tableLabel && (
+              <p className="mt-1 text-xs font-semibold text-text-primary">{o.tableLabel}</p>
+            )}
+            <ul className="mt-2 space-y-0.5 text-sm text-text-secondary">
+              {(o.items ?? []).map((l, i) => (
+                <li key={i}>
+                  <span className="font-semibold text-text-primary">{l.quantity}×</span> {l.name}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-text-muted">{fmt(o.amount)}</p>
+            <div className="mt-3 flex gap-2">
+              {actions(o).map((a) => (
+                <button
+                  key={a.label}
+                  onClick={() => advance(o, a.status)}
+                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold ${a.className}`}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function KdsPage() {
   const [orders, setOrders] = useState(null);
   const [err, setErr] = useState(null);
@@ -60,53 +109,6 @@ export default function KdsPage() {
       </div>
     );
   }
-
-  const Column = ({ title, icon, list, accent, actions }) => (
-    <section className="flex-1 rounded-2xl border border-border bg-surface p-3">
-      <h2
-        className={`mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide ${accent}`}
-      >
-        {icon} {title} <span className="ml-auto text-text-muted">{list.length}</span>
-      </h2>
-      <div className="space-y-3">
-        {list.length === 0 && (
-          <p className="rounded-xl border border-dashed border-border p-6 text-center text-xs text-text-muted">
-            Nothing here
-          </p>
-        )}
-        {list.map((o) => (
-          <article key={o.id} className="rounded-xl border border-border bg-background p-4">
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-text-muted">{o.reference}</span>
-              <span className="text-[11px] text-text-muted">{time(o.createdAt)}</span>
-            </div>
-            {o.tableLabel && (
-              <p className="mt-1 text-xs font-semibold text-text-primary">{o.tableLabel}</p>
-            )}
-            <ul className="mt-2 space-y-0.5 text-sm text-text-secondary">
-              {(o.items ?? []).map((l, i) => (
-                <li key={i}>
-                  <span className="font-semibold text-text-primary">{l.quantity}×</span> {l.name}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 text-xs text-text-muted">{fmt(o.amount)}</p>
-            <div className="mt-3 flex gap-2">
-              {actions(o).map((a) => (
-                <button
-                  key={a.label}
-                  onClick={() => advance(o, a.status)}
-                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold ${a.className}`}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </div>
-          </article>
-        ))}
-      </div>
-    </section>
-  );
 
   return (
     <div className="min-h-screen bg-background p-4 text-text-primary">
