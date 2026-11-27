@@ -3,6 +3,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { Moon, Sun, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { Footer } from '../../components/layout/Footer';
+import '../../styles/generated/marketing.css';
 
 interface NavLink {
   to: string;
@@ -25,7 +26,10 @@ export default function MarketingLayout() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-text-primary">
+    <div
+      data-vimad-marketing
+      className="flex min-h-screen flex-col bg-background text-text-primary"
+    >
       <header className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center gap-2.5 text-xl font-semibold text-primary">

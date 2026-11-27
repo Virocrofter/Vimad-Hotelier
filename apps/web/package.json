@@ -18,7 +18,9 @@
     "vrt": "playwright test -c ../../scripts/playwright.vrt.config.ts",
     "vrt:update": "playwright test -c ../../scripts/playwright.vrt.config.ts --update-snapshots",
     "vrt:docker": "docker build -f Dockerfile.vrt -t vimad-vrt . && docker run --rm -v $(pwd)/.vimad-vrt:/app/.vimad-vrt vimad-vrt",
-    "tokens:check": "npm run tokens:build && git diff --exit-code -- src/styles/generated"
+    "tokens:check": "npm run tokens:build && git diff --exit-code -- src/styles/generated",
+    "tokens:build:marketing": "node design-tokens/sd.marketing.mjs",
+    "tokens:check:marketing": "npm run tokens:build:marketing && git diff --exit-code -- src/styles/generated/marketing.css"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",

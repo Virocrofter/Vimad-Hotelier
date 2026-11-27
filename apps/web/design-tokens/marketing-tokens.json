@@ -1,0 +1,55 @@
+{
+  "paper": {
+    "canvas": {
+      "$value": "#FAF6F0"
+    },
+    "card": {
+      "$value": "#FFFFFF"
+    },
+    "hairline": {
+      "$value": "#E7DFD3"
+    },
+    "espresso": {
+      "$value": "#2B211B"
+    },
+    "espresso-soft": {
+      "$value": "#4B3E34"
+    },
+    "ember": {
+      "$value": "#E4572E"
+    },
+    "ember-soft": {
+      "$value": "#F26B45"
+    },
+    "gold": {
+      "$value": "#C9A227"
+    },
+    "teal": {
+      "$value": "#1F7A78"
+    },
+    "body": {
+      "$value": "#4B5563"
+    },
+    "muted": {
+      "$value": "#8A7A6C"
+    },
+    "on-dark": {
+      "$value": "#FAF6F0"
+    },
+    "radius-card": {
+      "$value": "12px"
+    },
+    "radius-pill": {
+      "$value": "9999px"
+    },
+    "font-display": {
+      "$value": "'Sora', 'Segoe UI', sans-serif"
+    },
+    "font-body": {
+      "$value": "'Inter', 'Segoe UI', sans-serif"
+    },
+    "font-mono": {
+      "$value": "'JetBrains Mono', 'SF Mono', monospace"
+    }
+  }
+}

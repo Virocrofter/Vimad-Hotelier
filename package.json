@@ -18,7 +18,9 @@
     "test:all": "turbo run test",
     "test:api": "cd apps/api && npx vitest run",
     "test:web": "turbo run test --filter=@unified-pms/web",
-    "test:shared": "turbo run test --filter=@unified-pms/shared"
+    "test:shared": "turbo run test --filter=@unified-pms/shared",
+    "lint:claims": "node scripts/marketing-claim-lint.mjs",
+    "prerender": "node scripts/prerender-marketing.mjs"
   },
   "devDependencies": {
     "@turbo/gen": "^2.0.0",
