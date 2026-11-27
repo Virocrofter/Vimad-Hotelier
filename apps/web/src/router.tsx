@@ -59,6 +59,39 @@ export const router = createBrowserRouter([
       { path: 'get-quote', ...page(() => import('./app/marketing/quote/page')) },
       { path: 'switch', ...page(() => import('./app/marketing/switch/page')) },
       { path: 'alternatives', ...page(() => import('./app/marketing/alternatives/page')) },
+      {
+        path: 'platform/front-desk',
+        ...page(() => import('./app/marketing/platform/front-desk/page')),
+      },
+      {
+        path: 'platform/housekeeping',
+        ...page(() => import('./app/marketing/platform/housekeeping/page')),
+      },
+      {
+        path: 'platform/payments',
+        ...page(() => import('./app/marketing/platform/payments/page')),
+      },
+      {
+        path: 'platform/accounting',
+        ...page(() => import('./app/marketing/platform/accounting/page')),
+      },
+      {
+        path: 'platform/direct-booking',
+        ...page(() => import('./app/marketing/platform/direct-booking/page')),
+      },
+      {
+        path: 'platform/guest-portal',
+        ...page(() => import('./app/marketing/platform/guest-portal/page')),
+      },
+      { path: 'platform/fnb', ...page(() => import('./app/marketing/platform/fnb/page')) },
+      {
+        path: 'platform/needs-attention',
+        ...page(() => import('./app/marketing/platform/needs-attention/page')),
+      },
+      { path: 'platform/chains', ...page(() => import('./app/marketing/platform/chains/page')) },
+      { path: 'platform', ...page(() => import('./app/marketing/platform/page')) },
+      { path: 'south-africa', ...page(() => import('./app/marketing/south-africa/page')) },
+      { path: 'add-ons', ...page(() => import('./app/marketing/add-ons/page')) },
       { path: 'blog', ...page(() => import('./app/marketing/blog/page')) },
       { path: 'case-studies', ...page(() => import('./app/marketing/case-studies/page')) },
       { path: 'integrations', ...page(() => import('./app/marketing/integrations/page')) },

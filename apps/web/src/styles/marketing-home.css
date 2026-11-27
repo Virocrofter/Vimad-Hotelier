@@ -1090,3 +1090,46 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Content Mass: module cards + platform grid ── */
+.mkh-modgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 32px;
+}
+.mkh-modcard {
+  background: var(--mk-card);
+  border: 1px solid var(--mk-hairline);
+  border-radius: 12px;
+  padding: 20px;
+  text-decoration: none;
+  display: block;
+  transition: background 0.15s ease;
+}
+.mkh-modcard:hover {
+  background: var(--mk-canvas);
+}
+.mkh-modcard h3 {
+  font-size: 15px;
+  margin: 0 0 6px;
+}
+.mkh-modcard p {
+  font-size: 12.5px;
+  color: var(--mk-body);
+  margin: 0;
+  line-height: 1.5;
+}
+.mkh-tierline {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--mk-muted);
+}
+.mkh-tierline b {
+  color: var(--mk-espresso);
+}
+@media (max-width: 900px) {
+  .mkh-modgrid {
+    grid-template-columns: 1fr;
+  }
+}
