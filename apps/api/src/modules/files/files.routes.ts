@@ -67,6 +67,41 @@ filesRouter.get('/*key', async (req: Request, res: Response, next: NextFunction)
   }
 });
 
+// ─── Catalog images (P65/P66): staff upload for the booking page + QR menu. ───
+filesRouter.post(
+  '/images',
+  authMiddleware,
+  tenantScope,
+  requirePermission('property', 'update'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = (req.body ?? {}) as { contentBase64?: string; name?: string };
+      if (!body.contentBase64 || !body.name?.trim()) {
+        return res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'contentBase64 + name required' },
+        });
+      }
+      const ext = String(body.name).split('.').pop()?.toLowerCase() ?? '';
+      if (!['png', 'jpg', 'jpeg', 'webp'].includes(ext)) {
+        return res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'Images only (png/jpg/jpeg/webp)' },
+        });
+      }
+      const buf = Buffer.from(String(body.contentBase64), 'base64');
+      if (!buf.length || buf.length > 5 * 1024 * 1024) {
+        return res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'Image must be non-empty and under 5MB' },
+        });
+      }
+      const key = `catalog/${req.tenantId}/${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`;
+      await putFile(key, buf, MIME[ext] ?? 'image/png');
+      return res.status(201).json({ data: { key } });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
 // ─── 4.4 Reservation documents: metadata rows + content via putFile. ───
 const MIME: Record<string, string> = {
   pdf: 'application/pdf',
@@ -93,22 +128,18 @@ filesRouter.post(
         contentBase64?: string;
       };
       if (!body.reservationId || !body.name?.trim() || !body.contentBase64) {
-        return res
-          .status(400)
-          .json({
-            error: {
-              code: 'VALIDATION_ERROR',
-              message: 'reservationId, name and contentBase64 are required',
-            },
-          });
+        return res.status(400).json({
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'reservationId, name and contentBase64 are required',
+          },
+        });
       }
       const buf = Buffer.from(String(body.contentBase64), 'base64');
       if (!buf.length || buf.length > 5 * 1024 * 1024) {
-        return res
-          .status(400)
-          .json({
-            error: { code: 'VALIDATION_ERROR', message: 'File must be non-empty and under 5MB' },
-          });
+        return res.status(400).json({
+          error: { code: 'VALIDATION_ERROR', message: 'File must be non-empty and under 5MB' },
+        });
       }
       const ext = String(body.name).split('.').pop()?.toLowerCase() ?? 'bin';
       const key = `documents/${body.reservationId}/${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`;

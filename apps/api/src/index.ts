@@ -164,6 +164,8 @@ import { fnbStaffRouter } from './modules/fnb/fnb.staff.routes.js';
 import { fnbTablesRouter } from './modules/fnb/fnb.tables.routes.js';
 import { stockRouter } from './modules/stock/stock.routes.js';
 import { automationsRouter } from './modules/automations/automations.routes.js';
+import { contentRouter } from './modules/content/content.routes.js';
+import { filesRouter } from './modules/files/files.routes.js';
 import { preauthRouter } from './modules/preauth/preauth.routes.js';
 import { tillRouter } from './modules/till/till.routes.js';
 import { bookingReadinessRouter } from './modules/booking/readiness.routes.js';
@@ -447,6 +449,8 @@ async function bootstrap() {
   app.use('/v1/fnb/tables', fnbTablesRouter);
   app.use('/v1/stock', stockRouter);
   app.use('/v1/automations', automationsRouter);
+  app.use('/v1/content', contentRouter);
+  app.use('/v1/files', filesRouter);
   app.use('/v1/preauth', preauthRouter);
   app.use('/v1/till', tillRouter);
   // [A5] Tax invoices & receipts (auth'd)
