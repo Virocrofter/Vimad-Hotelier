@@ -263,6 +263,7 @@ export default function UsersPage() {
   }, [load]);
 
   const stats = useMemo(() => {
+    // eslint-disable-next-line react-hooks/purity -- wall-clock activity window; recomputed with users
     const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
     return {
       total: users.length,

@@ -21,6 +21,9 @@ import { apiGet } from '../../../api/client';
 import { usePropertyScope } from '../../../hooks/usePropertyScope';
 import { Drawer } from '@/components/ui/drawer';
 
+const DEFAULT_DATE_FROM = new Date().toISOString().slice(0, 10);
+const DEFAULT_DATE_TO = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+
 const STATUS_STYLES = {
   active: 'bg-accent/10 text-[var(--accent-soft-fg)] border-accent/20',
   pending: 'bg-warning/10 text-[var(--warning-soft-fg)] border-warning/20',
@@ -518,8 +521,8 @@ function ConnectModal({ properties, onClose, onConnect, busy }) {
 /* ─── Push Modal — payload matches availabilityPushSchema / ratesPushSchema ─── */
 function PushModal({ kind, properties, onClose, onPush, busy }) {
   const { current: scopeProperty } = usePropertyScope();
-  const today = new Date().toISOString().slice(0, 10);
-  const defEnd = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const today = DEFAULT_DATE_FROM;
+  const defEnd = DEFAULT_DATE_TO;
   const [propertyId, setPropertyId] = useState(scopeProperty?.id || properties[0]?.id || '');
   const [dateFrom, setDateFrom] = useState(today);
   const [dateTo, setDateTo] = useState(defEnd);

@@ -108,6 +108,7 @@ export default function ContractsPage() {
 
   const kpis = useMemo(() => {
     const list = contracts || [];
+    // eslint-disable-next-line react-hooks/purity -- wall-clock KPI reference; recomputed with contracts
     const now = Date.now();
     const in90 = list.filter(
       (c) =>
@@ -539,6 +540,7 @@ function CreateContractModal({ onClose, onDone, notify }) {
     netFee: '',
     discountPct: 0,
     startDate: new Date().toISOString().slice(0, 10),
+    // eslint-disable-next-line react-hooks/purity -- form default dates computed at render; form opens immediately
     endDate: new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10),
     renewalFee: '',
     autoRenew: false,

@@ -45,6 +45,7 @@ export default function RateGridManager() {
   const [pct, setPct] = useState(10);
   const [seName, setSeName] = useState('');
   const [start, setStart] = useState(iso(new Date()));
+  // eslint-disable-next-line react-hooks/purity -- stable default window (7 days out)
   const [end, setEnd] = useState(iso(new Date(Date.now() + 6 * 86400_000)));
   const [seRate, setSeRate] = useState('');
   const [msg, setMsg] = useState(null);

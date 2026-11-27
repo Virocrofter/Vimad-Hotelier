@@ -717,7 +717,8 @@ function Queues() {
                       c={
                         h.error
                           ? 'crit'
-                          : Date.now() - new Date(h.ranAt).getTime() > 6 * 36e5
+                          : // eslint-disable-next-line react-hooks/purity -- staleness badge vs wall clock
+                            Date.now() - new Date(h.ranAt).getTime() > 6 * 36e5
                             ? 'warn'
                             : 'ok'
                       }

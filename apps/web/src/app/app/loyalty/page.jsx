@@ -295,6 +295,7 @@ export default function LoyaltyPage() {
     const total = members.length;
     const totalRevenue = members.reduce((s, m) => s + (Number(m.totalSpent) || 0), 0);
     const avgValue = total ? Math.round(totalRevenue / total) : 0;
+    // eslint-disable-next-line react-hooks/purity -- wall-clock activity window; recomputed with members
     const thirtyDaysAgo = Date.now() - 30 * 86400000;
     const active = members.filter(
       (m) => m.lastActivity && new Date(m.lastActivity).getTime() >= thirtyDaysAgo
