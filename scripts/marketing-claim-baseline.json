@@ -41,14 +41,6 @@
       "until": "Content Mass: Armada page absorbs this",
       "rules": "all"
     },
-    "apps/web/src/app/marketing/contact/page.jsx": {
-      "until": "Next batch: contact form wired to /v1/public/leads",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/demo/page.jsx": {
-      "until": "Next batch: demo form wired + DemoSession funnel",
-      "rules": "all"
-    },
     "apps/web/src/app/marketing/privacy/page.jsx": {
       "until": "Legal-docs swap: real POPIA policy replaces template",
       "rules": "all"
