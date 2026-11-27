@@ -1,6 +1,9 @@
 /* apps/web/src/app/booking/page.jsx
  * A4 — public booking engine. /book/:code
  * Steps: dates → rooms → guest details → success (+ Paystack deposit link).
+ * Enriched (2026-11-27): white-label theme (DS-12), Menu & experiences +
+ * room photos/descriptions (P65), sisters cross-sell (11.3) — all riding the
+ * pinned public APIs, wired to the lane's `results` availability state.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -70,6 +73,14 @@ export default function BookingPage() {
       .catch((e) => setError(e.message));
   }, [code]);
 
+  // P65: menu/experiences (same catalog the QR menu uses).
+  useEffect(() => {
+    fetch(`/v1/fnb/menu/${encodeURIComponent(code)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => setMenu(b?.data ?? null))
+      .catch(() => setMenu(null));
+  }, [code]);
+
   // DS-12: white-label theme — overrides the design-system CSS vars on this
   // page's root only (accent → --primary/--accent, ring, radius, logo).
   useEffect(() => {
@@ -77,24 +88,13 @@ export default function BookingPage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((b) => setTheme(b?.data ?? null))
       .catch(() => setTheme(null));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
-  // P65: menu/experiences for the hotel page (same catalog the QR menu uses).
+  // 11.3: sold out → sister properties of the chain (cross-sell), wired to
+  // the A4 `results` state.
   useEffect(() => {
-    fetch(`/v1/fnb/menu/${encodeURIComponent(code)}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((b) => setMenu(b?.data ?? null))
-      .catch(() => setMenu(null));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
-
-  // 11.3: sold out → sister properties of the chain (cross-sell).
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- clear cross-sell when the condition no longer holds
-    if (step !== 'rooms' || !roomTypes || roomTypes.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset/guard/reaction on prop or mount; render-adjust rewrites filed
-      setSisters(null);
+    if (step !== 'rooms' || !results || results.roomTypes.length > 0) {
+      Promise.resolve().then(() => setSisters(null));
       return;
     }
     const qs = new URLSearchParams({ checkIn, checkOut, adults: String(adults) });
@@ -103,7 +103,7 @@ export default function BookingPage() {
       .then((b) => setSisters(b?.data?.sisters ?? []))
       .catch(() => setSisters([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, roomTypes]);
+  }, [step, results]);
 
   const search = async () => {
     setError(null);
@@ -295,74 +295,6 @@ export default function BookingPage() {
           </div>
         )}
 
-        {['dates', 'rooms'].includes(step) && menu?.items?.length > 0 && (
-          <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
-            <h2 className="text-xl font-semibold text-text-primary">Menu &amp; experiences</h2>
-            <p className="mt-1 text-sm text-text-secondary">
-              Add these to your stay — order at check-in or scan the QR at the property.
-            </p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {menu.items.map((item) => (
-                <article
-                  key={item.id}
-                  className="overflow-hidden rounded-2xl border border-border bg-background"
-                >
-                  {item.imageKey ? (
-                    <img
-                      src={`/v1/public/image/${encodeURIComponent(item.imageKey)}`}
-                      alt={item.name}
-                      className="h-32 w-full object-cover"
-                    />
-                  ) : null}
-                  <div className="p-4">
-                    <p className="font-medium text-text-primary">{item.name}</p>
-                    {item.description ? (
-                      <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
-                        {item.description}
-                      </p>
-                    ) : null}
-                    <p className="mt-2 text-sm font-semibold">{fmtMoney(item.price)}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {step === 'rooms' && roomTypes?.length === 0 && sisters?.length > 0 && (
-          <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
-            <h2 className="text-xl font-semibold text-text-primary">Also available nearby</h2>
-            <p className="mt-1 text-sm text-text-secondary">
-              {property.name} is sold out for your dates — our sister properties have space:
-            </p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {sisters.map((sib) => (
-                <a
-                  key={sib.code}
-                  href={`/book/${encodeURIComponent(sib.code)}?checkIn=${encodeURIComponent(checkIn)}&checkOut=${encodeURIComponent(checkOut)}&adults=${adults}`}
-                  className="overflow-hidden rounded-2xl border border-border bg-background transition-shadow hover:shadow-md"
-                >
-                  {sib.imageKey ? (
-                    <img
-                      src={`/v1/public/image/${encodeURIComponent(sib.imageKey)}`}
-                      alt={sib.name}
-                      className="h-32 w-full object-cover"
-                    />
-                  ) : null}
-                  <div className="p-4">
-                    <p className="font-semibold text-text-primary">{sib.name}</p>
-                    <p className="mt-1 text-sm text-text-secondary">
-                      from {fmtMoney(sib.cheapestTotal)} · {sib.roomTypes} option
-                      {sib.roomTypes === 1 ? '' : 's'}
-                    </p>
-                    <p className="mt-2 text-sm font-medium text-secondary">Book at {sib.name} →</p>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* ═══ STEP: rooms ═══ */}
         {step === 'rooms' && (
           <div className="space-y-6">
@@ -442,6 +374,78 @@ export default function BookingPage() {
                   </div>
                 </div>
               ))}
+
+            {/* 11.3: sold out → sister properties of the chain. */}
+            {!loading && results && results.roomTypes.length === 0 && sisters?.length > 0 && (
+              <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+                <h2 className="text-xl font-semibold text-text-primary">Also available nearby</h2>
+                <p className="mt-1 text-sm text-text-secondary">
+                  {property?.name} is sold out for your dates — our sister properties have space:
+                </p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {sisters.map((sib) => (
+                    <a
+                      key={sib.code}
+                      href={`/book/${encodeURIComponent(sib.code)}?checkIn=${encodeURIComponent(checkIn)}&checkOut=${encodeURIComponent(checkOut)}&adults=${adults}`}
+                      className="overflow-hidden rounded-2xl border border-border bg-background transition-shadow hover:shadow-md"
+                    >
+                      {sib.imageKey ? (
+                        <img
+                          src={`/v1/public/image/${encodeURIComponent(sib.imageKey)}`}
+                          alt={sib.name}
+                          className="h-32 w-full object-cover"
+                        />
+                      ) : null}
+                      <div className="p-4">
+                        <p className="font-semibold text-text-primary">{sib.name}</p>
+                        <p className="mt-1 text-sm text-text-secondary">
+                          from {fmtMoney(sib.cheapestTotal)} · {sib.roomTypes} option
+                          {sib.roomTypes === 1 ? '' : 's'}
+                        </p>
+                        <p className="mt-2 text-sm font-medium text-secondary">
+                          Book at {sib.name} →
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* P65: menu/experiences from the same catalog the QR menu renders. */}
+            {['dates', 'rooms'].includes(step) && menu?.items?.length > 0 && (
+              <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+                <h2 className="text-xl font-semibold text-text-primary">Menu &amp; experiences</h2>
+                <p className="mt-1 text-sm text-text-secondary">
+                  Add these to your stay — order at check-in or scan the QR at the property.
+                </p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {menu.items.map((item) => (
+                    <article
+                      key={item.id}
+                      className="overflow-hidden rounded-2xl border border-border bg-background"
+                    >
+                      {item.imageKey ? (
+                        <img
+                          src={`/v1/public/image/${encodeURIComponent(item.imageKey)}`}
+                          alt={item.name}
+                          className="h-32 w-full object-cover"
+                        />
+                      ) : null}
+                      <div className="p-4">
+                        <p className="font-medium text-text-primary">{item.name}</p>
+                        {item.description ? (
+                          <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
+                            {item.description}
+                          </p>
+                        ) : null}
+                        <p className="mt-2 text-sm font-semibold">{fmtMoney(item.price)}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
         )}
 
