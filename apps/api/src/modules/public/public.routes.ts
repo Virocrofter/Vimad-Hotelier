@@ -69,6 +69,16 @@ publicRouter.post(
   }
 );
 
+/* GET /image/:key — signed-URL redirect for catalog/room photos (P65) */
+publicRouter.get('/image/:key', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { getSignedDownloadUrl } = await import('../../common/storage.js');
+    res.redirect(await getSignedDownloadUrl(String(req.params.key), { ttlSeconds: 3600 }));
+  } catch (err) {
+    next(err);
+  }
+});
+
 /* GET /marketing/unsubscribe?token= — one-click unsubscribe, no login (E5) */
 publicRouter.get(
   '/marketing/unsubscribe',

@@ -304,6 +304,7 @@ model RoomType {
   @@index([tenantId])
   @@index([propertyId])
   @@map("room_types")
+  imageKey    String?
 }
 
 model Room {
@@ -2890,6 +2891,8 @@ model UpsellProduct {
 
   @@index([propertyId])
   @@map("upsell_products")
+  imageKey    String?
+  description String? @db.Text
 }
 
 model UpsellSale {

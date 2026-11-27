@@ -59,12 +59,22 @@ export default function BookingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [booking, setBooking] = useState(null);
+  const [menu, setMenu] = useState(null);
 
   useEffect(() => {
     publicBookingApi
       .property(code)
       .then(setProperty)
       .catch((e) => setError(e.message));
+  }, [code]);
+
+  // P65: menu/experiences for the hotel page (same catalog the QR menu uses).
+  useEffect(() => {
+    fetch(`/v1/fnb/menu/${encodeURIComponent(code)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => setMenu(b?.data ?? null))
+      .catch(() => setMenu(null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
   const search = async () => {
@@ -237,6 +247,40 @@ export default function BookingPage() {
           </div>
         )}
 
+        {['dates', 'rooms'].includes(step) && menu?.items?.length > 0 && (
+          <section className="rounded-3xl border border-border bg-surface p-6 shadow-sm sm:p-8">
+            <h2 className="text-xl font-semibold text-text-primary">Menu &amp; experiences</h2>
+            <p className="mt-1 text-sm text-text-secondary">
+              Add these to your stay — order at check-in or scan the QR at the property.
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {menu.items.map((item) => (
+                <article
+                  key={item.id}
+                  className="overflow-hidden rounded-2xl border border-border bg-background"
+                >
+                  {item.imageKey ? (
+                    <img
+                      src={`/v1/public/image/${encodeURIComponent(item.imageKey)}`}
+                      alt={item.name}
+                      className="h-32 w-full object-cover"
+                    />
+                  ) : null}
+                  <div className="p-4">
+                    <p className="font-medium text-text-primary">{item.name}</p>
+                    {item.description ? (
+                      <p className="mt-1 line-clamp-2 text-xs text-text-secondary">
+                        {item.description}
+                      </p>
+                    ) : null}
+                    <p className="mt-2 text-sm font-semibold">{fmtMoney(item.price)}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ═══ STEP: rooms ═══ */}
         {step === 'rooms' && (
           <div className="space-y-6">
@@ -278,6 +322,13 @@ export default function BookingPage() {
                   className="flex flex-col justify-between gap-4 rounded-2xl border border-border bg-surface p-6 sm:flex-row sm:items-center"
                 >
                   <div>
+                    {rt.imageKey ? (
+                      <img
+                        src={`/v1/public/image/${encodeURIComponent(rt.imageKey)}`}
+                        alt={rt.name}
+                        className="mb-3 h-36 w-full rounded-xl object-cover sm:w-56"
+                      />
+                    ) : null}
                     <h3 className="text-lg font-semibold">{rt.name}</h3>
                     <p className="mt-1 text-sm text-text-muted">
                       Sleeps {rt.baseOccupancy}–{rt.maxOccupancy}
@@ -285,6 +336,9 @@ export default function BookingPage() {
                       {rt.availableRooms} room{rt.availableRooms === 1 ? '' : 's'} left at this
                       price
                     </p>
+                    {rt.description ? (
+                      <p className="mt-1 text-sm text-text-secondary">{rt.description}</p>
+                    ) : null}
                     <p className="mt-3">
                       <span className="text-2xl font-bold">{fmtMoney(rt.ratePerNight)}</span>
                       <span className="text-sm text-text-muted"> / night</span>

@@ -148,6 +148,8 @@ export async function getAvailability(
           name: true,
           baseOccupancy: true,
           maxOccupancy: true,
+          imageKey: true,
+          description: true,
           ratePlans: { where: { status: 'active' }, take: 1, select: { id: true, baseRate: true } },
         },
       },
@@ -212,6 +214,8 @@ export async function getAvailability(
       name: string;
       baseOccupancy: number;
       maxOccupancy: number;
+      imageKey: string | null;
+      description: string | null;
       total: number;
       free: number;
       rate: number;
@@ -222,6 +226,8 @@ export async function getAvailability(
     const typeId = room.roomTypeId;
     const entry = byType.get(typeId) ?? {
       name: room.roomType.name,
+      imageKey: room.roomType.imageKey,
+      description: room.roomType.description,
       baseOccupancy: room.roomType.baseOccupancy,
       maxOccupancy: room.roomType.maxOccupancy,
       total: 0,
@@ -259,6 +265,8 @@ export async function getAvailability(
       return {
         roomTypeId,
         name: v.name,
+        imageKey: v.imageKey,
+        description: v.description,
         baseOccupancy: v.baseOccupancy,
         maxOccupancy: v.maxOccupancy,
         availableRooms,

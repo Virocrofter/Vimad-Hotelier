@@ -18,7 +18,14 @@ export async function getMenu(code: string) {
   const items = await prisma.upsellProduct.findMany({
     where: { tenantId: property.tenantId, propertyId: property.id, status: 'active' },
     orderBy: { category: 'asc' },
-    select: { id: true, name: true, category: true, price: true },
+    select: {
+      id: true,
+      name: true,
+      category: true,
+      price: true,
+      imageKey: true,
+      description: true,
+    },
   });
   return {
     property: { id: property.id, name: property.name, code: property.code },
