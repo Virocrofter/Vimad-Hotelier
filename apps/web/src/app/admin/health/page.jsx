@@ -35,6 +35,7 @@ const useData = (fn) => {
         .catch((e) => live && setState((s) => ({ ...s, error: e.message })));
     load();
     const t = setInterval(load, 15000);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- expose the poller for manual refresh
     setState((s) => ({ ...s, reload: load }));
     return () => {
       live = false;

@@ -91,6 +91,7 @@ export default function BookingPage() {
 
   // 11.3: sold out → sister properties of the chain (cross-sell).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clear cross-sell when the condition no longer holds
     if (step !== 'rooms' || !roomTypes || roomTypes.length > 0) {
       setSisters(null);
       return;

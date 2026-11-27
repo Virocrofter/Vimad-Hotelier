@@ -228,6 +228,7 @@ export default function CommandPalette({ open, onOpen, onClose }) {
   useEffect(() => {
     if (!open) return undefined;
     if (mode === 'action' || mode === 'help' || term.length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale search hits when the mode/term changes
       setGuestHits([]);
       setResHits([]);
       setRoomHits([]);
@@ -436,7 +437,9 @@ export default function CommandPalette({ open, onOpen, onClose }) {
     location.pathname,
   ]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- reset highlight when results change
   useEffect(() => setIndex(0), [items.length, query]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- clear the copied flash when the target changes
   useEffect(() => setCopied(false), [index, query]);
 
   // Drawer must render even when the palette is closed — it opens after onClose.

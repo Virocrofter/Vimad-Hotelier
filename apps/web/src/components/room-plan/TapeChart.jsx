@@ -229,6 +229,7 @@ export default function TapeChart({
     onError: onMutateError,
   });
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- clear selection when the view window changes
   useEffect(() => setSelected(new Set()), [from, to, property.id]);
 
   useEffect(() => {

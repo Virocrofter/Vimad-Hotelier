@@ -28,6 +28,7 @@ export default function MyStaysPage() {
   useEffect(() => {
     const token = sessionStorage.getItem('gp_token');
     if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- session guard on mount
       setError('Session expired — please log in again.');
       setLoading(false);
       return;

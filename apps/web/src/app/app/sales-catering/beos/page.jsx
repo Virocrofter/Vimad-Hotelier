@@ -150,6 +150,7 @@ function BeoEditor({ beoId, eventId, onDone }) {
   });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset-on-prop/open is intentional (modal/form re-init)
     if (beo) {
       setForm({
         eventId: beo.eventId,

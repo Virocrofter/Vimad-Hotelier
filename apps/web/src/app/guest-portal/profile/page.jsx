@@ -37,6 +37,7 @@ export default function ProfilePage() {
   }, [hasToken, navigate]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset-on-prop/open is intentional (modal/form re-init) (once via form === null guard)
     if (data?.guest && form === null) {
       setForm({
         email: data.guest.email ?? '',

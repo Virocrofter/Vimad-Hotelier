@@ -13,6 +13,7 @@ export default function DemoEnterPage() {
 
   useEffect(() => {
     const token = params.get('token');
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- link-validation guard on mount
     if (!token) {
       setState('error');
       setError('This link is missing its token.');

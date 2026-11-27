@@ -55,6 +55,7 @@ export default function MinibarModal({ open, onClose, onLogged }) {
 
   useEffect(() => {
     if (!open) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset-on-prop/open is intentional (modal/form re-init)
     setRoomId('');
     setRows([]);
     setPhotos([]);

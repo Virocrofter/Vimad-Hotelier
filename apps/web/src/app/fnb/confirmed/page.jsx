@@ -12,6 +12,7 @@ export default function FnbConfirmedPage() {
 
   useEffect(() => {
     if (!reference) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- return-link validation guard
       setState({ phase: 'failed', reason: 'Missing payment reference' });
       return;
     }

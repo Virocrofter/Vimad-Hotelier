@@ -1047,6 +1047,7 @@ export default function MealPlansPage() {
   // Property resolution: the C1 property-switcher store (reactive — follows switching).
   const currentPropertyId = usePropertyStore((s) => s.currentPropertyId);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- follow the C1 property switcher store
     if (currentPropertyId) setPropertyId(currentPropertyId);
   }, [currentPropertyId]);
 
