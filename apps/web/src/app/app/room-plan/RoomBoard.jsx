@@ -150,11 +150,15 @@ function RoomCard({ room, selected, onSelect, onTransition, busy }) {
 
       {room.serviceReason && <p className="mt-1.5 text-[11px] text-danger">{room.serviceReason}</p>}
       {room.occupant ? (
-        <p className="mt-1.5 truncate text-xs text-text-primary">
+        <button
+          onClick={() => onSelect(room.id, true)}
+          className="mt-1.5 block w-full truncate rounded px-1 py-0.5 text-left text-xs text-text-primary hover:bg-surface-elevated"
+          title="Open stay details"
+        >
           <Users className="mr-1 inline h-3 w-3 text-text-muted" />
           {room.occupant.guestName}{' '}
           <span className="text-text-muted">· until {String(room.occupant.date).slice(5, 10)}</span>
-        </p>
+        </button>
       ) : (
         <p className="mt-1.5 text-xs text-text-muted">
           {room.nextStay
@@ -264,6 +268,46 @@ function Drawer({ roomId, onClose }) {
           </div>
           {q.data.serviceReason && (
             <p className="mt-2 text-xs text-danger">{q.data.serviceReason}</p>
+          )}
+
+          {q.data.occupant && (
+            <>
+              <h4 className="mt-5 text-xs font-semibold uppercase tracking-wide text-text-muted">
+                Occupant
+              </h4>
+              <div className="mt-1 space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-text-secondary">{q.data.occupant.guestName}</span>
+                  <span className="font-mono text-text-muted">
+                    {q.data.occupant.confirmationNumber}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Status</span>
+                  <span className="font-medium text-text-primary">{q.data.occupant.status}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Balance</span>
+                  <span
+                    className={
+                      (q.data.occupant.balance ?? 0) > 0
+                        ? 'font-semibold text-warning'
+                        : 'font-medium text-text-primary'
+                    }
+                  >
+                    {q.data.occupant.balance != null
+                      ? `R ${Number(q.data.occupant.balance).toFixed(2)}`
+                      : '—'}
+                  </span>
+                </div>
+                <a
+                  href={`/app/reservations/${q.data.occupant.reservationId}`}
+                  className="mt-1 inline-block rounded bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground"
+                >
+                  Open reservation →
+                </a>
+              </div>
+            </>
           )}
 
           <h4 className="mt-5 text-xs font-semibold uppercase tracking-wide text-text-muted">
