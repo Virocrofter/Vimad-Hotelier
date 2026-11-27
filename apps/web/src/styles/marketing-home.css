@@ -546,3 +546,125 @@
     display: none;
   }
 }
+
+/* ── F3.8 base chrome layer (assumed from F3.6, never landed — restored) ── */
+.mkh-drop {
+  position: relative;
+}
+.mkh-drop-panel {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  padding-top: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease;
+  z-index: 60;
+}
+.mkh-drop:hover .mkh-drop-panel,
+.mkh-drop:focus-within .mkh-drop-panel {
+  opacity: 1;
+  visibility: visible;
+}
+.mkh-drop-panel-inner {
+  background: #fff;
+  border: 1px solid var(--mk-hairline);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 24px 60px rgba(43, 33, 27, 0.14);
+}
+.mkh-drop-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+.mkh-drop-item:hover {
+  background: var(--mk-canvas);
+}
+.mkh-drop-item b {
+  display: block;
+  font-family: var(--mk-font-display);
+  font-size: 13.5px;
+  color: var(--mk-espresso);
+  font-weight: 700;
+}
+.mkh-drop-item span {
+  font-size: 12px;
+  color: var(--mk-body);
+}
+.mkh-drop-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mk-muted);
+  font-weight: 700;
+}
+.mkh-caret {
+  transition: transform 0.15s ease;
+}
+.mkh-drop:hover .mkh-caret {
+  transform: rotate(180deg);
+}
+
+.mkh-footer {
+  border-top: 1px solid var(--mk-hairline);
+  background: var(--mk-card);
+}
+.mkh-footer-grid {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 56px 24px 24px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+  gap: 24px;
+}
+.mkh-footer h4 {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mk-muted);
+  margin: 0 0 12px;
+  font-family: var(--mk-font-display);
+}
+.mkh-footer a {
+  display: block;
+  font-size: 13px;
+  color: var(--mk-body);
+  text-decoration: none;
+  padding: 3px 0;
+}
+.mkh-footer a:hover {
+  color: var(--mk-espresso);
+}
+.mkh-footer-brand p {
+  font-size: 12.5px;
+  color: var(--mk-body);
+  line-height: 1.6;
+  max-width: 240px;
+}
+.mkh-footer-base {
+  border-top: 1px solid var(--mk-hairline);
+}
+.mkh-footer-base-in {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 16px 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--mk-muted);
+}
+.mkh-footer-base a {
+  color: var(--mk-muted);
+  text-decoration: none;
+  padding: 0 10px 0 0;
+}
+@media (max-width: 900px) {
+  .mkh-footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
