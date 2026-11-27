@@ -3,6 +3,7 @@ import { Router } from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.middleware.js';
+import { paystackTenantScope } from '../../common/paystack-scope.js';
 import {
   createHold,
   capture,
@@ -23,6 +24,7 @@ preauthRouter.get('/verify/:reference', async (req: Request, res: Response, next
 });
 
 preauthRouter.use(authMiddleware, tenantScope);
+preauthRouter.use(paystackTenantScope);
 
 preauthRouter.get('/', requirePermission('folio', 'read'), async (req, res, next) => {
   try {

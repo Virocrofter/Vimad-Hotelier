@@ -6,6 +6,8 @@ import { authMiddleware, tenantScope, requirePermission } from '../auth/auth.mid
 import { validateBody, validateQuery } from '../../common/validate.js';
 import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
 import { env } from '../../common/env.js';
+import { paystackTenantScope } from '../../common/paystack-scope.js';
+import { beginPennyTest, verifyPennyTestByReference } from './penny-test.service.js';
 import {
   initializePaymentSchema,
   chargeSavedCardSchema,
@@ -43,7 +45,19 @@ paymentsRouter.get('/config', (_req: Request, res: Response) => {
   });
 });
 
+paymentsRouter.get(
+  '/penny-test/verify/:reference',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.json({ data: await verifyPennyTestByReference(req.params.reference) });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 paymentsRouter.use(authMiddleware, tenantScope);
+paymentsRouter.use(paystackTenantScope);
 
 registry.registerPath({
   method: 'get',
@@ -59,6 +73,22 @@ paymentsRouter.get(
     try {
       const result = await listPayments(req.tenantId, req.validatedQuery as any);
       res.json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+paymentsRouter.post(
+  '/penny-test',
+  requirePermission('folio', 'payment'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const data = await beginPennyTest(
+        req.tenantId,
+        String((req as any).auth?.user?.email ?? `owner+${req.tenantId}@example.com`)
+      );
+      res.status(201).json({ data });
     } catch (err) {
       next(err);
     }
