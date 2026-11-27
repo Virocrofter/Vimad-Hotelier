@@ -15,12 +15,10 @@ export default function MarketingLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks: NavLink[] = [
-    { to: '/', label: 'Home' },
-    { to: '/features', label: 'Features' },
+    { to: '/features', label: 'Platform' },
     { to: '/pricing', label: 'Pricing' },
-    { to: '/integrations', label: 'Integrations' },
-    { to: '/case-studies', label: 'Case Studies' },
-    { to: '/blog', label: 'Blog' },
+    { to: '/alternatives', label: 'Compare' },
+    { to: '/blog', label: 'Resources' },
     { to: '/about', label: 'About' },
     { to: '/contact', label: 'Contact' },
   ];
@@ -62,7 +60,7 @@ export default function MarketingLayout() {
               )}
             </button>
             <Link
-              to="/app"
+              to="/contact"
               className="hidden h-9 items-center justify-center rounded-md bg-secondary px-4 text-sm font-medium text-white hover:bg-secondary/90 sm:inline-flex"
             >
               Get Started
@@ -89,7 +87,7 @@ export default function MarketingLayout() {
                 </Link>
               ))}
               <Link
-                to="/app"
+                to="/contact"
                 onClick={() => setMobileMenuOpen(false)}
                 className="inline-flex h-9 items-center justify-center rounded-md bg-secondary px-4 text-sm font-medium text-white"
               >
