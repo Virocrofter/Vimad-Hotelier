@@ -54,6 +54,9 @@ const envSchema = z.object({
   // Ops inbox for dead-letter / permanent job-failure alerts
   OPS_EMAIL: z.string().email().default('ops@vimad.io'),
 
+  // [MARKETING-LEADS] Founder inbox for new marketing-site leads (Phase 0+)
+  LEAD_NOTIFY_EMAIL: z.string().email().optional(),
+
   // Channel manager
   CHANNEL_API_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).default(15000),
 

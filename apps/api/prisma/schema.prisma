@@ -4356,3 +4356,30 @@ model TenantTheme {
 
   @@map("tenant_themes")
 }
+
+// ─── [MARKETING-LEADS] Phase 0+ — public lead capture from the marketing site ───
+// Standalone platform table (no tenantId): these people are NOT customers yet.
+model Lead {
+  id           String    @id @default(cuid())
+  source       String // contact | demo | quote | ebook
+  name         String
+  email        String
+  phone        String?
+  propertyName String?
+  roomCount    Int?
+  currentPms   String?
+  message      String?
+  consent      Boolean   @default(false) // POPIA privacy-notice checkbox — must be true at write
+  status       String    @default("new") // new | contacted | demo | trial | won | lost
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  page         String?
+  notifiedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email])
+  @@map("leads")
+}

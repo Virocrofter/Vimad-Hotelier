@@ -220,6 +220,8 @@ import {
   demoAccessPublicRouter,
 } from './modules/admin/admin.demo-access.routes.js';
 import { publicStatusRouter } from './modules/health/public.status.routes.js';
+// [MARKETING-LEADS] public lead capture (unauthenticated, IP-rate-limited)
+import { leadsRouter } from './modules/leads/leads.routes.js';
 import { adminJobsRouter } from './modules/admin/admin.jobs.routes.js';
 import { adminReportsRouter } from './modules/admin/admin.reports.routes.js';
 import { upsellRouter } from './modules/upsell/upsell.routes.js';
@@ -419,6 +421,7 @@ async function bootstrap() {
   // /invoices was even mounted three times in total.
   app.use('/v1/public/demo-access', demoAccessPublicRouter);
   app.use('/v1/public/status', publicLimiter, publicStatusRouter);
+  app.use('/v1/public/leads', publicLimiter, leadsRouter);
   app.use('/v1', tieredLimiter);
 
   // [PAYMENTS] Webhook is PUBLIC (HMAC-signed, no JWT) — must mount BEFORE
