@@ -11,8 +11,9 @@ export default defineConfig([
     files: ['**/*.{js,jsx,ts,tsx}'],
     extends: [
       js.configs.recommended,
-      // react-hooks preset removed: v7 bundles React-Compiler diagnostics (76 findings,
-      // queued as a dedicated sweep). The two classic rules are explicit below.
+      // React-Compiler diagnostics swept clean 2026-11-27 (89 findings cleared across
+      // 8 batches). Compiler rules live in the js/jsx-scoped block below; the two
+      // classic rules stay explicit here for every file type.
       reactRefresh.configs.vite,
     ],
     languageOptions: {
@@ -49,6 +50,30 @@ export default defineConfig([
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+    },
+  },
+  {
+    // React-Compiler diagnostics — swept clean 2026-11-27. incompatible-library and
+    // invariant are deliberately NOT enabled (filed: compilation-skipped warnings /
+    // compiler-internal, not fixable by us).
+    files: ['**/*.{js,jsx}'],
+    rules: {
+      'react-hooks/set-state-in-effect': 'error',
+      'react-hooks/set-state-in-render': 'error',
+      'react-hooks/no-deriving-state-in-effects': 'error',
+      'react-hooks/immutability': 'error',
+      'react-hooks/purity': 'error',
+      'react-hooks/refs': 'error',
+      'react-hooks/exhaustive-effect-dependencies': 'error',
+      'react-hooks/memo-dependencies': 'error',
+      'react-hooks/preserve-manual-memoization': 'error',
+      'react-hooks/unsupported-syntax': 'error',
+      'react-hooks/static-components': 'error',
+      'react-hooks/capitalized-calls': 'error',
+      'react-hooks/component-hook-factories': 'error',
+      'react-hooks/error-boundaries': 'error',
+      'react-hooks/void-use-memo': 'error',
+      'react-hooks/use-memo': 'error',
     },
   },
 ]);
