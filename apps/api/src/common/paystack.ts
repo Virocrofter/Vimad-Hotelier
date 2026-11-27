@@ -10,6 +10,30 @@ import { logger } from './logger.js';
 
 const BASE_URL = 'https://api.paystack.co';
 
+/* D-1/F-A21 — per-tenant credentials. Services wrap calls in
+ * withPaystackCredentials(tenantCreds, fn); the context rides the async
+ * scope (AsyncLocalStorage) so concurrent requests never bleed keys.
+ * Everywhere falls back to the platform env keys when no tenant scope. */
+export interface PaystackCredentials {
+  secretKey: string;
+  webhookSecret?: string;
+}
+
+import { AsyncLocalStorage } from 'node:async_hooks';
+
+const credentialsAls = new AsyncLocalStorage<PaystackCredentials | null>();
+
+export function withPaystackCredentials<T>(
+  credentials: PaystackCredentials | null,
+  fn: () => Promise<T>
+): Promise<T> {
+  return credentialsAls.run(credentials, fn);
+}
+
+export function currentPaystackCredentials(): PaystackCredentials | null {
+  return credentialsAls.getStore() ?? null;
+}
+
 export interface PaystackAuthorization {
   authorization_code: string;
   card_type?: string;
@@ -64,14 +88,16 @@ async function paystackFetch<T>(path: string, init: RequestInit = {}): Promise<T
   if (await isDemoTenantId(process.env.VIMAD_DEMO_TENANT ?? null)) {
     return demoPaystackStub(path, init) as never;
   }
-  if (!env.PAYSTACK_SECRET_KEY) {
+  const scoped = currentPaystackCredentials();
+  const secret = scoped?.secretKey ?? env.PAYSTACK_SECRET_KEY;
+  if (!secret) {
     throw new AppError(503, 'Paystack is not configured', 'PAYMENTS_NOT_CONFIGURED');
   }
 
   const res = await fetch(`${BASE_URL}${path}`, {
     ...init,
     headers: {
-      Authorization: `Bearer ${env.PAYSTACK_SECRET_KEY}`,
+      Authorization: `Bearer ${secret}`,
       'Content-Type': 'application/json',
       ...(init.headers ?? {}),
     },
@@ -243,7 +269,12 @@ export function verifyWebhookSignature(
   signature?: string | string[] | null
 ): boolean {
   if (!signature || Array.isArray(signature)) return false;
-  const secret = env.PAYSTACK_WEBHOOK_SECRET || env.PAYSTACK_SECRET_KEY;
+  const scoped = currentPaystackCredentials();
+  const secret =
+    scoped?.webhookSecret ??
+    scoped?.secretKey ??
+    env.PAYSTACK_WEBHOOK_SECRET ??
+    env.PAYSTACK_SECRET_KEY;
   if (!secret) return false;
 
   const expected = crypto.createHmac('sha512', secret).update(rawBody).digest('hex');

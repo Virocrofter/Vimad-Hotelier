@@ -98,6 +98,9 @@ model Tenant {
   giftVouchers GiftVoucher[]
   paymentProofs PaymentProof[]
   securityIncidents SecurityIncident[]
+  // D-1/F-A21: per-tenant Paystack keys (hotel-owned accounts)
+  paystackSecretEnc String?
+  paystackPublicKey String?
 }
 
 model User {
