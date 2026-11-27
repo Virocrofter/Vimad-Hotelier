@@ -1,5 +1,5 @@
 /* help/page.jsx — the old page listed articles that didn&rsquo;t exist and a chat
- * button that did nothing, with payments routed through "Stripe, Adyen". Replaced
+ * button that did nothing, with payments routed through fictional providers. Replaced
  * with real answers and a phone that is answered. */
 import { Link } from 'react-router-dom';
 
