@@ -104,6 +104,8 @@ model Tenant {
   // D-1 hard gate: penny test through the tenant own Paystack keys
   pennyTestReference String?
   pennyTestAt        DateTime?
+  // P67: enforce 2FA for all users of this tenant (forced-setup flow)
+  require2fa Boolean @default(false)
 }
 
 model User {

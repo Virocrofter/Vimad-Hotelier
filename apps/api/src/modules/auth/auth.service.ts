@@ -152,6 +152,21 @@ export async function login(input: LoginInput) {
     throw new AppError(401, 'Invalid credentials', 'UNAUTHORIZED');
   }
 
+  // P67: enforced tenants — users without TOTP get a forced-setup pending
+  // token (10m) instead of a session; setup/enable accept that token.
+  const tenantEnforce = await prisma.tenant.findFirst({
+    where: { id: user.tenantId },
+    select: { require2fa: true },
+  });
+  if (tenantEnforce?.require2fa && !user.totpEnabled) {
+    const setupToken = jwt.sign(
+      { userId: user.id, tenantId: user.tenantId, twoFactorSetup: true },
+      JWT_SECRET,
+      { expiresIn: '10m' }
+    );
+    return { twoFactorSetupRequired: true, pendingToken: setupToken };
+  }
+
   // P46: 2FA-enabled users get a short-lived pending token instead of a
   // session; POST /auth/login/2fa completes the second factor.
   if (user.totpEnabled && user.totpSecret) {
@@ -509,4 +524,18 @@ export async function verifyTotpLogin(pendingToken: string, code: string) {
       tenantId: user.tenantId,
     },
   };
+}
+
+/* P67 — tenant-wide 2FA enforcement toggle (owner/admin). */
+export async function set2faEnforcement(tenantId: string, require2fa: boolean) {
+  await prisma.tenant.update({ where: { id: tenantId }, data: { require2fa } });
+  return { require2fa };
+}
+
+export async function get2faEnforcement(tenantId: string) {
+  const tenant = await prisma.tenant.findFirst({
+    where: { id: tenantId },
+    select: { require2fa: true },
+  });
+  return { require2fa: tenant?.require2fa ?? false };
 }

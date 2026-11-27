@@ -18,7 +18,16 @@ import {
   changePasswordSchema,
 } from './auth.service.js';
 import { authMiddleware } from '../auth/auth.middleware.js';
-import { setupTotp, enableTotp, disableTotp, verifyTotpLogin } from './auth.service.js';
+import {
+  setupTotp,
+  enableTotp,
+  disableTotp,
+  verifyTotpLogin,
+  set2faEnforcement,
+  get2faEnforcement,
+} from './auth.service.js';
+import jwt from 'jsonwebtoken';
+import { env } from '../../common/env.js';
 
 extendZodWithOpenApi(z);
 
@@ -314,7 +323,29 @@ authRouter.post('/login/2fa', validateBody(TwoFactorLoginSchema), async (req, re
   }
 });
 
-authRouter.post('/2fa/setup', authMiddleware, async (req, res, next) => {
+/* P67: a valid forced-setup pending token counts as auth for setup+enable
+ * (the user proved the password at login; the TOTP code proves the device). */
+const setupTokenAuth = (req: any, res: any, next: any) => {
+  const header = String(req.get('authorization') ?? '');
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  if (token) {
+    try {
+      const payload = jwt.verify(token, env.JWT_SECRET) as {
+        userId?: string;
+        twoFactorSetup?: boolean;
+      };
+      if (payload.twoFactorSetup && payload.userId) {
+        (req as any).auth = { user: { id: payload.userId } };
+        return next();
+      }
+    } catch {
+      /* fall through to full auth */
+    }
+  }
+  return authMiddleware(req, res, next);
+};
+
+authRouter.post('/2fa/setup', setupTokenAuth, async (req, res, next) => {
   try {
     const result = await setupTotp((req as any).auth.user.id);
     res.json({ data: result });
@@ -325,7 +356,7 @@ authRouter.post('/2fa/setup', authMiddleware, async (req, res, next) => {
 
 authRouter.post(
   '/2fa/enable',
-  authMiddleware,
+  setupTokenAuth,
   validateBody(TwoFactorCodeSchema),
   async (req, res, next) => {
     try {
@@ -347,6 +378,35 @@ authRouter.post(
       const body = req.validatedBody as z.infer<typeof TwoFactorCodeSchema>;
       const result = await disableTotp((req as any).auth.user.id, body.code);
       res.json({ data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+const EnforcementSchema = z.object({ require2fa: z.boolean() });
+
+authRouter.get('/2fa/enforcement', authMiddleware, async (req, res, next) => {
+  try {
+    res.json({ data: await get2faEnforcement((req as any).auth.user.tenantId) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+authRouter.put(
+  '/2fa/enforcement',
+  authMiddleware,
+  validateBody(EnforcementSchema),
+  async (req, res, next) => {
+    try {
+      const role = String((req as any).auth?.user?.role ?? '');
+      if (role !== 'owner' && role !== 'admin') {
+        res.status(403).json({ error: { code: 'FORBIDDEN', message: 'Owner/admin only' } });
+        return;
+      }
+      const body = req.validatedBody as z.infer<typeof EnforcementSchema>;
+      res.json({ data: await set2faEnforcement((req as any).auth.user.tenantId, body.require2fa) });
     } catch (err) {
       next(err);
     }
