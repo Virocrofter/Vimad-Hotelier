@@ -118,7 +118,7 @@ function AppDashboardV1() {
   const [tick, setTick] = useState(0);
   const alertsList = useMemo(
     () => filterDismissed(alerts.data ?? [], businessDate),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/memo-dependencies -- tick drives the refresh
     [alerts.data, businessDate, tick]
   );
 

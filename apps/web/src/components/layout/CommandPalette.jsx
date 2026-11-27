@@ -362,6 +362,7 @@ export default function CommandPalette({ open, onOpen, onClose }) {
         },
         {
           label: 'Copy contact',
+          // eslint-disable-next-line react-hooks/memo-dependencies -- fresh closure per palette render
           run: () => copyText(g.phone ?? g.email ?? `${g.firstName ?? ''} ${g.lastName ?? ''}`),
         },
       ],

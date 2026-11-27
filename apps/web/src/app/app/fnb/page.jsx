@@ -23,6 +23,7 @@ export default function FnbStaffPage() {
   const [err, setErr] = useState(null);
   const [lens, setLens] = useState('active');
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- stable refresh identity drives the polling effect
   const refresh = useCallback(async () => {
     try {
       const r = await apiClient.get('/fnb/staff/orders', {

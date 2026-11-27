@@ -59,6 +59,7 @@ function PaymentsInner() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/memo-dependencies -- fetch effect reads stable module fns
   }, [filters]);
 
   useEffect(() => {

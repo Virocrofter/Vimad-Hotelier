@@ -17,6 +17,7 @@ export default function ContentPage() {
   const [products, setProducts] = useState(null);
   const [err, setErr] = useState(null);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- stable refresh identity drives the polling effect
   const refresh = useCallback(async () => {
     if (!property?.id) return;
     try {

@@ -23,6 +23,7 @@ export default function FloorPage() {
   const [adding, setAdding] = useState(false);
   const [form, setForm] = useState({ label: '', area: '', seats: '' });
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- stable refresh identity drives the polling effect
   const refresh = useCallback(async () => {
     if (!property?.id) return;
     try {

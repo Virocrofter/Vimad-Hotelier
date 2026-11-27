@@ -33,6 +33,7 @@ export default function TillPage() {
   const [session, setSession] = useState(null); // cash-up form state
   const [closing, setClosing] = useState(null); // check being closed
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- stable refresh identity drives the polling effect
   const refresh = useCallback(async () => {
     if (!property?.id) return;
     try {
