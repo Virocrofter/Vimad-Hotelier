@@ -561,7 +561,7 @@ function LogTab({ toast }) {
         description: String(e.message || e),
       });
     }
-  }, [JSON.stringify(params)]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [params]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/memo-dependencies
 
   useEffect(() => {
     load();
@@ -934,7 +934,7 @@ function CoversTab({ propertyId, toast }) {
     } finally {
       setLoading(false);
     }
-  }, [propertyId, date]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [propertyId, date]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/memo-dependencies -- toast + api client are module-stable
 
   useEffect(() => {
     load();
