@@ -1,161 +1,77 @@
-import { useEffect } from 'react';
+/* [LEGAL-BATCH] Claim-lint-gated legal page for VIMAD (Pty) Ltd.
+ * Drafted against POPIA 4/2013, ECTA 25/2002, CPA 68/2008. Founder review before public launch. */
 import { Link } from 'react-router-dom';
-import {
-  Shield,
-  Lock,
-  Key,
-  Eye,
-  Server,
-  Zap,
-  Globe,
-  Clock,
-  FileCheck,
-  AlertTriangle,
-} from 'lucide-react';
 
-export default function SecurityOverviewPage() {
-  // Security pages feel better in dark mode — respect user choice but default dark on mount
-  useEffect(() => {
-    const html = document.documentElement;
-    const wasLight = html.classList.contains('light');
-    if (wasLight) {
-      // Only switch if user hasn't explicitly chosen light in this session
-      const stored = localStorage.getItem('pms-theme-storage');
-      const parsed = stored ? JSON.parse(stored) : null;
-      if (!parsed?.state?.theme || parsed.state.theme === 'system') {
-        html.classList.remove('light');
-        html.classList.add('dark');
-      }
-    }
-  }, []);
-
-  const pillars = [
-    {
-      icon: Lock,
-      title: 'End-to-End Encryption',
-      desc: 'All data is encrypted in transit with TLS 1.3 and at rest with AES-256. Customer data is logically isolated using row-level security.',
-    },
-    {
-      icon: Key,
-      title: 'Identity & Access',
-      desc: 'SSO via SAML 2.0 / OIDC, multi-factor authentication (TOTP/WebAuthn), and role-based access control (RBAC) with principle of least privilege.',
-    },
-    {
-      icon: Eye,
-      title: 'Threat Detection',
-      desc: '24/7 SOC monitoring with automated anomaly detection, DDoS mitigation via Cloudflare, and real-time vulnerability scanning.',
-    },
-    {
-      icon: Server,
-      title: 'Infrastructure',
-      desc: 'Cloud-native architecture on AWS & GCP with auto-scaling, multi-region failover, and daily encrypted backups with 30-day retention.',
-    },
-    {
-      icon: Zap,
-      title: 'Incident Response',
-      desc: 'Defined IR playbook with 15-minute response SLA for critical issues. Automated containment and customer notification within 1 hour.',
-    },
-    {
-      icon: Globe,
-      title: 'Compliance',
-      desc: 'SOC 2 Type II, PCI DSS Level 1, GDPR, and CCPA compliant. Regular third-party penetration testing and continuous compliance monitoring.',
-    },
-  ];
-
+function Shell({ title, updated, children }) {
   return (
-    <div className="bg-background">
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border bg-surface py-20">
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-        <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/10">
-            <Shield className="h-8 w-8 text-secondary" />
-          </div>
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
-            Security at Vimad
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-            Trust is the foundation of hospitality technology. We protect your property and guest
-            data with enterprise-grade security at every layer.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-text-secondary">
-              <FileCheck className="h-3.5 w-3.5 text-accent" /> SOC 2 Type II
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-text-secondary">
-              <FileCheck className="h-3.5 w-3.5 text-accent" /> PCI DSS Level 1
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-text-secondary">
-              <FileCheck className="h-3.5 w-3.5 text-accent" /> GDPR Compliant
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-text-secondary">
-              <FileCheck className="h-3.5 w-3.5 text-accent" /> ISO 27001
-            </span>
-          </div>
+    <div className="mkh">
+      <section className="mkh-hero" style={{ padding: '72px 24px 32px' }}>
+        <div className="mkh-hero-inner">
+          <p className="mkh-kicker">VIMAD (Pty) Ltd · CIPC Reg 2026/949106/07</p>
+          <h1>{title}</h1>
+          <p className="updated">Last updated: {updated}</p>
         </div>
       </section>
-
-      {/* Pillars */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {pillars.map((p) => (
-              <div
-                key={p.title}
-                className="rounded-xl border border-border bg-surface p-6 transition-colors hover:border-secondary/30"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10">
-                  <p.icon className="h-5 w-5 text-secondary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-text-primary">{p.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-text-secondary">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="border-y border-border bg-surface py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            {[
-              { label: 'Uptime SLA', value: '99.99%' },
-              { label: 'Data Encryption', value: 'AES-256' },
-              { label: 'RTO', value: '< 1 hour' },
-              { label: 'Pen Tests / Year', value: '4+' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="text-3xl font-bold text-secondary">{stat.value}</p>
-                <p className="mt-1 text-sm text-text-muted">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Reporting */}
-      <section className="py-20">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <AlertTriangle className="mx-auto h-8 w-8 text-warning" />
-          <h2 className="mt-4 text-2xl font-bold text-text-primary">Report a Security Issue</h2>
-          <p className="mt-2 text-text-secondary">
-            We operate a responsible disclosure program. If you discover a vulnerability, please
-            report it to{' '}
-            <a href="mailto:security@efeohise@gmail.com" className="text-secondary hover:underline">
-              security@efeohise@gmail.com
-            </a>
-            . We commit to acknowledging reports within 24 hours and resolving critical issues
-            within 72 hours.
-          </p>
-        </div>
+      <section className="mkh-section mkh-legal" style={{ paddingTop: 8 }}>
+        {children}
+        <p style={{ marginTop: 40, fontSize: 12, color: 'var(--mk-muted)' }}>
+          Questions: <b style={{ color: 'var(--mk-espresso)' }}>efeohise@gmail.com</b> · +27 65 074
+          8802 ·{' '}
+          <Link to="/contact" style={{ color: 'var(--mk-teal)' }}>
+            contact page
+          </Link>
+        </p>
       </section>
     </div>
+  );
+}
+
+export default function SecurityPage() {
+  return (
+    <Shell title="Security posture" updated="27 November 2026">
+      <p className="note">
+        We publish our posture, not promises. Every item below describes how the system is built
+        today — ask us to demonstrate any of it on a walk-in.
+      </p>
+      <h2>Account security</h2>
+      <ul>
+        <li>
+          Two-factor authentication (TOTP, compatible with standard authenticator apps) for every
+          account.
+        </li>
+        <li>Role-based access: staff see what their role requires — nothing more.</li>
+        <li>Money-actions are audited: who, when, what, on an immutable trail.</li>
+      </ul>
+      <h2>Payments</h2>
+      <p>
+        Card data is tokenised and processed by Paystack. Card numbers never touch our servers — see{' '}
+        <Link to="/pci-dss">payments &amp; PCI</Link>. Each property&rsquo;s money settles into its
+        own Paystack account; we cannot move your funds.
+      </p>
+      <h2>Infrastructure</h2>
+      <ul>
+        <li>
+          Encryption in transit (TLS) on every connection; access-controlled hosting in South
+          Africa.
+        </li>
+        <li>Nightly backups with test-restore drills; backups roll off on a fixed cycle.</li>
+        <li>
+          Offline-tolerant front desk: short outages queue work locally rather than losing it.
+        </li>
+      </ul>
+      <h2>POPIA</h2>
+      <p>
+        Guest erasure on request, ID-scan purging, and a breach-ledger are built into the product.
+        If a breach affecting personal information occurs, we will notify the Information Regulator
+        and affected data subjects as the law requires. Read the full{' '}
+        <Link to="/privacy">privacy policy</Link>.
+      </p>
+      <h2>Transparency</h2>
+      <p>
+        Live uptime and incident history on our <Link to="/status">status page</Link>. Found a
+        vulnerability? Write to <b>efeohise@gmail.com</b> — we treat responsible disclosures
+        seriously and never pursue good-faith researchers.
+      </p>
+    </Shell>
   );
 }

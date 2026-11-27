@@ -1,25 +1,4 @@
 {
   "note": "Quarantined legacy violations. Each file maps to its rebuild task in Vimad-Marketing-Plan-Addendum-v1.1 §3/§4 — remove an entry when its task ships. New violations outside this list fail the gate. Amend the register (§2), never weaken the rules.",
-  "files": {
-    "apps/web/src/app/marketing/page.jsx": {
-      "until": "Foundation: homepage Ember & Paper rebuild (new spine)",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/features/page.jsx": {
-      "until": "Content Mass: replaced by the nine module pages",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/case-studies/page.jsx": {
-      "until": "Field & Measure: real named pilot case studies",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/privacy/page.jsx": {
-      "until": "Legal-docs swap: real POPIA policy replaces template",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/security/page.jsx": {
-      "until": "Legal-docs swap: honest security posture doc",
-      "rules": "all"
-    }
-  }
+  "files": {}
 }

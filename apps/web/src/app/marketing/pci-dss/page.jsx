@@ -1,112 +1,62 @@
+/* [LEGAL-BATCH] Claim-lint-gated legal page for VIMAD (Pty) Ltd.
+ * Drafted against POPIA 4/2013, ECTA 25/2002, CPA 68/2008. Founder review before public launch. */
 import { Link } from 'react-router-dom';
-import { CreditCard, Lock, Fingerprint, Server, FileCheck, RefreshCw } from 'lucide-react';
 
-export default function PCIDSSPage() {
+function Shell({ title, updated, children }) {
   return (
-    <div className="bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-info/10">
-            <CreditCard className="h-6 w-6 text-info" />
-          </div>
-          <h1 className="mt-4 text-3xl font-bold text-text-primary">PCI DSS Compliance</h1>
-          <p className="mt-2 text-sm text-text-muted">
-            Vimad maintains PCI DSS Level 1 Service Provider certification — the highest level of
-            payment card security.
-          </p>
+    <div className="mkh">
+      <section className="mkh-hero" style={{ padding: '72px 24px 32px' }}>
+        <div className="mkh-hero-inner">
+          <p className="mkh-kicker">VIMAD (Pty) Ltd · CIPC Reg 2026/949106/07</p>
+          <h1>{title}</h1>
+          <p className="updated">Last updated: {updated}</p>
         </div>
-
-        <div className="space-y-8 text-text-secondary">
-          <section className="rounded-xl border border-info/20 bg-info/5 p-6">
-            <div className="flex items-center gap-3">
-              <FileCheck className="h-5 w-5 text-info" />
-              <h2 className="text-lg font-semibold text-text-primary">Certification Status</h2>
-            </div>
-            <p className="mt-2 leading-relaxed">
-              Vimad is certified as a{' '}
-              <strong className="text-text-primary">PCI DSS Level 1 Service Provider</strong>. This
-              certification is validated annually by an independent Qualified Security Assessor
-              (QSA) and covers all cardholder data environments (CDEs) within our platform.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-full bg-info/10 px-3 py-1 text-xs font-medium text-info">
-                Level 1 Service Provider
-              </span>
-              <span className="inline-flex items-center rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
-                Annual QSA Audit
-              </span>
-              <span className="inline-flex items-center rounded-full bg-secondary/10 px-3 py-1 text-xs font-medium text-secondary">
-                SAQ-D Validated
-              </span>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">Security Controls</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {[
-                {
-                  icon: Lock,
-                  title: 'Encryption',
-                  desc: 'AES-256 encryption at rest and TLS 1.3 in transit for all cardholder data.',
-                },
-                {
-                  icon: Fingerprint,
-                  title: 'Tokenization',
-                  desc: 'Primary account numbers (PANs) are replaced with non-sensitive tokens.',
-                },
-                {
-                  icon: Server,
-                  title: 'Network Segmentation',
-                  desc: 'Cardholder data environments are isolated with strict access controls.',
-                },
-                {
-                  icon: RefreshCw,
-                  title: 'Continuous Monitoring',
-                  desc: '24/7 intrusion detection, vulnerability scanning, and log analysis.',
-                },
-              ].map((control) => (
-                <div key={control.title} className="rounded-lg border border-border bg-surface p-4">
-                  <div className="flex items-center gap-2">
-                    <control.icon className="h-4 w-4 text-secondary" />
-                    <h3 className="font-medium text-text-primary">{control.title}</h3>
-                  </div>
-                  <p className="mt-1 text-sm">{control.desc}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">Shared Responsibility</h2>
-            <p className="mt-2 leading-relaxed">
-              While Vimad secures the platform infrastructure, our customers are responsible for:
-            </p>
-            <ul className="mt-3 list-disc space-y-2 pl-5">
-              <li>Maintaining secure endpoint devices (front desk computers, tablets)</li>
-              <li>Restricting physical access to payment terminals</li>
-              <li>Training staff on cardholder data handling procedures</li>
-              <li>Never storing CVV codes, PINs, or magnetic stripe data</li>
-              <li>Using only PCI-compliant payment integrations provided through our platform</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">Attestation of Compliance</h2>
-            <p className="mt-2 leading-relaxed">
-              A copy of our current Attestation of Compliance (AOC) and Responsibility Matrix is
-              available to active customers upon request through your account manager or by emailing{' '}
-              <a
-                href="mailto:security@efeohise@gmail.com"
-                className="text-secondary hover:underline"
-              >
-                security@efeohise@gmail.com
-              </a>
-              .
-            </p>
-          </section>
-        </div>
-      </div>
+      </section>
+      <section className="mkh-section mkh-legal" style={{ paddingTop: 8 }}>
+        {children}
+        <p style={{ marginTop: 40, fontSize: 12, color: 'var(--mk-muted)' }}>
+          Questions: <b style={{ color: 'var(--mk-espresso)' }}>efeohise@gmail.com</b> · +27 65 074
+          8802 ·{' '}
+          <Link to="/contact" style={{ color: 'var(--mk-teal)' }}>
+            contact page
+          </Link>
+        </p>
+      </section>
     </div>
+  );
+}
+
+export default function PciPage() {
+  return (
+    <Shell title="Payments &amp; PCI" updated="27 November 2026">
+      <h2>The short version</h2>
+      <p>
+        Your guests&rsquo; card details go to Paystack — a PCI DSS Level 1 certified payment
+        provider — and never touch Vimad&rsquo;s servers. We store no card numbers, no CVVs, no card
+        expiry data. There is no cardholder-data environment to breach on our side.
+      </p>
+      <h2>What that means for your property</h2>
+      <ul>
+        <li>
+          Deposits and payments are taken through Paystack&rsquo;s hosted flows, tokenised end to
+          end.
+        </li>
+        <li>
+          Each property settles into its own Paystack account. We never hold, pool or move your
+          funds — reconciliation is yours to the cent.
+        </li>
+        <li>
+          EFT payments run bank-to-bank; uploaded proofs of payment are matched to folios in the
+          system, and the paper trail stays yours.
+        </li>
+      </ul>
+      <h2>Honest scope</h2>
+      <p>
+        Because card data never enters our environment, our PCI scope is minimal by architecture,
+        not by paperwork. When your bank or accountant asks, the answer is simple: card processing
+        is Paystack&rsquo;s regulated environment; Vimad touches tokens and payment status only.
+        Questions: <b>efeohise@gmail.com</b>.
+      </p>
+    </Shell>
   );
 }

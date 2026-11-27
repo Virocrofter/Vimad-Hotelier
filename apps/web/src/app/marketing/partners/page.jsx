@@ -1,130 +1,49 @@
+/* partners/page.jsx — the old page promised commission tiers and showed a logo
+ * wall of companies we have never integrated. Replaced with what is actually true. */
 import { Link } from 'react-router-dom';
-import {
-  ArrowRight,
-  Handshake,
-  Zap,
-  Globe,
-  Award,
-  Check,
-  Code,
-  Building2,
-  TrendingUp,
-} from 'lucide-react';
 
-const partnerTypes = [
+const PATHS = [
   {
-    icon: Code,
-    title: 'Technology Partners',
-    desc: 'Integrate your app with Vimad. Get listed in our marketplace and reach 200+ hotels.',
-    benefits: ['Open REST API', 'Sandbox environment', 'Co-marketing', 'Technical support'],
+    title: 'Accountants & bookkeepers',
+    body: 'Your practice stays yours. Vimad does the plumbing — continuous tie-out, TOMSA remittance-ready, Xero/Sage CSV export — and refers clients in your area when properties ask us who to trust.',
   },
   {
-    icon: Building2,
-    title: 'Reseller Partners',
-    desc: 'Sell Vimad to your hospitality clients. Earn recurring commissions on every deal.',
-    benefits: [
-      '20% recurring commission',
-      'Sales enablement kit',
-      'Partner portal',
-      'Deal registration',
-    ],
+    title: 'Hospitality consultants',
+    body: 'Take the walk-in demo kit to your clients: the iPad tour, the leave-behind, the 15-minute look at their own numbers. If your client signs, you did the work — write to us about referral terms.',
   },
   {
-    icon: TrendingUp,
-    title: 'Referral Partners',
-    desc: 'Refer properties to Vimad and earn rewards for every successful signup.',
-    benefits: [
-      '1 free month per referral',
-      'No commitment',
-      'Tracking dashboard',
-      'Instant payout',
-    ],
+    title: 'Integrators & developers',
+    body: 'API access is included from the Command tier and webhooks already ship. Tell us what two properties need and it goes on the roadmap — we build against demand, not logo walls.',
   },
-];
-
-const existing = [
-  'Stripe',
-  'Adyen',
-  'Booking.com',
-  'Expedia',
-  'Airbnb',
-  'Salesforce',
-  'HubSpot',
-  'QuickBooks',
-  'Toast',
-  'Oracle MICROS',
 ];
 
 export default function PartnersPage() {
   return (
-    <div className="bg-background">
-      <section className="py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10">
-            <Handshake className="h-6 w-6 text-secondary" />
-          </div>
-          <h1 className="mt-4 text-4xl font-bold text-text-primary sm:text-5xl">
-            Partner with <span className="text-secondary">Vimad</span>
+    <div className="mkh">
+      <section className="mkh-hero" style={{ padding: '72px 24px 40px' }}>
+        <div className="mkh-hero-inner">
+          <p className="mkh-kicker">Work with Vimad</p>
+          <h1>
+            Partnerships, <em>honestly.</em>
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-            Join our ecosystem of technology providers, resellers, and hospitality consultants.
+          <p className="mkh-hero-sub">
+            There is no commission structure yet and no logo wall — there will be, once it is real.
+            What exists today is three genuine ways to work together.
           </p>
         </div>
       </section>
-
-      <section className="border-t border-border bg-surface py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-6 md:grid-cols-3">
-            {partnerTypes.map((p) => (
-              <div key={p.title} className="rounded-xl border border-border bg-background p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/10">
-                  <p.icon className="h-6 w-6 text-secondary" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold text-text-primary">{p.title}</h3>
-                <p className="mt-2 text-sm text-text-secondary">{p.desc}</p>
-                <ul className="mt-4 space-y-2">
-                  {p.benefits.map((b) => (
-                    <li key={b} className="flex items-center gap-2 text-sm text-text-secondary">
-                      <Check className="h-4 w-4 text-accent shrink-0" /> {b}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+      <section className="mkh-section" style={{ paddingTop: 8 }}>
+        <div className="mkh-segs">
+          {PATHS.map((p) => (
+            <div key={p.title} className="mkh-seg">
+              <h3>{p.title}</h3>
+              <p>{p.body}</p>
+            </div>
+          ))}
         </div>
-      </section>
-
-      <section className="py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl font-bold text-text-primary">Already integrated</h2>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            {existing.map((name) => (
-              <div
-                key={name}
-                className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary"
-              >
-                {name}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-border bg-surface py-20">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10">
-            <Award className="h-6 w-6 text-accent" />
-          </div>
-          <h2 className="mt-4 text-2xl font-bold text-text-primary">Ready to partner?</h2>
-          <p className="mt-2 text-text-secondary">
-            Apply to our partner program and start growing together.
-          </p>
-          <Link
-            to="/contact"
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
-          >
-            Apply Now <ArrowRight className="ml-2 h-4 w-4" />
+        <div className="mkh-cta-row" style={{ marginTop: 32 }}>
+          <Link className="mkh-pill" to="/contact">
+            Start the conversation
           </Link>
         </div>
       </section>

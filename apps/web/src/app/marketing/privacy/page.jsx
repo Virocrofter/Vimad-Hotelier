@@ -1,134 +1,96 @@
+/* [LEGAL-BATCH] Claim-lint-gated legal page for VIMAD (Pty) Ltd.
+ * Drafted against POPIA 4/2013, ECTA 25/2002, CPA 68/2008. Founder review before public launch. */
 import { Link } from 'react-router-dom';
-import { Shield, Lock, Eye, Server, Globe, Mail } from 'lucide-react';
 
-export default function PrivacyPolicyPage() {
+function Shell({ title, updated, children }) {
   return (
-    <div className="bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10">
-            <Shield className="h-6 w-6 text-secondary" />
-          </div>
-          <h1 className="mt-4 text-3xl font-bold text-text-primary">Privacy Policy</h1>
-          <p className="mt-2 text-sm text-text-muted">Last updated: August 11, 2026</p>
+    <div className="mkh">
+      <section className="mkh-hero" style={{ padding: '72px 24px 32px' }}>
+        <div className="mkh-hero-inner">
+          <p className="mkh-kicker">VIMAD (Pty) Ltd · CIPC Reg 2026/949106/07</p>
+          <h1>{title}</h1>
+          <p className="updated">Last updated: {updated}</p>
         </div>
-
-        <div className="prose prose-slate max-w-none dark:prose-invert">
-          <div className="space-y-8 text-text-secondary">
-            <section>
-              <h2 className="text-xl font-semibold text-text-primary">1. Introduction</h2>
-              <p className="mt-2 leading-relaxed">
-                Vimad (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed to
-                protecting your privacy. This Privacy Policy explains how we collect, use, disclose,
-                and safeguard your information when you use our property management platform,
-                websites, and related services (collectively, the &ldquo;Services&rdquo;).
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-text-primary">2. Information We Collect</h2>
-              <div className="mt-3 space-y-3">
-                <div className="rounded-lg border border-border bg-surface p-4">
-                  <h3 className="flex items-center gap-2 font-medium text-text-primary">
-                    <Eye className="h-4 w-4 text-secondary" /> Personal Information
-                  </h3>
-                  <p className="mt-1 text-sm">
-                    Name, email address, phone number, billing information, and property details
-                    provided during account registration.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border bg-surface p-4">
-                  <h3 className="flex items-center gap-2 font-medium text-text-primary">
-                    <Server className="h-4 w-4 text-secondary" /> Usage Data
-                  </h3>
-                  <p className="mt-1 text-sm">
-                    Log data, device information, IP addresses, browser type, and pages visited
-                    within our platform.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-border bg-surface p-4">
-                  <h3 className="flex items-center gap-2 font-medium text-text-primary">
-                    <Lock className="h-4 w-4 text-secondary" /> Guest Data
-                  </h3>
-                  <p className="mt-1 text-sm">
-                    As a data processor, we handle guest reservation data, preferences, and stay
-                    history on behalf of your property.
-                  </p>
-                </div>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-text-primary">
-                3. How We Use Your Information
-              </h2>
-              <ul className="mt-3 list-disc space-y-2 pl-5">
-                <li>Provide, operate, and maintain our Services</li>
-                <li>Process transactions and send related information</li>
-                <li>Improve, personalize, and expand our platform</li>
-                <li>Communicate with you about updates, security alerts, and support</li>
-                <li>Prevent fraud and ensure platform security</li>
-                <li>Comply with legal obligations</li>
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-text-primary">
-                4. Data Sharing & Disclosure
-              </h2>
-              <p className="mt-2 leading-relaxed">
-                We do not sell your personal information. We may share data with trusted third-party
-                service providers (cloud hosting, payment processing, analytics) under strict
-                confidentiality agreements. We may also disclose information if required by law or
-                to protect our rights.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-text-primary">5. Data Security</h2>
-              <p className="mt-2 leading-relaxed">
-                We implement industry-standard security measures including AES-256 encryption at
-                rest, TLS 1.3 in transit, and SOC 2 Type II certified infrastructure. Access to data
-                is restricted to authorized personnel only.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-text-primary">6. Your Rights</h2>
-              <p className="mt-2 leading-relaxed">
-                Depending on your jurisdiction, you may have the right to access, correct, delete,
-                or port your personal data. To exercise these rights, contact us at{' '}
-                <a
-                  href="mailto:privacy@efeohise@gmail.com"
-                  className="text-secondary hover:underline"
-                >
-                  privacy@efeohise@gmail.com
-                </a>
-                .
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-semibold text-text-primary">7. Contact Us</h2>
-              <p className="mt-2 leading-relaxed">
-                If you have questions about this Privacy Policy, please contact our Data Protection
-                Officer:
-              </p>
-              <div className="mt-3 rounded-lg border border-border bg-surface p-4">
-                <p className="text-sm text-text-secondary">Vimad Data Protection Officer</p>
-                <p className="text-sm text-text-secondary">123 Hospitality Way, Suite 400</p>
-                <p className="text-sm text-text-secondary">Durban, CA 94105</p>
-                <a
-                  href="mailto:privacy@efeohise@gmail.com"
-                  className="mt-1 inline-flex items-center gap-1.5 text-sm text-secondary hover:underline"
-                >
-                  <Mail className="h-3.5 w-3.5" /> privacy@efeohise@gmail.com
-                </a>
-              </div>
-            </section>
-          </div>
-        </div>
-      </div>
+      </section>
+      <section className="mkh-section mkh-legal" style={{ paddingTop: 8 }}>
+        {children}
+        <p style={{ marginTop: 40, fontSize: 12, color: 'var(--mk-muted)' }}>
+          Questions: <b style={{ color: 'var(--mk-espresso)' }}>efeohise@gmail.com</b> · +27 65 074
+          8802 ·{' '}
+          <Link to="/contact" style={{ color: 'var(--mk-teal)' }}>
+            contact page
+          </Link>
+        </p>
+      </section>
     </div>
+  );
+}
+
+export default function PrivacyPage() {
+  return (
+    <Shell title="Privacy & POPIA policy" updated="27 November 2026">
+      <h2>1. Who we are</h2>
+      <p>
+        VIMAD (Pty) Ltd (registration 2026/949106/07), based in Durban, South Africa, is the
+        responsible party for the personal information collected on this website and through our
+        hotel-management service. Our Information Officer is Efeohise Vincent Okpeku —{' '}
+        <b>efeohise@gmail.com</b> / +27 65 074 8802.
+      </p>
+      <h2>2. What we collect</h2>
+      <ul>
+        <li>
+          <b>Enquiry data</b> (quote, demo and contact forms): your name, email, phone number,
+          property name, room count, current system, message, and how you found us (page and
+          campaign metadata). Submission records include the consent tick and timestamp.
+        </li>
+        <li>
+          <b>Customer data</b> (once you subscribe): your property&rsquo;s configuration and the
+          guest and operational data you load into the service. You remain the responsible party for
+          your guests&rsquo; data; we act as operator, processing it only to provide the service.
+        </li>
+        <li>
+          <b>Technical data</b>: standard server logs used for security and reliability.
+        </li>
+      </ul>
+      <h2>3. Lawful basis and use</h2>
+      <p>
+        We process enquiry data with your consent, to respond to your request and prepare quotes. We
+        process customer data to deliver the contracted service, keep it secure, and meet legal
+        obligations (tax and levy reporting). We do <b>not</b> sell personal information, maintain
+        marketing lists you didn&rsquo;t ask for, or profile visitors.
+      </p>
+      <h2>4. Sharing</h2>
+      <p>
+        We share data only as needed to run the service: payment processing by Paystack (an
+        independent responsible party — card details go to Paystack, never to our servers), hosting
+        within South Africa, and regulators or courts where the law compels us. No other disclosure.
+      </p>
+      <h2>5. Retention</h2>
+      <p>
+        Enquiry data is kept for up to 24 months unless you become a customer. Customer data is kept
+        for the life of the contract and an export window after it ends, then deleted — with backups
+        rolling off on their normal cycle. Financial records required by law are retained as the law
+        requires.
+      </p>
+      <h2>6. Your rights</h2>
+      <p>
+        You may request access to, correction of, or deletion of your personal information, and
+        object to processing, by emailing the Information Officer. Access requests are answered
+        within the period the law allows (30 days under PAIA). If we can&rsquo;t resolve a
+        complaint, you may contact the Information Regulator (South Africa) — inforeg@justice.gov.za
+        / 010 023 5200.
+      </p>
+      <h2>7. Security and cookies</h2>
+      <p>
+        Summary measures are on our <Link to="/security">security page</Link>. This site currently
+        sets no tracking cookies; when analytics are enabled they are cookieless. The booking flow
+        and portal use strictly necessary storage to function.
+      </p>
+      <h2>8. Changes</h2>
+      <p>
+        If this policy changes materially, we will note the update here. Material changes affecting
+        customers will also be notified in the service.
+      </p>
+    </Shell>
   );
 }

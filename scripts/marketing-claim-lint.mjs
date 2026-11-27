@@ -26,6 +26,10 @@ const RULES = [
   ['old brand', /Unified PMS|unifiedpms/i],
   ['white-label claim (roadmap — not shippable)', /white-?label/i],
   ['unsourced revenue metric', /RevPAR/],
+  [
+    'fabricated integration catalog (only LIVE/PILOT integrations may be named)',
+    /Stripe|Adyen|Worldpay|MICROS|Toast POS|Lightspeed|Assa ?Abloy|SALTO|Dormakaba|QuickBooks|Salesforce|HubSpot/i,
+  ],
 ];
 
 const baseline = existsSync(BASELINE_PATH)

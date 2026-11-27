@@ -1,127 +1,68 @@
+/* about/page.jsx — the old page listed an imaginary team and invented stats.
+ * This is the true story, and it is better. */
 import { Link } from 'react-router-dom';
-import { ArrowRight, Target, Eye, Heart, Users, Globe, Award } from 'lucide-react';
 
-const values = [
+const FACTS = [
+  { value: '01', label: 'founder — the person who answers your calls also writes the code' },
+  { value: '09', label: 'modules on one spine, from front desk to SARS' },
   {
-    icon: Target,
-    title: 'Mission-Driven',
-    desc: 'We build technology that lets hoteliers focus on guests, not software.',
+    value: '05',
+    label: 'founding properties — the cohort every early number on this site will come from',
   },
-  {
-    icon: Eye,
-    title: 'Transparent',
-    desc: 'No hidden fees, no lock-in contracts, no surprise price hikes.',
-  },
-  {
-    icon: Heart,
-    title: 'Hospitality-First',
-    desc: 'Designed by hoteliers, for hoteliers. Every feature starts with operational reality.',
-  },
-  {
-    icon: Users,
-    title: 'Customer-Obsessed',
-    desc: 'White-glove onboarding and 24/7 support because your property never sleeps.',
-  },
-];
-
-const stats = [
-  { value: '200+', label: 'Hotels Powered' },
-  { value: '30', label: 'Countries' },
-  { value: '46', label: 'Core Modules' },
-  { value: '99.99%', label: 'Uptime SLA' },
-];
-
-const team = [
-  { name: 'Alex Morgan', role: 'CEO & Co-Founder', initials: 'AM' },
-  { name: 'Jordan Lee', role: 'CTO & Co-Founder', initials: 'JL' },
-  { name: 'Sarah Chen', role: 'Chief Product Officer', initials: 'SC' },
-  { name: 'Marcus Johnson', role: 'VP of Revenue', initials: 'MJ' },
+  { value: 'Durban', label: 'built here, for South African load-shedding, EFTs and TOMSA' },
 ];
 
 export default function AboutPage() {
   return (
-    <div className="bg-background">
-      <section className="py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold text-text-primary sm:text-5xl">
-            Building the future of <span className="text-secondary">hospitality</span>
+    <div className="mkh">
+      <section className="mkh-hero" style={{ padding: '72px 24px 40px' }}>
+        <div className="mkh-hero-inner">
+          <p className="mkh-kicker">About</p>
+          <h1>
+            One hotel. One system. <em>No leaks.</em>
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-            Vimad was founded by hoteliers who were tired of legacy software. Today we power
-            properties across 30 countries.
+          <p className="mkh-hero-sub">
+            Vimad is a South African company — VIMAD (Pty) Ltd, registered November 2026 — building
+            the hotel operating system the local market never got: rand-priced, load-shedding-proof,
+            POPIA-native, and honest enough to publish its claim register.
           </p>
         </div>
       </section>
-
-      <section className="border-t border-border bg-surface py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            {stats.map((s) => (
-              <div key={s.label} className="text-center">
-                <p className="text-3xl font-bold text-secondary">{s.value}</p>
-                <p className="mt-1 text-sm text-text-muted">{s.label}</p>
-              </div>
-            ))}
-          </div>
+      <section className="mkh-section" style={{ paddingTop: 8 }}>
+        <div className="mkh-statstrip">
+          {FACTS.map((f) => (
+            <div key={f.label} className="mkh-stat">
+              <b>{f.value}</b>
+              <span>{f.label}</span>
+            </div>
+          ))}
         </div>
       </section>
-
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-text-primary">Our Values</h2>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {values.map((v) => (
-              <div
-                key={v.title}
-                className="rounded-xl border border-border bg-surface p-6 text-center"
-              >
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-secondary/10">
-                  <v.icon className="h-6 w-6 text-secondary" />
-                </div>
-                <h3 className="mt-4 font-semibold text-text-primary">{v.title}</h3>
-                <p className="mt-2 text-sm text-text-secondary">{v.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-t border-border bg-surface py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-text-primary">Leadership</h2>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {team.map((t) => (
-              <div
-                key={t.name}
-                className="rounded-xl border border-border bg-background p-6 text-center"
-              >
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-secondary/10 text-lg font-bold text-secondary">
-                  {t.initials}
-                </div>
-                <h3 className="mt-4 font-semibold text-text-primary">{t.name}</h3>
-                <p className="text-sm text-text-muted">{t.role}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 text-center">
-        <div className="mx-auto max-w-xl px-4">
-          <h2 className="text-2xl font-bold text-text-primary">Want to join the team?</h2>
-          <p className="mt-2 text-text-secondary">
-            We are always looking for hospitality-minded engineers and designers.
+      <section className="mkh-section mkh-founder" style={{ paddingTop: 16 }}>
+        <div>
+          <p className="mkh-kicker">The team</p>
+          <h2 className="mkh-h2">The founder is the support desk.</h2>
+          <p>
+            No account managers, no ticket queues, no offshore call centre. You phone +27 65 074
+            8802 and the person who answers wrote the system — ask for the thing you need, and if it
+            belongs in a hotel operating system, it ships.
           </p>
-          <Link
-            to="/contact"
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
-          >
-            Get in Touch <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
+          <p className="mkh-contactline">
+            efeohise@gmail.com ·{' '}
+            <Link to="/status" style={{ color: 'var(--mk-teal)', fontWeight: 700 }}>
+              live status page
+            </Link>
+          </p>
+        </div>
+        <div className="mkh-statuscard">
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--mk-espresso)' }}>
+            Why trust a young company?
+          </p>
+          <p style={{ fontSize: 13, color: 'var(--mk-body)', lineHeight: 1.6 }}>
+            Because every claim on this site traces to running code, every page passes a claim-lint
+            gate, your money never touches our accounts, and you can leave with a full export any
+            time. Trust is a feature here.
+          </p>
         </div>
       </section>
     </div>

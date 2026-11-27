@@ -1,111 +1,86 @@
+/* [LEGAL-BATCH] Claim-lint-gated legal page for VIMAD (Pty) Ltd.
+ * Drafted against POPIA 4/2013, ECTA 25/2002, CPA 68/2008. Founder review before public launch. */
 import { Link } from 'react-router-dom';
-import { FileText, Scale, AlertCircle, RefreshCw } from 'lucide-react';
+
+function Shell({ title, updated, children }) {
+  return (
+    <div className="mkh">
+      <section className="mkh-hero" style={{ padding: '72px 24px 32px' }}>
+        <div className="mkh-hero-inner">
+          <p className="mkh-kicker">VIMAD (Pty) Ltd · CIPC Reg 2026/949106/07</p>
+          <h1>{title}</h1>
+          <p className="updated">Last updated: {updated}</p>
+        </div>
+      </section>
+      <section className="mkh-section mkh-legal" style={{ paddingTop: 8 }}>
+        {children}
+        <p style={{ marginTop: 40, fontSize: 12, color: 'var(--mk-muted)' }}>
+          Questions: <b style={{ color: 'var(--mk-espresso)' }}>efeohise@gmail.com</b> · +27 65 074
+          8802 ·{' '}
+          <Link to="/contact" style={{ color: 'var(--mk-teal)' }}>
+            contact page
+          </Link>
+        </p>
+      </section>
+    </div>
+  );
+}
 
 export default function TermsPage() {
   return (
-    <div className="bg-background">
-      <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-secondary/10">
-            <Scale className="h-6 w-6 text-secondary" />
-          </div>
-          <h1 className="mt-4 text-3xl font-bold text-text-primary">Terms of Service</h1>
-          <p className="mt-2 text-sm text-text-muted">Last updated: August 11, 2026</p>
-        </div>
-
-        <div className="space-y-8 text-text-secondary">
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">1. Agreement to Terms</h2>
-            <p className="mt-2 leading-relaxed">
-              By accessing or using Vimad (&ldquo;the Platform&rdquo;), you agree to be bound by
-              these Terms of Service. If you do not agree, you may not use our Services. These terms
-              apply to all visitors, users, and others who access or use the Platform.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">2. Description of Services</h2>
-            <p className="mt-2 leading-relaxed">
-              Vimad provides cloud-based property management software for hotels, resorts, and
-              hospitality businesses. Services include reservation management, front desk
-              operations, billing, reporting, channel management, and guest portal functionality.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">3. Account Registration</h2>
-            <p className="mt-2 leading-relaxed">
-              To use certain features, you must register for an account. You agree to provide
-              accurate, current, and complete information during registration and to update such
-              information to keep it accurate. You are responsible for safeguarding your password
-              and for all activities under your account.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">4. Subscription & Billing</h2>
-            <div className="mt-3 rounded-lg border border-border bg-surface p-4">
-              <ul className="list-disc space-y-2 pl-5 text-sm">
-                <li>Subscriptions are billed in advance on a monthly or annual basis.</li>
-                <li>All fees are exclusive of taxes unless stated otherwise.</li>
-                <li>
-                  You may upgrade or downgrade your plan at any time; changes take effect at the
-                  next billing cycle.
-                </li>
-                <li>No refunds for partial months or unused features.</li>
-              </ul>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">5. Acceptable Use</h2>
-            <p className="mt-2 leading-relaxed">
-              You agree not to use the Platform to: (a) violate any applicable law or regulation;
-              (b) infringe intellectual property rights; (c) transmit malicious software; (d)
-              attempt to gain unauthorized access; or (e) interfere with the integrity or
-              performance of the Services.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">6. Data Ownership</h2>
-            <p className="mt-2 leading-relaxed">
-              You retain all rights to your property and guest data. We claim no ownership over your
-              data. You grant us a limited license to host, process, and transmit your data solely
-              to provide and improve the Services.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">7. Termination</h2>
-            <p className="mt-2 leading-relaxed">
-              You may terminate your account at any time through the Settings page. We may suspend
-              or terminate your access if you violate these terms. Upon termination, your data will
-              be retained for 30 days, after which it will be permanently deleted from active
-              systems.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">8. Limitation of Liability</h2>
-            <p className="mt-2 leading-relaxed">
-              To the maximum extent permitted by law, Vimad shall not be liable for any indirect,
-              incidental, special, consequential, or punitive damages arising out of or relating to
-              your use of the Services. Our total liability shall not exceed the amount you paid us
-              in the 12 months preceding the claim.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-text-primary">9. Changes to Terms</h2>
-            <p className="mt-2 leading-relaxed">
-              We may modify these terms at any time. We will notify you of material changes via
-              email or through the Platform. Continued use after changes constitutes acceptance of
-              the revised terms.
-            </p>
-          </section>
-        </div>
-      </div>
-    </div>
+    <Shell title="Terms of service" updated="27 November 2026">
+      <h2>1. The agreement</h2>
+      <p>
+        This website is an invitation to do business, not an offer. Our services are provided under
+        a written quote and contract for your property, incorporating these terms. Where the
+        contract and these terms differ, the contract prevails.
+      </p>
+      <h2>2. The service</h2>
+      <p>
+        Hosted hotel-management software, quoted per property. Payment processing is provided by
+        Paystack; their processing fees are theirs, are shown separately in your contract, and are
+        governed by Paystack&rsquo;s own terms.
+      </p>
+      <h2>3. Your data</h2>
+      <p>
+        You own your data. You can export guests, history and financial records at any time, without
+        asking permission. On termination you receive an export window; after it closes we delete
+        your data (backups roll off on schedule), keeping only what the law requires us to keep. You
+        are responsible for lawfully collecting your guests&rsquo; data into the service and for
+        your own POPIA duties as responsible party.
+      </p>
+      <h2>4. Acceptable use</h2>
+      <p>
+        Use the service lawfully. Don&rsquo;t upload unlawful content, attempt to breach the
+        service, or process data you have no right to process. We may suspend access that endangers
+        the service or other customers, with notice where practicable.
+      </p>
+      <h2>5. Fees</h2>
+      <p>
+        As per your contract. Founder pricing applies for the lock-in period stated in your
+        contract. Third-party fees (Paystack, SMS bundles) are pass-through and always disclosed.
+      </p>
+      <h2>6. Warranties and liability</h2>
+      <p>
+        We provide the service with reasonable skill and care. To the maximum extent the law allows,
+        other warranties are excluded, and our total liability for any claim is capped at the fees
+        you paid in the 3 months before the claim arose. We are not liable for indirect or
+        consequential loss (lost profits, lost bookings). Nothing in these terms excludes liability
+        that South African law does not allow to be excluded.
+      </p>
+      <h2>7. Term, termination and move-back</h2>
+      <p>
+        Your contract states its term and renewal. You may export and leave at any time; where our
+        Switch offer applies, move-back assistance follows its published terms. Sections on data
+        export, liability and law survive termination.
+      </p>
+      <h2>8. General</h2>
+      <p>
+        South African law governs. Disputes go to the courts of Durban, unless your contract says
+        otherwise. Electronic records and signatures are recognised (ECTA). If a clause is invalid,
+        the rest stands. This agreement is the whole agreement — no side promises count unless
+        written.
+      </p>
+    </Shell>
   );
 }

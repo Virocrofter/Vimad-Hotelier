@@ -1133,3 +1133,35 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Legal pages prose ── */
+.mkh-legal {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.mkh-legal h2 {
+  font-size: 20px;
+  margin: 36px 0 10px;
+}
+.mkh-legal p,
+.mkh-legal li {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--mk-body);
+}
+.mkh-legal ul {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+.mkh-legal .updated {
+  font-size: 12px;
+  color: var(--mk-muted);
+  margin-top: 8px;
+}
+.mkh-legal .note {
+  border-left: 3px solid var(--mk-teal);
+  background: var(--mk-card);
+  border-radius: 0 10px 10px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+}
