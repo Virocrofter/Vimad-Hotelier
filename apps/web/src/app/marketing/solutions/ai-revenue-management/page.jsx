@@ -30,26 +30,26 @@ export default function RevenueToolsPage() {
 
   return (
     <div className="container mx-auto px-4 py-16">
-      <p className="text-sm uppercase tracking-widest text-muted-foreground">Revenue tools</p>
+      <p className="text-sm uppercase tracking-widest text-text-secondary">Revenue tools</p>
       <h1 className="mt-2 max-w-3xl text-4xl font-bold leading-tight">
         Pricing discipline, not pricing magic
       </h1>
-      <p className="mt-4 max-w-2xl text-muted-foreground">
+      <p className="mt-4 max-w-2xl text-text-secondary">
         No black box, no promised percentage lifts. Vimad ships the guardrails and rules that keep
         your pricing sane — and shows its work on every change.
       </p>
       <div className="mt-12 grid gap-6 md:grid-cols-2">
         {tools.map((t) => (
-          <div key={t.title} className="rounded-xl border bg-card p-6">
+          <div key={t.title} className="rounded-xl border border-border bg-surface p-6">
             <h2 className="text-lg font-semibold">{t.title}</h2>
-            <p className="mt-3 text-sm text-muted-foreground">{t.blurb}</p>
+            <p className="mt-3 text-sm text-text-secondary">{t.blurb}</p>
           </div>
         ))}
       </div>
       <div className="mt-12">
         <a
           href="/pricing"
-          className="inline-flex h-11 items-center rounded-lg bg-primary px-6 text-sm font-medium text-primary-foreground"
+          className="inline-flex h-11 items-center rounded-lg bg-secondary px-6 text-sm font-medium text-white"
         >
           See which tier includes what
         </a>

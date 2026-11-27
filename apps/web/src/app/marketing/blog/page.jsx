@@ -25,26 +25,26 @@ export default function BlogPage() {
 
   return (
     <div className="container mx-auto px-4 py-16">
-      <p className="text-sm uppercase tracking-widest text-muted-foreground">Resources</p>
+      <p className="text-sm uppercase tracking-widest text-text-secondary">Resources</p>
       <h1 className="mt-2 text-4xl font-bold">The Switcher&rsquo;s Library</h1>
-      <p className="mt-4 max-w-2xl text-muted-foreground">
+      <p className="mt-4 max-w-2xl text-text-secondary">
         Written from real South African cutovers, not a content mill. The first guides land with our
         founding hotels — every claim traceable to a property we can name.
       </p>
       <div className="mt-12 grid gap-6 md:grid-cols-3">
         {guides.map((g) => (
-          <div key={g.title} className="rounded-xl border bg-card p-6">
+          <div key={g.title} className="rounded-xl border border-border bg-surface p-6">
             <h2 className="text-lg font-semibold leading-snug">{g.title}</h2>
-            <p className="mt-3 text-sm text-muted-foreground">{g.blurb}</p>
-            <p className="mt-4 text-xs uppercase tracking-wider text-muted-foreground">
+            <p className="mt-3 text-sm text-text-secondary">{g.blurb}</p>
+            <p className="mt-4 text-xs uppercase tracking-wider text-text-secondary">
               Publishing with pilot data
             </p>
           </div>
         ))}
       </div>
-      <div className="mt-12 rounded-xl border bg-card p-6">
+      <div className="mt-12 rounded-xl border border-border bg-surface p-6">
         <h2 className="text-lg font-semibold">Want these in your inbox the day they drop?</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-text-secondary">
           Leave your details on the{' '}
           <a className="underline" href="/contact">
             contact page

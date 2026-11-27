@@ -19,6 +19,7 @@ import { cn } from '../../../lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { requestDemo } from '../../../api/demo-access';
+import { submitLead } from '../../../api/leads';
 
 const timeSlots = [
   '9:00 AM',
@@ -66,6 +67,7 @@ export default function DemoRequestPage() {
   const [selectedTime, setSelectedTime] = useState(null);
   const [step, setStep] = useState('pick');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [consent, setConsent] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -108,6 +110,10 @@ export default function DemoRequestPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!consent) {
+      alert('Please agree to the consent box so we can contact you about the demo.');
+      return;
+    }
     setIsSubmitting(true);
     try {
       await requestDemo({
@@ -119,6 +125,18 @@ export default function DemoRequestPage() {
         currentPms: formData.currentPMS,
         preferredSlot: `${selectedDateStr} ${selectedTime}`,
       });
+      submitLead({
+        source: 'demo',
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        propertyName: formData.hotelName,
+        roomCount: formData.roomCount ? Number(formData.roomCount) : undefined,
+        currentPms: formData.currentPMS,
+        message: `Demo request: ${selectedDateStr} ${selectedTime}`,
+        consent,
+        page: window.location.pathname,
+      }).catch(() => {});
       setStep('success');
     } catch (err) {
       alert(err?.data?.error || err.message || 'Something went wrong — please try again.');
@@ -161,7 +179,7 @@ export default function DemoRequestPage() {
               <strong className="text-text-primary">{selectedTime}</strong>.
             </p>
             <p className="mt-1 text-sm text-text-muted">
-              A confirmation email has been sent to {formData.email}. Our team will call you at{' '}
+              We will confirm your slot by email or WhatsApp shortly — our team will call you at{' '}
               {formData.phone} a few minutes before the demo.
             </p>
             <Link
@@ -277,8 +295,8 @@ export default function DemoRequestPage() {
                         2
                       </div>
                       <span>
-                        <strong className="text-text-primary">Live Q&A</strong> with a product
-                        specialist who knows hospitality operations.
+                        <strong className="text-text-primary">Live Q&A</strong> with the founder —
+                        the person who built Vimad.
                       </span>
                     </li>
                     <li className="flex gap-3">
@@ -343,7 +361,7 @@ export default function DemoRequestPage() {
                   />
                   <Input
                     label="Hotel Name"
-                    placeholder="Grand Plaza Hotel"
+                    placeholder="e.g. Ocean View Guesthouse"
                     icon={Building2}
                     required
                     value={formData.hotelName}
@@ -379,7 +397,7 @@ export default function DemoRequestPage() {
                   <Input
                     label="Phone"
                     type="tel"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+27 82 000 0000"
                     icon={Phone}
                     required
                     value={formData.phone}
@@ -395,7 +413,25 @@ export default function DemoRequestPage() {
                     onChange={(e) => handleFormChange('email', e.target.value)}
                   />
 
-                  <Button type="submit" className="w-full" isLoading={isSubmitting}>
+                  <label className="flex items-start gap-2 text-xs text-text-secondary">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={consent}
+                      onChange={(e) => setConsent(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 rounded border-border"
+                    />
+                    <span>
+                      I agree to Vimad storing these details to arrange my demo (POPIA). No
+                      marketing lists, ever.
+                    </span>
+                  </label>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    isLoading={isSubmitting}
+                    disabled={!consent}
+                  >
                     Schedule Demo
                   </Button>
                 </form>
