@@ -954,3 +954,74 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── M1 compare pages: honest matrices ── */
+.mkh-cmp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 28px;
+  background: var(--mk-card);
+  border: 1px solid var(--mk-hairline);
+  border-radius: 14px;
+  overflow: hidden;
+  display: block;
+}
+.mkh-cmp-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.mkh-cmp-table th {
+  font-family: var(--mk-font-display);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mk-espresso);
+  text-align: left;
+  padding: 14px 18px;
+  border-bottom: 2px solid var(--mk-espresso);
+  background: var(--mk-canvas);
+}
+.mkh-cmp-table td {
+  font-size: 13.5px;
+  color: var(--mk-body);
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--mk-hairline);
+  vertical-align: top;
+}
+.mkh-cmp-table tr:last-child td {
+  border-bottom: none;
+}
+.mkh-cmp-table td.cap {
+  color: var(--mk-espresso);
+  font-weight: 600;
+}
+.mkh-cmp-yes {
+  color: var(--mk-teal);
+  font-weight: 700;
+}
+.mkh-cmp-no {
+  color: var(--mk-muted);
+}
+.mkh-cmp-theirs {
+  color: var(--mk-gold);
+  font-weight: 600;
+}
+.mkh-verdict {
+  margin-top: 24px;
+  border-left: 3px solid var(--mk-ember);
+  background: var(--mk-card);
+  border-radius: 0 12px 12px 0;
+  padding: 18px 22px;
+}
+.mkh-verdict b {
+  font-family: var(--mk-font-display);
+  color: var(--mk-espresso);
+  display: block;
+  margin-bottom: 6px;
+}
+.mkh-verdict p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--mk-body);
+}

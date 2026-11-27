@@ -9,18 +9,6 @@
       "until": "Content Mass: replaced by the nine module pages",
       "rules": "all"
     },
-    "apps/web/src/app/marketing/alternatives/cloudbeds/page.jsx": {
-      "until": "Money Pages: replaced by /compare/vimad-vs-nightsbridge",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/alternatives/hilton-onq/page.jsx": {
-      "until": "Money Pages: replaced by compare set",
-      "rules": "all"
-    },
-    "apps/web/src/app/marketing/alternatives/opera-5/page.jsx": {
-      "until": "Money Pages: replaced by compare set",
-      "rules": "all"
-    },
     "apps/web/src/app/marketing/case-studies/page.jsx": {
       "until": "Field & Measure: real named pilot case studies",
       "rules": "all"

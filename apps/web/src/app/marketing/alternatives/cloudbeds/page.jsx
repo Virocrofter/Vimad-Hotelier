@@ -1,209 +1,203 @@
+/* apps/web/src/app/marketing/alternatives/{cloudbeds,hilton-onq,opera-5}/page.jsx — [M1] honest compare page.
+ * Replaces the old template alternative page. Self-published, claim-lint-gated;
+ * competitor strengths marked as theirs. Part of the Money Pages set. */
 import { Link } from 'react-router-dom';
-import {
-  ArrowRight,
-  Check,
-  X,
-  Zap,
-  Puzzle,
-  DollarSign,
-  Layers,
-  TrendingUp,
-  Users,
-  Building2,
-  Shield,
-  Headphones,
-} from 'lucide-react';
-import { cn } from '../../../../lib/utils';
-import { Button } from '../../../../components/ui/button';
 
-const painPoints = [
-  {
-    icon: Puzzle,
-    title: 'Fragmented Modules',
-    desc: 'Core features split across separate products. Pay extra for basics like a booking engine or channel manager.',
-  },
-  {
-    icon: Layers,
-    title: 'Limited Enterprise Depth',
-    desc: 'Works for small hostels, but lacks group blocks, catering, and multi-property dashboards.',
-  },
-  {
-    icon: Headphones,
-    title: 'Support Bottlenecks',
-    desc: 'Long ticket queues and generic responses when you need urgent operational help.',
-  },
-  {
-    icon: DollarSign,
-    title: 'Hidden Costs',
-    desc: 'Essential integrations, premium support, and advanced reporting all carry extra fees.',
-  },
-];
-
-const advantages = [
-  {
-    icon: Zap,
-    title: 'Truly All-in-One',
-    desc: 'One platform with 46 modules. No add-ons required for revenue management or guest portal.',
-  },
-  {
-    icon: Users,
-    title: 'White-Glove Support',
-    desc: 'Dedicated onboarding specialist and 24/7 phone support on Professional and Enterprise.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'AI Revenue Manager',
-    desc: 'LSTM demand forecasting and automated pricing that Cloudbeds cannot offer natively.',
-  },
-  {
-    icon: Shield,
-    title: 'Enterprise-Ready',
-    desc: 'Multi-property dashboards, advanced permissions, and custom integrations built-in.',
-  },
-];
-
-const comparison = [
-  { label: 'Starting Cost', cloudbeds: '$200/mo + add-ons', unified: '$199/mo all-in' },
-  { label: 'Training Time', cloudbeds: '8 hours', unified: '4 hours' },
-  { label: 'Revenue Management', cloudbeds: 'Add-on / third-party', unified: 'Built-in AI' },
-  { label: 'Multi-Property', cloudbeds: 'Limited', unified: 'Full dashboard' },
-  { label: 'Guest Portal', cloudbeds: 'Basic', unified: 'White-label + mobile app' },
-  { label: 'Group Management', cloudbeds: 'Not available', unified: 'Full blocks & BEOs' },
-  { label: 'Support', cloudbeds: 'Email + chat', unified: '24/7 phone (Enterprise)' },
-  { label: 'API Access', cloudbeds: 'Limited', unified: 'Open REST + webhooks' },
-];
-
-export default function CloudbedsAlternativePage() {
+export default function ComparePage() {
   return (
-    <div className="flex flex-col bg-background">
-      <section className="relative overflow-hidden bg-background py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-secondary mb-6">
-              <Building2 className="mr-1.5 h-3 w-3" />
-              Cloudbeds Alternative
-            </div>
-            <h1 className="text-4xl font-bold tracking-tight text-text-primary sm:text-6xl">
-              The Enterprise Alternative to <span className="text-secondary">Cloudbeds</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              Stop paying for fragmented tools. Get a unified platform with deeper operations, AI
-              revenue management, and white-glove support.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link
-                to="/app"
-                className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
-              >
-                Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-              <Link
-                to="/demo"
-                className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated"
-              >
-                Schedule a Demo
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-border bg-surface py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-text-primary">Why hotels outgrow Cloudbeds</h2>
-            <p className="mt-2 text-text-secondary">
-              The pain of pieced-together hospitality software.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {painPoints.map((p) => (
-              <div key={p.title} className="rounded-xl border border-danger/20 bg-danger/5 p-5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-danger/10">
-                  <p.icon className="h-5 w-5 text-danger" />
-                </div>
-                <h3 className="mt-3 font-semibold text-text-primary">{p.title}</h3>
-                <p className="mt-1 text-sm text-text-secondary leading-relaxed">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-background py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-text-primary">Head-to-head comparison</h2>
-            <p className="mt-2 text-text-secondary">See what you get when you upgrade.</p>
-          </div>
-          <div className="overflow-hidden rounded-xl border border-border">
-            <div className="grid grid-cols-3 bg-surface">
-              <div className="px-6 py-4 text-sm font-semibold text-text-muted">Feature</div>
-              <div className="px-6 py-4 text-sm font-semibold text-text-primary text-center">
-                Cloudbeds
-              </div>
-              <div className="px-6 py-4 text-sm font-semibold text-secondary text-center bg-secondary/5">
-                Vimad
-              </div>
-            </div>
-            {comparison.map((row, i) => (
-              <div
-                key={row.label}
-                className={cn('grid grid-cols-3', i % 2 === 0 ? 'bg-background' : 'bg-surface')}
-              >
-                <div className="px-6 py-3.5 text-sm font-medium text-text-primary">{row.label}</div>
-                <div className="px-6 py-3.5 text-center text-sm text-text-secondary">
-                  {row.cloudbeds}
-                </div>
-                <div className="px-6 py-3.5 text-center text-sm font-medium text-secondary bg-secondary/5">
-                  {row.unified}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-border bg-surface py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl font-bold text-text-primary">Built to scale with you</h2>
-            <p className="mt-2 text-text-secondary">One platform. Every stage of growth.</p>
-          </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {advantages.map((a) => (
-              <div key={a.title} className="rounded-xl border border-accent/20 bg-accent/5 p-5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10">
-                  <a.icon className="h-5 w-5 text-accent" />
-                </div>
-                <h3 className="mt-3 font-semibold text-text-primary">{a.title}</h3>
-                <p className="mt-1 text-sm text-text-secondary leading-relaxed">{a.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-background py-20">
-        <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="text-3xl font-bold text-text-primary">Ready to unify your stack?</h2>
-          <p className="mt-4 text-text-secondary">
-            Migrate your data, train your team, and go live in under two weeks.
+    <div className="mkh">
+      <section className="mkh-hero" style={{ padding: '72px 24px 48px' }}>
+        <div className="mkh-hero-inner">
+          <p className="mkh-kicker">Vimad vs the booking widget</p>
+          <h1>
+            A widget takes the booking.
+            <br />
+            <em>Then what?</em>
+          </h1>
+          <p className="mkh-hero-sub">
+            Booking widgets are good at one thing: putting a reservation form on your website. This
+            is the honest comparison of what happens after the booking is made.
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              to="/app"
-              className="inline-flex h-11 items-center justify-center rounded-md bg-secondary px-8 text-sm font-medium text-white hover:bg-secondary/90"
-            >
-              Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-            <Link
-              to="/features"
-              className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-surface px-8 text-sm font-medium text-text-primary hover:bg-surface-elevated"
-            >
-              Explore All Features
-            </Link>
-          </div>
+        </div>
+      </section>
+      <section className="mkh-section" style={{ paddingTop: 24 }}>
+        <div className="mkh-cmp-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Capability</th>
+                <th>Vimad</th>
+                <th>Booking widget</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="cap">
+                  Front desk & reservations — tape chart, walk-ins, 45-second check-in
+                </td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">Housekeeping & maintenance board (included, not an add-on)</td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">Guest profiles & stay history</td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">Payments + automatic reconciliation (your own Paystack)</td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">EFT proof-of-payment matching to the folio</td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">TOMSA 1% levy auto-calculated, remittance-ready</td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">SARS-ready accounting with Xero/Sage CSV export</td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">Conversational pre-arrival upsells</td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">
+                  Multi-property: shared guests, chain billing, central reservations
+                </td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">Live public status page</td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-no">—</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">Direct booking engine on your own website</td>
+                <td>
+                  <span className="mkh-cmp-yes">✓ Included</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-theirs">✓ Their core job</span>
+                </td>
+              </tr>
+              <tr>
+                <td className="cap">OTA channel connections</td>
+                <td>
+                  <span className="mkh-cmp-theirs">In pilot — LIVE/PILOT pills on our site</span>
+                </td>
+                <td>
+                  <span className="mkh-cmp-theirs">✓ Their other core job</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="mkh-verdict">
+          <b>The honest verdict</b>
+          <p>
+            If all you need is a booking button, keep the widget — they are good at it. But a button
+            can't clean a room, split a folio, match an EFT, or file your TOMSA. That is the other
+            90% of running a hotel, and it is the part Vimad does. Most properties end up running
+            the widget <i>plus</i> a diary <i>plus</i> spreadsheets — one system replaces all three.
+          </p>
+        </div>
+      </section>
+      <section className="mkh-section" style={{ paddingTop: 8 }}>
+        <p className="mkh-kicker">Straight answers</p>
+        <h2 className="mkh-h2">The questions owners ask</h2>
+        <div className="mkh-faq">
+          <details>
+            <summary>Can I keep my booking widget and still use Vimad?</summary>
+            <p>
+              You can keep any distribution you love. Vimad replaces what happens after the booking
+              — front desk, housekeeping, money, compliance. When you're ready, the direct engine at
+              0% commission is already inside.
+            </p>
+          </details>
+          <details>
+            <summary>Will I pay double for a booking engine?</summary>
+            <p>
+              No — the direct booking engine with Paystack deposits is included from Compass, at 0%
+              commission on your own site.
+            </p>
+          </details>
+          <details>
+            <summary>What happens to my existing bookings if I switch?</summary>
+            <p>
+              We import them (CSV), you run parallel for 30 days, and cut over on a Tuesday
+              afternoon. If it doesn't win, we move you back — free.
+            </p>
+          </details>
+          <details>
+            <summary>Is this comparison fair?</summary>
+            <p>
+              The widget's two rows are marked as theirs on purpose. We don't claim to beat a
+              booking engine at being a booking engine — we claim the widget was never meant to run
+              a hotel, and the matrix above is what 'running a hotel' actually consists of.
+            </p>
+          </details>
+        </div>
+        <div className="mkh-cta-row" style={{ marginTop: 32 }}>
+          <Link className="mkh-pill" to="/contact">
+            Get your quote
+          </Link>
+          <Link className="mkh-ghost" to="/demo">
+            Book a walk-in demo
+          </Link>
         </div>
       </section>
     </div>
