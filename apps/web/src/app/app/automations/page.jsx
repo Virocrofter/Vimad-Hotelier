@@ -55,7 +55,7 @@ export default function AutomationsPage() {
   }, []);
 
   useEffect(() => {
-    refresh();
+    Promise.resolve().then(refresh);
     const t = setInterval(refresh, 15_000);
     return () => clearInterval(t);
   }, [refresh]);

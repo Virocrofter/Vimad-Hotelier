@@ -132,7 +132,7 @@ export default function BillingPage() {
   }, [statusFilter]);
 
   useEffect(() => {
-    loadFolios();
+    Promise.resolve().then(loadFolios);
   }, [loadFolios]);
 
   const filteredFolios = useMemo(() => {

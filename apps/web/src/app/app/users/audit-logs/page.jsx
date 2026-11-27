@@ -131,7 +131,7 @@ export default function AuditLogsPage() {
   }, [page, categoryFilter, severityFilter, dateFrom, dateTo]);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const filteredEntries = useMemo(() => {

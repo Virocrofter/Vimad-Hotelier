@@ -74,7 +74,7 @@ export default function KdsPage() {
   }, []);
 
   useEffect(() => {
-    refresh();
+    Promise.resolve().then(refresh);
     const t = setInterval(refresh, 4000);
     return () => clearInterval(t);
   }, [refresh]);

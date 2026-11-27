@@ -160,7 +160,7 @@ export default function UserDetailPage() {
   }, [userId]);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const saveProfile = async () => {

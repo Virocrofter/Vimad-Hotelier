@@ -64,7 +64,7 @@ export default function GuestConciergePage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const submit = async (e) => {

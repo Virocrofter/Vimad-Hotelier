@@ -47,7 +47,7 @@ export default function FolioOverview() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const currency = stats?.property?.currency || 'ZAR';

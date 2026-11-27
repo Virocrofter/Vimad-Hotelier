@@ -259,7 +259,7 @@ export default function UsersPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const stats = useMemo(() => {

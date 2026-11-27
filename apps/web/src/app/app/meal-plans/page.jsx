@@ -564,7 +564,7 @@ function LogTab({ toast }) {
   }, [params]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/memo-dependencies
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const retry = async (id) => {
@@ -937,7 +937,7 @@ function CoversTab({ propertyId, toast }) {
   }, [propertyId, date]); // eslint-disable-line react-hooks/exhaustive-deps, react-hooks/memo-dependencies -- toast + api client are module-stable
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   return (

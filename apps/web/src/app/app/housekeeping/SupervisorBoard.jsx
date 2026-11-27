@@ -244,7 +244,7 @@ export default function SupervisorBoard({ department = 'housekeeping' }) {
   }, [department]);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
     timer.current = setInterval(load, 30000); // live SLA timers
     return () => clearInterval(timer.current);
   }, [load]);

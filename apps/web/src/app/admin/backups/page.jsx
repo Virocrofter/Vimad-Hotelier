@@ -98,7 +98,7 @@ export default function BackupsDrPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
   const activeWork =
     backups.some((b) => b.status === 'running') || restores.some((r) => r.status === 'running');

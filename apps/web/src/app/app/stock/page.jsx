@@ -49,7 +49,7 @@ export default function StockPage() {
   }, [property?.id]);
 
   useEffect(() => {
-    refresh();
+    Promise.resolve().then(refresh);
   }, [refresh]);
 
   const act = async (fn, ok) => {

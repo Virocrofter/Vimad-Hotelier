@@ -629,7 +629,7 @@ export default function RolesPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const filteredRoles = useMemo(

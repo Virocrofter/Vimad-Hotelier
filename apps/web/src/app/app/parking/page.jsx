@@ -124,7 +124,7 @@ export default function ParkingBoardPage() {
   }, [date]);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
   // light polling — the gate view stays fresh
   useEffect(() => {

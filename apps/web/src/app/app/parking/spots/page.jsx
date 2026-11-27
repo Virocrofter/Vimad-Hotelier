@@ -336,7 +336,7 @@ export default function ParkingSpotsPage() {
   }, [date]);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load, propertyId]);
 
   const act = async (id, fn, okMsg) => {

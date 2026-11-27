@@ -47,7 +47,7 @@ export default function AnnouncementsPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const filtered = useMemo(() => {

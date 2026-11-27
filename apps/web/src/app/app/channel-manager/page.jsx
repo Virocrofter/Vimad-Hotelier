@@ -73,7 +73,7 @@ export default function ChannelManagerPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const run = async (key, fn, successText) => {

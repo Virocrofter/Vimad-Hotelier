@@ -66,7 +66,7 @@ export default function ConciergePage() {
   }, [date]);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const patch = async (id, body) => {

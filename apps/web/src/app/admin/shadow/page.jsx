@@ -76,7 +76,7 @@ export default function ShadowPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const kpis = useMemo(

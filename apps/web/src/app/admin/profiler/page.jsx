@@ -48,7 +48,7 @@ function useData(fn, msPoll = 15000) {
     }
   }, [fn]);
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
     const t = setInterval(load, msPoll);
     return () => clearInterval(t);
   }, [load, msPoll]);

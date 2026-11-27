@@ -23,7 +23,7 @@ export default function ParkingValetPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
   useEffect(() => {
     const t = setInterval(() => load(), 30000);

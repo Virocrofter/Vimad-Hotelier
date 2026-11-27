@@ -90,7 +90,7 @@ export default function DemoAccessPage() {
   }, [tab, search, toast]);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   useEffect(() => {

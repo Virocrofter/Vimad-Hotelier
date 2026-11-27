@@ -29,7 +29,7 @@ export default function FeatureFlagsPage() {
     }
   };
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, []);
 
   const filtered = flags.filter(

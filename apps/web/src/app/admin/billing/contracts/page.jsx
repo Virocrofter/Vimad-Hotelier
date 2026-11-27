@@ -88,7 +88,7 @@ export default function ContractsPage() {
   }, [tab, debouncedQ]);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const openDetail = async (c) => {

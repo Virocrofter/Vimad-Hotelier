@@ -47,7 +47,7 @@ export default function VouchersPage() {
   }, []);
 
   useEffect(() => {
-    refresh();
+    Promise.resolve().then(refresh);
   }, [refresh]);
 
   const act = async (fn, okMsg) => {

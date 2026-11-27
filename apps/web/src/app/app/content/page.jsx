@@ -34,7 +34,7 @@ export default function ContentPage() {
   }, [property?.id]);
 
   useEffect(() => {
-    refresh();
+    Promise.resolve().then(refresh);
   }, [refresh]);
 
   const patch = async (path, id, body, okMsg) => {

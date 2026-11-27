@@ -53,7 +53,7 @@ export default function DunningPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const withDays = useMemo(

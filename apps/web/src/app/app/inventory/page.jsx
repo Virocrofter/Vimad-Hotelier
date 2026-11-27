@@ -129,7 +129,7 @@ export default function InventoryPage() {
       .catch(() => {});
   }, []);
 
-  useEffect(loadGrid, [loadGrid]);
+  useEffect(() => Promise.resolve().then(loadGrid), [loadGrid]);
   useEffect(() => {
     if (tab === 'allocations') loadHolds();
     if (tab === 'overbook') loadOverbook();

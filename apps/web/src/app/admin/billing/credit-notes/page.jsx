@@ -40,7 +40,7 @@ export default function CreditNotesPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const creditNotes = useMemo(

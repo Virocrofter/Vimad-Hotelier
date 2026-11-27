@@ -24,7 +24,7 @@ export default function EvChargingPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
   useEffect(() => {
     const t = setInterval(() => load(), 30000);

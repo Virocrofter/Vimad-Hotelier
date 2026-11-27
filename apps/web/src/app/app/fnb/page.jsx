@@ -37,7 +37,7 @@ export default function FnbStaffPage() {
   }, [property?.id]);
 
   useEffect(() => {
-    refresh();
+    Promise.resolve().then(refresh);
     const t = setInterval(refresh, 10_000);
     return () => clearInterval(t);
   }, [refresh]);

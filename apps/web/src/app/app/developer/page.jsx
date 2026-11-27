@@ -56,7 +56,7 @@ export default function DeveloperWebhooksPage() {
   }, []);
 
   useEffect(() => {
-    loadEndpoints();
+    Promise.resolve().then(loadEndpoints);
   }, [loadEndpoints]);
 
   useEffect(() => {

@@ -39,7 +39,7 @@ export default function SplitBillPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const addBill = async () => {

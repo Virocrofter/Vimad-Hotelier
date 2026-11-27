@@ -41,7 +41,7 @@ export default function ParkingVehiclesPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const filtered = useMemo(

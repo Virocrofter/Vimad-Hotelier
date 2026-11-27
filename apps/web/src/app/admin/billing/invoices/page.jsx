@@ -71,7 +71,7 @@ export default function InvoicesPage() {
   }, [tab, debouncedQ]);
 
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
   }, [load]);
 
   const openDetail = async (inv) => {
