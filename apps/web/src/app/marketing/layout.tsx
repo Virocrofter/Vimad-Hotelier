@@ -23,12 +23,12 @@ const PLATFORM_GROUPS: { label: string; desc: string; items: DropItem[] }[] = [
     desc: 'Everything the front desk and the floor need, on one spine.',
     items: [
       {
-        to: '/features',
+        to: '/platform/front-desk',
         label: 'Front Desk & Reservations',
         desc: 'Tape chart, walk-ins, check-in under 45 seconds',
       },
       {
-        to: '/features',
+        to: '/platform/housekeeping',
         label: 'Housekeeping & Maintenance',
         desc: 'Three-tap multilingual board — included, not an add-on',
       },
@@ -39,12 +39,12 @@ const PLATFORM_GROUPS: { label: string; desc: string; items: DropItem[] }[] = [
     desc: 'Payments, folios and books that reconcile themselves.',
     items: [
       {
-        to: '/features',
+        to: '/platform/payments',
         label: 'Payments',
         desc: 'Paystack, EFT proof-of-payment matching, TOMSA levy',
       },
       {
-        to: '/features',
+        to: '/platform/accounting',
         label: 'Accounting & SARS',
         desc: 'Continuous tie-out, Xero/Sage CSV, no night-audit freeze',
       },
@@ -55,12 +55,12 @@ const PLATFORM_GROUPS: { label: string; desc: string; items: DropItem[] }[] = [
     desc: 'Direct revenue and stays that sell themselves.',
     items: [
       {
-        to: '/features',
+        to: '/platform/direct-booking',
         label: 'Direct Booking & Distribution',
         desc: '0% commission widget, channel sync where it counts',
       },
       {
-        to: '/features',
+        to: '/platform/guest-portal',
         label: 'Guest Portal & Upsells',
         desc: 'Pre-arrival offers — verified R145 to R495 per stay',
       },
@@ -142,7 +142,7 @@ export default function MarketingLayout() {
                 <div className="mkh-drop-panel-inner" style={{ width: 'auto', display: 'block' }}>
                   <div className="mkh-drop-mega">
                     <div className="mkh-drop-rail">
-                      <Link to="/features" className="mkh-railcard mkh-railcard-dark">
+                      <Link to="/platform" className="mkh-railcard mkh-railcard-dark">
                         <div className="mkh-minicrop" aria-hidden="true">
                           <div className="ln">
                             <span>NEEDS ATTENTION</span>
@@ -305,11 +305,11 @@ export default function MarketingLayout() {
           </div>
           <div>
             <h4>Platform</h4>
-            <Link to="/features">Front Desk</Link>
-            <Link to="/features">Housekeeping</Link>
-            <Link to="/features">Payments</Link>
-            <Link to="/features">Accounting & SARS</Link>
-            <Link to="/features">Guest Portal</Link>
+            <Link to="/platform/front-desk">Front Desk</Link>
+            <Link to="/platform/housekeeping">Housekeeping</Link>
+            <Link to="/platform/payments">Payments</Link>
+            <Link to="/platform/accounting">Accounting & SARS</Link>
+            <Link to="/platform/guest-portal">Guest Portal</Link>
           </div>
           <div>
             <h4>Solutions</h4>
@@ -317,6 +317,7 @@ export default function MarketingLayout() {
             <Link to="/solutions/hotel-chains">Multi-Property</Link>
             <Link to="/solutions/contactless-checkin">Guesthouses & B&Bs</Link>
             <Link to="/demo">Venues & Events</Link>
+            <Link to="/south-africa">Built for South Africa</Link>
           </div>
           <div>
             <h4>Compare & switch</h4>
