@@ -9,7 +9,7 @@ const fmt = (n) =>
   `R ${Number(n).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const time = (d) => new Date(d).toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' });
 
-function Column({ title, icon, list, accent, actions }) {
+function Column({ title, icon, list, accent, actions, onAdvance }) {
   return (
     <section className="flex-1 rounded-2xl border border-border bg-surface p-3">
       <h2
@@ -44,7 +44,7 @@ function Column({ title, icon, list, accent, actions }) {
               {actions(o).map((a) => (
                 <button
                   key={a.label}
-                  onClick={() => advance(o, a.status)}
+                  onClick={() => onAdvance(o, a.status)}
                   className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold ${a.className}`}
                 >
                   {a.label}
@@ -133,6 +133,7 @@ export default function KdsPage() {
 
       <div className="flex flex-col gap-4 lg:flex-row">
         <Column
+          onAdvance={advance}
           title="New"
           icon={<ReceiptText className="h-4 w-4" />}
           accent="text-blue-600"
@@ -146,6 +147,7 @@ export default function KdsPage() {
           ]}
         />
         <Column
+          onAdvance={advance}
           title="Preparing"
           icon={<ChefHat className="h-4 w-4" />}
           accent="text-purple-600"
@@ -160,6 +162,7 @@ export default function KdsPage() {
           ]}
         />
         <Column
+          onAdvance={advance}
           title="Served"
           icon={<CheckCheck className="h-4 w-4" />}
           accent="text-emerald-600"
