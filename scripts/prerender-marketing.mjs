@@ -34,6 +34,9 @@ const ROUTES = [
   '/blog',
   '/contact',
   '/demo',
+  '/get-quote',
+  '/switch',
+  '/alternatives',
   '/about',
   '/partners',
   '/integrations',
@@ -49,10 +52,16 @@ const ROUTES = [
 ];
 
 const MIME = {
-  '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
-  '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon', '.json': 'application/json',
-  '.webmanifest': 'application/manifest+json', '.woff2': 'font/woff2',
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.json': 'application/json',
+  '.webmanifest': 'application/manifest+json',
+  '.woff2': 'font/woff2',
 };
 
 const indexFor = (route) =>
@@ -65,9 +74,8 @@ const server = createServer((req, res) => {
     file = indexFor(urlPath);
   } else {
     const candidate = join(DIST, urlPath);
-    file = existsSync(candidate) && statSync(candidate).isFile()
-      ? candidate
-      : join(DIST, 'index.html');
+    file =
+      existsSync(candidate) && statSync(candidate).isFile() ? candidate : join(DIST, 'index.html');
   }
   try {
     const body = readFileSync(file);
@@ -109,9 +117,9 @@ for (const route of ROUTES) {
   }
 }
 
-const urls = ROUTES
-  .map((r) => `  <url><loc>${BASE}${r === '/' ? '/' : r + '/'}</loc><lastmod>${today}</lastmod></url>`)
-  .join('\n');
+const urls = ROUTES.map(
+  (r) => `  <url><loc>${BASE}${r === '/' ? '/' : r + '/'}</loc><lastmod>${today}</lastmod></url>`
+).join('\n');
 writeFileSync(
   join(DIST, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`

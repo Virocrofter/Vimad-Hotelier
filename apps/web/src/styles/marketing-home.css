@@ -1025,3 +1025,68 @@
   line-height: 1.6;
   color: var(--mk-body);
 }
+
+/* ── M2 quote-flow form ── */
+.mkh-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.mkh-form-grid .full {
+  grid-column: 1 / -1;
+}
+.mkh-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mk-muted);
+  margin-bottom: 6px;
+}
+.mkh-input,
+.mkh-select,
+.mkh-textarea {
+  width: 100%;
+  background: var(--mk-card);
+  border: 1px solid var(--mk-hairline);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: var(--mk-font-body);
+  color: var(--mk-espresso);
+}
+.mkh-input:focus,
+.mkh-select:focus,
+.mkh-textarea:focus {
+  outline: 2px solid var(--mk-teal);
+  outline-offset: -1px;
+  border-color: var(--mk-teal);
+}
+.mkh-textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+.mkh-form-note {
+  font-size: 12px;
+  color: var(--mk-muted);
+  line-height: 1.5;
+}
+.mkh-check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 12.5px;
+  color: var(--mk-body);
+}
+.mkh-check input {
+  margin-top: 3px;
+  width: 15px;
+  height: 15px;
+  accent-color: var(--mk-ember);
+}
+@media (max-width: 700px) {
+  .mkh-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

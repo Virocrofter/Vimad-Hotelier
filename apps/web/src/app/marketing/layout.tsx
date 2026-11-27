@@ -320,9 +320,9 @@ export default function MarketingLayout() {
           </div>
           <div>
             <h4>Compare & switch</h4>
-            <Link to="/alternatives">vs the booking widget</Link>
-            <Link to="/alternatives">vs the spreadsheet</Link>
-            <Link to="/alternatives">vs the legacy stack</Link>
+            <Link to="/alternative/cloudbeds">vs the booking widget</Link>
+            <Link to="/alternative/hilton-onq">vs the spreadsheet</Link>
+            <Link to="/alternative/opera-5">vs the legacy stack</Link>
             <Link to="/pricing">Pricing</Link>
             <Link to="/demo">Book a walk-in demo</Link>
           </div>
