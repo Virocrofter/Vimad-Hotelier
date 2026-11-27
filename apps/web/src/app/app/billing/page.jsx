@@ -153,6 +153,7 @@ export default function BillingPage() {
 
   useEffect(() => {
     if (!activeFolio) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear view when the active folio goes away
       setFolio(null);
       setItems([]);
       return;

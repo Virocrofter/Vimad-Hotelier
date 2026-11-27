@@ -166,7 +166,7 @@ export default function OnlineCheckinPage() {
     });
 
   useEffect(() => {
-    if (step === 5) refresh();
+    if (step === 5) Promise.resolve().then(refresh);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- step-gated single-fire; refresh identity is per-render
   }, [step]);
 

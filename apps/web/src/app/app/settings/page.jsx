@@ -312,7 +312,7 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
-    load(1);
+    Promise.resolve().then(() => load(1));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const copyLogs = async () => {

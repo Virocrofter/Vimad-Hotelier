@@ -24,6 +24,7 @@ export default function FeatureFlagModal({ flag, onClose, onSaved }) {
 
   useEffect(() => {
     if (flag) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset-on-prop/open is intentional (modal/form re-init)
       setF({
         key: flag.key,
         description: flag.description || '',

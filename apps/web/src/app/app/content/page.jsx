@@ -128,6 +128,7 @@ function ContentCard({ title, imageKey, description, extra, onSave }) {
   const [busy, setBusy] = useState(false);
   const fileRef = useRef(null);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- edit-field re-init when the record changes
   useEffect(() => setDesc(description ?? ''), [description]);
 
   const upload = async (file) => {

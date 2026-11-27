@@ -61,7 +61,7 @@ export default function DeveloperWebhooksPage() {
 
   useEffect(() => {
     if (pollRef.current) clearInterval(pollRef.current);
-    loadDeliveries(selected);
+    Promise.resolve().then(() => loadDeliveries(selected));
     if (selected) {
       pollRef.current = setInterval(() => loadDeliveries(selected), 5000);
     }

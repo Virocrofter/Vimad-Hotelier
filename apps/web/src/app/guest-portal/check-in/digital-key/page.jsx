@@ -44,7 +44,7 @@ export default function DigitalKeyPage() {
       navigate('/guest-portal/auth/login', { replace: true });
       return;
     }
-    load();
+    Promise.resolve().then(load);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasToken]);
 

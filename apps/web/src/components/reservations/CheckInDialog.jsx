@@ -48,7 +48,7 @@ export default function CheckInDialog({ reservationId, room, onClose, onCheckedI
   };
 
   useEffect(() => {
-    attempt(false);
+    Promise.resolve().then(() => attempt(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

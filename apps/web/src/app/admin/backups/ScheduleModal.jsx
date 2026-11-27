@@ -11,6 +11,7 @@ export default function ScheduleModal({ open, onClose, onSubmit, busy, editing }
   const [isActive, setIsActive] = useState(true);
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset-on-prop/open is intentional (modal/form re-init)
       setName(editing?.name ?? '');
       setType(editing?.type ?? 'full');
       setCron(editing?.cron ?? '0 2 * * *');

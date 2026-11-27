@@ -303,7 +303,7 @@ export function FlagDrawer({ flagId, flags, onClose, onChanged, onAsk }) {
     }
   };
   useEffect(() => {
-    load();
+    Promise.resolve().then(load);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load is re-created per render; flagId is the real trigger
   }, [flagId]);
 

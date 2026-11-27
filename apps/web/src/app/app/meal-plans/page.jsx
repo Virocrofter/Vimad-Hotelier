@@ -1065,7 +1065,7 @@ export default function MealPlansPage() {
   }, [propertyId]);
 
   useEffect(() => {
-    loadRestaurants();
+    Promise.resolve().then(loadRestaurants);
   }, [loadRestaurants, restaurantTick]);
 
   const refreshAll = useCallback(() => {

@@ -857,6 +857,7 @@ function AllocationsTab({ holds, holdFilter, setHoldFilter, onRelease }) {
 
 function OverbookRow({ row, physical, onSave }) {
   const [value, setValue] = useState(row.limit);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- editor re-init when the row changes
   useEffect(() => setValue(row.limit), [row.limit]);
   return (
     <tr className="border-b last:border-0">
@@ -894,6 +895,7 @@ function CellModal({ roomType, cell, onClose, onSave }) {
   const [adjustment, setAdjustment] = useState(cell.adjustment);
   const [notes, setNotes] = useState(cell.notes ?? '');
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- cell editor re-init when the cell changes
     setAdjustment(cell.adjustment);
     setNotes(cell.notes ?? '');
   }, [cell]);
