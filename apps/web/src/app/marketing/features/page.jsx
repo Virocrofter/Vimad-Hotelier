@@ -209,7 +209,7 @@ const categories = [
   },
 ];
 
-const competitors = ['Oracle OPERA 5', 'Hilton OnQ', 'Cloudbeds', 'Unified PMS'];
+const competitors = ['Oracle OPERA 5', 'Hilton OnQ', 'Cloudbeds', 'Vimad'];
 
 const comparisonRows = [
   { feature: 'Cloud-Native SaaS', opera: false, onq: false, cloudbeds: true, unified: true },
@@ -280,8 +280,8 @@ export default function FeaturesPage() {
               Everything you need to <span className="text-secondary">run a modern hotel</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              From reservations to revenue management, Unified PMS replaces your entire tech stack
-              with one intelligent platform.
+              From reservations to revenue management, Vimad replaces your entire tech stack with
+              one intelligent platform.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -362,7 +362,7 @@ export default function FeaturesPage() {
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold text-text-primary">How we compare</h2>
             <p className="mt-2 text-text-secondary">
-              See why hotels are switching from legacy systems to Unified PMS.
+              See why hotels are switching from legacy systems to Vimad.
             </p>
           </div>
 
@@ -376,7 +376,7 @@ export default function FeaturesPage() {
                       key={c}
                       className={cn(
                         'px-6 py-4 text-center font-semibold',
-                        c === 'Unified PMS' ? 'text-secondary' : 'text-text-primary'
+                        c === 'Vimad' ? 'text-secondary' : 'text-text-primary'
                       )}
                     >
                       {c}

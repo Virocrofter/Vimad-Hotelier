@@ -78,7 +78,7 @@ export default function SecurityOverviewPage() {
             <Shield className="h-8 w-8 text-secondary" />
           </div>
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
-            Security at Unified PMS
+            Security at Vimad
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
             Trust is the foundation of hospitality technology. We protect your property and guest
@@ -148,8 +148,8 @@ export default function SecurityOverviewPage() {
           <p className="mt-2 text-text-secondary">
             We operate a responsible disclosure program. If you discover a vulnerability, please
             report it to{' '}
-            <a href="mailto:security@unifiedpms.com" className="text-secondary hover:underline">
-              security@unifiedpms.com
+            <a href="mailto:security@efeohise@gmail.com" className="text-secondary hover:underline">
+              security@efeohise@gmail.com
             </a>
             . We commit to acknowledging reports within 24 hours and resolving critical issues
             within 72 hours.

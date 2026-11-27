@@ -15,13 +15,13 @@ const partnerTypes = [
   {
     icon: Code,
     title: 'Technology Partners',
-    desc: 'Integrate your app with Unified PMS. Get listed in our marketplace and reach 200+ hotels.',
+    desc: 'Integrate your app with Vimad. Get listed in our marketplace and reach 200+ hotels.',
     benefits: ['Open REST API', 'Sandbox environment', 'Co-marketing', 'Technical support'],
   },
   {
     icon: Building2,
     title: 'Reseller Partners',
-    desc: 'Sell Unified PMS to your hospitality clients. Earn recurring commissions on every deal.',
+    desc: 'Sell Vimad to your hospitality clients. Earn recurring commissions on every deal.',
     benefits: [
       '20% recurring commission',
       'Sales enablement kit',
@@ -32,7 +32,7 @@ const partnerTypes = [
   {
     icon: TrendingUp,
     title: 'Referral Partners',
-    desc: 'Refer properties to Unified PMS and earn rewards for every successful signup.',
+    desc: 'Refer properties to Vimad and earn rewards for every successful signup.',
     benefits: [
       '1 free month per referral',
       'No commitment',
@@ -64,7 +64,7 @@ export default function PartnersPage() {
             <Handshake className="h-6 w-6 text-secondary" />
           </div>
           <h1 className="mt-4 text-4xl font-bold text-text-primary sm:text-5xl">
-            Partner with <span className="text-secondary">Unified PMS</span>
+            Partner with <span className="text-secondary">Vimad</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
             Join our ecosystem of technology providers, resellers, and hospitality consultants.

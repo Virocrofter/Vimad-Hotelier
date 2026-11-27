@@ -145,7 +145,7 @@ export default function DemoRequestPage() {
           </div>
           <h1 className="mt-4 text-3xl font-bold text-text-primary">Request a Personalized Demo</h1>
           <p className="mt-2 text-text-secondary">
-            See how Unified PMS works for your property in a 30-minute walkthrough.
+            See how Vimad works for your property in a 30-minute walkthrough.
           </p>
         </div>
 
@@ -303,7 +303,7 @@ export default function DemoRequestPage() {
                   <div className="rounded-lg border border-accent/20 bg-accent/5 p-3">
                     <p className="text-xs text-accent font-medium flex items-center gap-1.5">
                       <HelpCircle className="h-3.5 w-3.5" />
-                      Prefer to talk now? Call us at +1-800-555-1234
+                      Prefer to talk now? Call us at +27 65 074 8802
                     </p>
                   </div>
                   <Button

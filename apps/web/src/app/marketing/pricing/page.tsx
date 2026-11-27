@@ -13,142 +13,133 @@ import {
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 
+/* [CLAIM-PURGE] Phase 0+ — full honest rewrite of the pricing page.
+ * Doctrine (addendum §1): NO public prices, no free tier, founder-quoted contracts.
+ * Tier cards publish the FULL contents; price by quote only. */
+
 const tiers = [
   {
     name: 'Compass',
     icon: Hotel,
-    monthlyPrice: 199,
-    annualPrice: 165,
-    roomLimit: 'Up to 75 rooms',
-    description: 'Independent hotels, B&Bs',
+    forWho: 'Guesthouses & B&Bs · 6–20 rooms',
+    description: 'Direction for small properties',
     features: [
-      'Core PMS',
-      'Reservations & Front Desk',
-      'Basic Housekeeping',
-      'Billing & Folios',
-      'Basic Reporting',
+      'Core PMS — tape chart & front desk',
+      '3-tap multilingual housekeeping board',
+      'Direct booking engine (0% commission)',
+      'Paystack payments + EFT proof-of-payment matching',
+      'TOMSA 1% levy auto-calculated',
+      'SARS-ready accounting + Xero/Sage CSV export',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Get your quote',
     popular: false,
     included: [
       'Unlimited users',
-      'Email support',
-      'Standard onboarding',
-      'API access (read-only)',
-      'Mobile app access',
+      'Founder support — phone & WhatsApp',
+      'Guided onboarding',
+      'Load-shedding shift pack',
+      'Public live status page',
     ],
   },
   {
     name: 'Command',
     icon: Building2,
-    monthlyPrice: 499,
-    annualPrice: 414,
-    roomLimit: 'Up to 200 rooms',
-    description: 'Boutique hotels',
+    forWho: 'Boutique hotels · 20–80 rooms',
+    description: 'The full operating system',
     features: [
       'Everything in Compass',
-      'Booking Engine',
-      'Channel Manager',
-      'CRM & Loyalty',
-      'Marketing Automation',
-      'Guest Portal',
+      'Channel manager + booking engine sync',
+      'Rate guardrails & seasonal rules',
+      'Folio splitting + City Ledger (corporate AR)',
+      'Guest portal with pre-arrival upsells',
+      'Conversational upsell loop (verified R145→R495)',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Get your quote',
     popular: true,
     included: [
       'Everything in Compass',
-      'Priority email + chat support',
-      'Dedicated onboarding specialist',
+      'Priority phone + WhatsApp support',
       'Full API access',
+      'Offline-tolerant front desk',
       'Custom reports',
-      'Revenue management basics',
     ],
   },
   {
     name: 'Constellation',
     icon: Crown,
-    monthlyPrice: 999,
-    annualPrice: 829,
-    roomLimit: 'Unlimited rooms',
-    description: 'Hotel chains & resorts',
+    forWho: 'Large properties · 80+ rooms',
+    description: 'Deep ops + intelligence',
     features: [
       'Everything in Command',
-      'Multi-Property Dashboard',
-      'AI Revenue Manager',
-      'Sales & Catering',
-      'Advanced Analytics',
-      'Priority Support',
+      'Needs Attention exception queue',
+      'BI roll-ups & advanced analytics',
+      'Advanced automations',
+      'Sales & catering',
+      '3-click rate overrides, fully audited',
     ],
-    cta: 'Contact Sales',
+    cta: 'Get your quote',
     popular: false,
     included: [
       'Everything in Command',
       '24/7 phone support',
-      'Dedicated account manager',
-      'Custom integrations',
-      'SLA guarantee',
       'Advanced user permissions',
       'On-site training available',
+      'Dedicated account manager',
     ],
   },
   {
-    name: 'White-Label',
+    name: 'Armada',
     icon: Globe,
-    monthlyPrice: 2499,
-    annualPrice: 2074,
-    roomLimit: '50+ properties',
-    description: 'Branded guest experience',
+    forWho: 'Groups · 2+ properties',
+    description: 'Fleet control',
     features: [
       'Everything in Constellation',
-      'Custom Branding',
-      'Dedicated Infrastructure',
-      'API Access',
-      'SLA Guarantee',
-      'Account Manager',
+      'Multi-property switcher & rollups',
+      'Shared guest profiles & contracts',
+      'Central reservations',
+      'Cross-property booking',
+      'Chain billing & loyalty',
     ],
-    cta: 'Contact Sales',
+    cta: 'Get your quote',
     popular: false,
     accentColor: 'border-accent',
     included: [
       'Everything in Constellation',
-      'White-glove setup',
-      'Custom domain & SSL',
-      'Dedicated success team',
-      'Quarterly business reviews',
-      'Co-marketing opportunities',
+      'Chain onboarding playbook',
+      'Per-group contract pricing',
+      'Dedicated success check-ins',
     ],
   },
 ];
 
 const faqs = [
   {
-    q: 'Can I change plans later?',
-    a: 'Absolutely. Upgrade or downgrade anytime. Prorated charges are calculated automatically.',
+    q: 'How is pricing worked out?',
+    a: 'Every contract is quoted for your property: room count, the tiers you need, the add-ons you want. Founding hotels lock founder pricing for the life of the contract.',
   },
   {
     q: 'What payment methods do you accept?',
-    a: 'All major credit cards, ACH bank transfer, and wire for annual Constellation plans.',
+    a: "Cards via Paystack, EFT with proof-of-payment matching, and instant EFT. Processing fees are Paystack's own and always shown separately.",
   },
   {
-    q: 'Is there a discount for annual billing?',
-    a: "Yes. Annual plans include 2 months free — that's a 17% discount compared to monthly.",
+    q: 'Is there a trial period?',
+    a: "No free tier. We run a guided demo on your own numbers, then a paid founding plan. If Vimad doesn't earn its keep in the first 30 days, we move you back — free.",
+  },
+  {
+    q: 'Can I change tiers later?',
+    a: 'Yes — and because contracts are line-item based, add-ons move freely as you grow. Upgrade or downgrade at renewal.',
   },
   {
     q: 'Do you offer refunds?',
-    a: 'We offer a 30-day money-back guarantee on all plans. No questions asked.',
-  },
-  {
-    q: 'What happens after the 60-day trial?',
-    a: 'Choose a plan and add your billing details, or export your data and walk away. No automatic charges.',
+    a: 'A 30-day money-back guarantee on every plan. No questions asked.',
   },
   {
     q: 'Is there a limit on reservations or users?',
-    a: 'No. All plans include unlimited reservations and user accounts. Pricing is based on room count only.',
+    a: 'No. Unlimited reservations and user accounts on every tier.',
   },
 ];
 
 export default function PricingPage() {
-  const [isAnnual, setIsAnnual] = useState(true);
   const [expandedTier, setExpandedTier] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -159,39 +150,15 @@ export default function PricingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-text-primary sm:text-5xl">
-              Simple, transparent pricing
+              Founder-quoted, not list-priced
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-              No setup fees. No contracts. Cancel anytime.
+              No two hotels run the same. Every contract is priced for your property — here is
+              exactly what each tier includes.
             </p>
-
-            <div className="mt-8 inline-flex items-center rounded-full border border-border bg-surface p-1">
-              <button
-                onClick={() => setIsAnnual(false)}
-                className={cn(
-                  'rounded-full px-5 py-2 text-sm font-medium transition-colors',
-                  !isAnnual
-                    ? 'bg-secondary text-white'
-                    : 'text-text-secondary hover:text-text-primary'
-                )}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setIsAnnual(true)}
-                className={cn(
-                  'rounded-full px-5 py-2 text-sm font-medium transition-colors',
-                  isAnnual
-                    ? 'bg-secondary text-white'
-                    : 'text-text-secondary hover:text-text-primary'
-                )}
-              >
-                Annual <span className="ml-1 text-xs opacity-90">Save 17%</span>
-              </button>
-            </div>
           </div>
 
-          {/* Pricing Cards */}
+          {/* Tier Cards — full contents, quoted per property */}
           <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {tiers.map((tier) => (
               <div
@@ -210,9 +177,9 @@ export default function PricingPage() {
                     Most Popular
                   </div>
                 )}
-                {tier.name === 'White-Label' && !tier.popular && (
+                {tier.name === 'Armada' && !tier.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground">
-                    Premium
+                    Groups
                   </div>
                 )}
 
@@ -232,27 +199,10 @@ export default function PricingPage() {
                 </div>
 
                 <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-text-primary">
-                      ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
-                    </span>
-                    <span className="text-sm text-text-muted">/mo</span>
-                  </div>
-                  {isAnnual ? (
-                    <div className="mt-1 space-y-0.5">
-                      <p className="text-xs text-text-muted">
-                        Billed annually (${tier.monthlyPrice * 12}/yr)
-                      </p>
-                      <p className="text-xs text-accent font-medium">
-                        You save ${(tier.monthlyPrice - tier.annualPrice) * 12}/year
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="mt-1 text-xs text-text-muted">
-                      ${tier.annualPrice}/mo when billed annually
-                    </p>
-                  )}
-                  <p className="mt-2 text-xs font-medium text-text-secondary">{tier.roomLimit}</p>
+                  <p className="text-sm font-medium text-text-secondary">{tier.forWho}</p>
+                  <p className="mt-2 inline-block rounded-full border border-border bg-surface-elevated px-3 py-1 text-xs font-semibold text-text-primary">
+                    Quoted per property
+                  </p>
                 </div>
 
                 <ul className="mt-6 flex-1 space-y-3">
@@ -267,18 +217,19 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <button
+                <Link
+                  to="/contact"
                   className={cn(
-                    'mt-8 w-full rounded-md py-2.5 text-sm font-medium transition-colors',
+                    'mt-8 flex w-full items-center justify-center rounded-md py-2.5 text-sm font-medium transition-colors',
                     tier.popular
                       ? 'bg-secondary text-white hover:bg-secondary/90'
-                      : tier.name === 'White-Label'
+                      : tier.name === 'Armada'
                         ? 'border border-accent bg-accent/5 text-[var(--accent-soft-fg)] hover:bg-accent/10'
                         : 'border border-border bg-background text-text-primary hover:bg-surface-elevated'
                   )}
                 >
                   {tier.cta}
-                </button>
+                </Link>
 
                 {/* Expandable What's Included */}
                 <div className="mt-4 border-t border-border pt-4">
@@ -287,7 +238,7 @@ export default function PricingPage() {
                     className="flex w-full items-center justify-between text-xs font-medium text-text-secondary hover:text-text-primary transition-colors"
                   >
                     <span className="flex items-center gap-1.5">
-                      <HelpCircle className="h-3.5 w-3.5" /> What's included
+                      <HelpCircle className="h-3.5 w-3.5" /> Full contents
                     </span>
                     {expandedTier === tier.name ? (
                       <ChevronUp className="h-3.5 w-3.5" />
@@ -313,17 +264,21 @@ export default function PricingPage() {
             ))}
           </div>
 
-          {/* Constellation CTA Banner */}
+          {/* Armada banner */}
           <div className="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
             <h3 className="text-lg font-semibold text-text-primary">
-              Need a custom plan for 500+ rooms or multiple brands?
+              Running multiple properties — or one big one with venue space?
             </h3>
             <p className="mt-2 text-sm text-text-secondary">
-              Our solutions team will design a package tailored to your portfolio.
+              Tell us the room count and setup; you will have a founder-priced quote within 24
+              hours.
             </p>
-            <button className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-secondary px-6 text-sm font-medium text-white hover:bg-secondary/90 transition-colors">
-              Talk to Sales <ArrowRight className="ml-2 h-4 w-4" />
-            </button>
+            <Link
+              to="/contact"
+              className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-secondary px-6 text-sm font-medium text-white hover:bg-secondary/90 transition-colors"
+            >
+              Get your quote <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </div>
         </div>
       </div>
@@ -333,7 +288,9 @@ export default function PricingPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-text-primary">Pricing FAQ</h2>
-            <p className="mt-4 text-text-secondary">Got questions? We've got answers.</p>
+            <p className="mt-4 text-text-secondary">
+              Got questions? We answer the phone ourselves.
+            </p>
           </div>
 
           <div className="space-y-3">
@@ -365,8 +322,8 @@ export default function PricingPage() {
           <div className="mt-12 text-center">
             <p className="text-sm text-text-muted">
               Still have questions?{' '}
-              <Link to="/" className="text-secondary hover:underline font-medium">
-                Chat with our team
+              <Link to="/contact" className="text-secondary hover:underline font-medium">
+                Talk to the founder
               </Link>
             </p>
           </div>

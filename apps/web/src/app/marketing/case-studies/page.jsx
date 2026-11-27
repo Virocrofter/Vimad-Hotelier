@@ -73,8 +73,8 @@ export default function CaseStudiesPage() {
             Trusted by hoteliers <span className="text-secondary">worldwide</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-            Real results from real properties. See how Unified PMS transforms operations, revenue,
-            and guest experience.
+            Real results from real properties. See how Vimad transforms operations, revenue, and
+            guest experience.
           </p>
         </div>
       </section>
@@ -145,7 +145,7 @@ export default function CaseStudiesPage() {
             Ready to write your success story?
           </h2>
           <p className="mt-2 text-text-secondary">
-            Join hundreds of properties already using Unified PMS.
+            Join hundreds of properties already using Vimad.
           </p>
           <Link
             to="/demo"

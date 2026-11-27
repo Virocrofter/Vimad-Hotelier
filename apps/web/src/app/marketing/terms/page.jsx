@@ -17,16 +17,16 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-text-primary">1. Agreement to Terms</h2>
             <p className="mt-2 leading-relaxed">
-              By accessing or using Unified PMS (&ldquo;the Platform&rdquo;), you agree to be bound
-              by these Terms of Service. If you do not agree, you may not use our Services. These
-              terms apply to all visitors, users, and others who access or use the Platform.
+              By accessing or using Vimad (&ldquo;the Platform&rdquo;), you agree to be bound by
+              these Terms of Service. If you do not agree, you may not use our Services. These terms
+              apply to all visitors, users, and others who access or use the Platform.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-text-primary">2. Description of Services</h2>
             <p className="mt-2 leading-relaxed">
-              Unified PMS provides cloud-based property management software for hotels, resorts, and
+              Vimad provides cloud-based property management software for hotels, resorts, and
               hospitality businesses. Services include reservation management, front desk
               operations, billing, reporting, channel management, and guest portal functionality.
             </p>
@@ -89,10 +89,10 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-text-primary">8. Limitation of Liability</h2>
             <p className="mt-2 leading-relaxed">
-              To the maximum extent permitted by law, Unified PMS shall not be liable for any
-              indirect, incidental, special, consequential, or punitive damages arising out of or
-              relating to your use of the Services. Our total liability shall not exceed the amount
-              you paid us in the 12 months preceding the claim.
+              To the maximum extent permitted by law, Vimad shall not be liable for any indirect,
+              incidental, special, consequential, or punitive damages arising out of or relating to
+              your use of the Services. Our total liability shall not exceed the amount you paid us
+              in the 12 months preceding the claim.
             </p>
           </section>
 

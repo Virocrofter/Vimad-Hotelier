@@ -47,7 +47,7 @@ export default function AboutPage() {
             Building the future of <span className="text-secondary">hospitality</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-text-secondary">
-            Unified PMS was founded by hoteliers who were tired of legacy software. Today we power
+            Vimad was founded by hoteliers who were tired of legacy software. Today we power
             properties across 30 countries.
           </p>
         </div>

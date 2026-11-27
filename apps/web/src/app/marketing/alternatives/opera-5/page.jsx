@@ -147,7 +147,7 @@ export default function Opera5AlternativePage() {
                 Oracle OPERA 5
               </div>
               <div className="px-6 py-4 text-sm font-semibold text-secondary text-center bg-secondary/5">
-                Unified PMS
+                Vimad
               </div>
             </div>
             {comparison.map((row, i) => (

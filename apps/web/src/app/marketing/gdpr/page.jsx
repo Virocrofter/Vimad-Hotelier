@@ -11,8 +11,8 @@ export default function GDPRPage() {
           </div>
           <h1 className="mt-4 text-3xl font-bold text-text-primary">GDPR Compliance</h1>
           <p className="mt-2 text-sm text-text-muted">
-            Unified PMS is fully committed to compliance with the EU General Data Protection
-            Regulation (Regulation 2016/679).
+            Vimad is fully committed to compliance with the EU General Data Protection Regulation
+            (Regulation 2016/679).
           </p>
         </div>
 
@@ -20,8 +20,8 @@ export default function GDPRPage() {
           <section className="rounded-xl border border-accent/20 bg-accent/5 p-6">
             <h2 className="text-lg font-semibold text-text-primary">Our Role Under GDPR</h2>
             <p className="mt-2 leading-relaxed">
-              Unified PMS acts as a <strong className="text-text-primary">Data Processor</strong>{' '}
-              for guest data managed through our platform on behalf of our hotel customers (Data
+              Vimad acts as a <strong className="text-text-primary">Data Processor</strong> for
+              guest data managed through our platform on behalf of our hotel customers (Data
               Controllers). For account and billing data, we act as a{' '}
               <strong className="text-text-primary">Data Controller</strong>.
             </p>
@@ -126,8 +126,8 @@ export default function GDPRPage() {
               </div>
               <p className="mt-1 text-sm">
                 Email:{' '}
-                <a href="mailto:dpo@unifiedpms.com" className="text-secondary hover:underline">
-                  dpo@unifiedpms.com
+                <a href="mailto:dpo@efeohise@gmail.com" className="text-secondary hover:underline">
+                  dpo@efeohise@gmail.com
                 </a>
               </p>
               <p className="text-sm">Response time: Within 72 hours</p>

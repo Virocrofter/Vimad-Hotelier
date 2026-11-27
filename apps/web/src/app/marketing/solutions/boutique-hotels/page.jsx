@@ -163,7 +163,7 @@ export default function BoutiqueHotelsPage() {
             Your boutique hotel deserves better software
           </h2>
           <p className="mt-4 text-text-secondary">
-            Join 200+ independent hotels already using Unified PMS to deliver Hilton-level guest
+            Join 200+ independent hotels already using Vimad to deliver Hilton-level guest
             experiences.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">

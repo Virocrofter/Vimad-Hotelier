@@ -1,122 +1,58 @@
-import { Link } from 'react-router-dom';
-import { ArrowRight, Calendar, Clock, Tag } from 'lucide-react';
-
-const posts = [
-  {
-    title: 'How AI Revenue Management Increased RevPAR by 18%',
-    excerpt:
-      'Grand Plaza Hotel switched to automated pricing and saw results within one quarter. Here is exactly how they did it.',
-    category: 'Product',
-    date: 'Aug 5, 2026',
-    readTime: '6 min read',
-    featured: true,
-  },
-  {
-    title: 'Migrating from OPERA 5: A Complete Playbook',
-    excerpt: 'Data mapping, staff training, and parallel-run strategies for a seamless transition.',
-    category: 'Industry',
-    date: 'Jul 28, 2026',
-    readTime: '8 min read',
-    featured: false,
-  },
-  {
-    title: 'The Real Cost of OTA Commissions (And How to Reduce Them)',
-    excerpt: 'Why direct bookings matter more than ever and the technology stack that drives them.',
-    category: 'Tips',
-    date: 'Jul 15, 2026',
-    readTime: '5 min read',
-    featured: false,
-  },
-  {
-    title: 'Building a Real-Time Tape Chart with WebSockets',
-    excerpt: 'An engineering deep dive into how we built our drag-and-drop reservation grid.',
-    category: 'Engineering',
-    date: 'Jul 2, 2026',
-    readTime: '10 min read',
-    featured: false,
-  },
-  {
-    title: 'Night Audit Automation: Save 2 Hours Every Day',
-    excerpt: 'How automated end-of-day processing reduces errors and frees up your night manager.',
-    category: 'Product',
-    date: 'Jun 20, 2026',
-    readTime: '4 min read',
-    featured: false,
-  },
-  {
-    title: 'PCI DSS Level 1: What It Means for Your Property',
-    excerpt: 'A practical guide to payment security compliance for independent hotels.',
-    category: 'Industry',
-    date: 'Jun 10, 2026',
-    readTime: '7 min read',
-    featured: false,
-  },
-];
-
+/* apps/web/src/app/marketing/blog/page.jsx
+ * [CLAIM-PURGE] Phase 0+ — the blog was a shell carrying a fabricated customer
+ * case study with invented percentage gains. Replaced with an honest shelf: the
+ * three switcher guides, published as real cutovers land. Foundation rebuilds this
+ * as the full content engine with real posts + routes.
+ */
 export default function BlogPage() {
-  const featured = posts.find((p) => p.featured);
-  const rest = posts.filter((p) => !p.featured);
+  const guides = [
+    {
+      title: 'NightsBridge to Vimad: the full migration playbook',
+      blurb:
+        'CSV export, the 1-afternoon cutover, running parallel for 30 days — the exact sequence, with the buyout offer explained.',
+    },
+    {
+      title: 'The paper diary to PMS switchover checklist',
+      blurb:
+        'For the 8-to-30-room properties still running on the book: what to capture, what to leave behind, and what breaks if you rush.',
+    },
+    {
+      title: "A guesthouse owner's guide to killing OTA commission",
+      blurb:
+        'The direct-booking math for small SA properties: what two saved bookings a month actually buy you.',
+    },
+  ];
 
   return (
-    <div className="bg-background">
-      <section className="py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-text-primary sm:text-5xl">
-              Hospitality Insights
-            </h1>
-            <p className="mt-4 text-text-secondary">
-              Product updates, industry trends, and operational best practices.
+    <div className="container mx-auto px-4 py-16">
+      <p className="text-sm uppercase tracking-widest text-muted-foreground">Resources</p>
+      <h1 className="mt-2 text-4xl font-bold">The Switcher&rsquo;s Library</h1>
+      <p className="mt-4 max-w-2xl text-muted-foreground">
+        Written from real South African cutovers, not a content mill. The first guides land with our
+        founding hotels — every claim traceable to a property we can name.
+      </p>
+      <div className="mt-12 grid gap-6 md:grid-cols-3">
+        {guides.map((g) => (
+          <div key={g.title} className="rounded-xl border bg-card p-6">
+            <h2 className="text-lg font-semibold leading-snug">{g.title}</h2>
+            <p className="mt-3 text-sm text-muted-foreground">{g.blurb}</p>
+            <p className="mt-4 text-xs uppercase tracking-wider text-muted-foreground">
+              Publishing with pilot data
             </p>
           </div>
-
-          {featured && (
-            <div className="mb-12 rounded-xl border border-border bg-surface p-6 sm:p-8">
-              <div className="flex items-center gap-2 text-xs font-medium text-secondary mb-3">
-                <Tag className="h-3.5 w-3.5" /> Featured · {featured.category}
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary">{featured.title}</h2>
-              <p className="mt-2 text-text-secondary max-w-2xl">{featured.excerpt}</p>
-              <div className="mt-4 flex items-center gap-4 text-xs text-text-muted">
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" /> {featured.date}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" /> {featured.readTime}
-                </span>
-              </div>
-              <button className="mt-4 inline-flex items-center text-sm font-medium text-secondary hover:underline">
-                Read article <ArrowRight className="ml-1 h-4 w-4" />
-              </button>
-            </div>
-          )}
-
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {rest.map((post, i) => (
-              <div
-                key={i}
-                className="group rounded-xl border border-border bg-surface p-5 hover:border-secondary/50 transition-colors"
-              >
-                <div className="flex items-center gap-2 text-xs font-medium text-secondary mb-2">
-                  <Tag className="h-3.5 w-3.5" /> {post.category}
-                </div>
-                <h3 className="text-lg font-semibold text-text-primary group-hover:text-secondary transition-colors">
-                  {post.title}
-                </h3>
-                <p className="mt-2 text-sm text-text-secondary line-clamp-2">{post.excerpt}</p>
-                <div className="mt-4 flex items-center gap-3 text-xs text-text-muted">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5" /> {post.date}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5" /> {post.readTime}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        ))}
+      </div>
+      <div className="mt-12 rounded-xl border bg-card p-6">
+        <h2 className="text-lg font-semibold">Want these in your inbox the day they drop?</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Leave your details on the{' '}
+          <a className="underline" href="/contact">
+            contact page
+          </a>{' '}
+          with the note &ldquo;send the guides&rdquo; — you&rsquo;ll get them before they&rsquo;re
+          public.
+        </p>
+      </div>
     </div>
   );
 }

@@ -11,8 +11,8 @@ export default function PCIDSSPage() {
           </div>
           <h1 className="mt-4 text-3xl font-bold text-text-primary">PCI DSS Compliance</h1>
           <p className="mt-2 text-sm text-text-muted">
-            Unified PMS maintains PCI DSS Level 1 Service Provider certification — the highest level
-            of payment card security.
+            Vimad maintains PCI DSS Level 1 Service Provider certification — the highest level of
+            payment card security.
           </p>
         </div>
 
@@ -23,7 +23,7 @@ export default function PCIDSSPage() {
               <h2 className="text-lg font-semibold text-text-primary">Certification Status</h2>
             </div>
             <p className="mt-2 leading-relaxed">
-              Unified PMS is certified as a{' '}
+              Vimad is certified as a{' '}
               <strong className="text-text-primary">PCI DSS Level 1 Service Provider</strong>. This
               certification is validated annually by an independent Qualified Security Assessor
               (QSA) and covers all cardholder data environments (CDEs) within our platform.
@@ -80,8 +80,7 @@ export default function PCIDSSPage() {
           <section>
             <h2 className="text-xl font-semibold text-text-primary">Shared Responsibility</h2>
             <p className="mt-2 leading-relaxed">
-              While Unified PMS secures the platform infrastructure, our customers are responsible
-              for:
+              While Vimad secures the platform infrastructure, our customers are responsible for:
             </p>
             <ul className="mt-3 list-disc space-y-2 pl-5">
               <li>Maintaining secure endpoint devices (front desk computers, tablets)</li>
@@ -97,8 +96,11 @@ export default function PCIDSSPage() {
             <p className="mt-2 leading-relaxed">
               A copy of our current Attestation of Compliance (AOC) and Responsibility Matrix is
               available to active customers upon request through your account manager or by emailing{' '}
-              <a href="mailto:security@unifiedpms.com" className="text-secondary hover:underline">
-                security@unifiedpms.com
+              <a
+                href="mailto:security@efeohise@gmail.com"
+                className="text-secondary hover:underline"
+              >
+                security@efeohise@gmail.com
               </a>
               .
             </p>

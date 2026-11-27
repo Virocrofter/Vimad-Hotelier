@@ -53,7 +53,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-text-primary">Phone</p>
-                    <p className="text-sm">+1-800-555-1234</p>
+                    <p className="text-sm">+27 65 074 8802</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-text-secondary">
@@ -62,7 +62,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-text-primary">Email</p>
-                    <p className="text-sm">hello@unifiedpms.com</p>
+                    <p className="text-sm">efeohise@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-text-secondary">
@@ -71,7 +71,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-text-primary">Headquarters</p>
-                    <p className="text-sm">123 Hospitality Way, San Francisco, CA 94105</p>
+                    <p className="text-sm">123 Hospitality Way, Durban, CA 94105</p>
                   </div>
                 </div>
               </div>

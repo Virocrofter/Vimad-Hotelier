@@ -18,10 +18,10 @@ export default function PrivacyPolicyPage() {
             <section>
               <h2 className="text-xl font-semibold text-text-primary">1. Introduction</h2>
               <p className="mt-2 leading-relaxed">
-                Unified PMS (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed
-                to protecting your privacy. This Privacy Policy explains how we collect, use,
-                disclose, and safeguard your information when you use our property management
-                platform, websites, and related services (collectively, the &ldquo;Services&rdquo;).
+                Vimad (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed to
+                protecting your privacy. This Privacy Policy explains how we collect, use, disclose,
+                and safeguard your information when you use our property management platform,
+                websites, and related services (collectively, the &ldquo;Services&rdquo;).
               </p>
             </section>
 
@@ -98,8 +98,11 @@ export default function PrivacyPolicyPage() {
               <p className="mt-2 leading-relaxed">
                 Depending on your jurisdiction, you may have the right to access, correct, delete,
                 or port your personal data. To exercise these rights, contact us at{' '}
-                <a href="mailto:privacy@unifiedpms.com" className="text-secondary hover:underline">
-                  privacy@unifiedpms.com
+                <a
+                  href="mailto:privacy@efeohise@gmail.com"
+                  className="text-secondary hover:underline"
+                >
+                  privacy@efeohise@gmail.com
                 </a>
                 .
               </p>
@@ -112,14 +115,14 @@ export default function PrivacyPolicyPage() {
                 Officer:
               </p>
               <div className="mt-3 rounded-lg border border-border bg-surface p-4">
-                <p className="text-sm text-text-secondary">Unified PMS Data Protection Officer</p>
+                <p className="text-sm text-text-secondary">Vimad Data Protection Officer</p>
                 <p className="text-sm text-text-secondary">123 Hospitality Way, Suite 400</p>
-                <p className="text-sm text-text-secondary">San Francisco, CA 94105</p>
+                <p className="text-sm text-text-secondary">Durban, CA 94105</p>
                 <a
-                  href="mailto:privacy@unifiedpms.com"
+                  href="mailto:privacy@efeohise@gmail.com"
                   className="mt-1 inline-flex items-center gap-1.5 text-sm text-secondary hover:underline"
                 >
-                  <Mail className="h-3.5 w-3.5" /> privacy@unifiedpms.com
+                  <Mail className="h-3.5 w-3.5" /> privacy@efeohise@gmail.com
                 </a>
               </div>
             </section>

@@ -75,8 +75,8 @@ export default function HotelChainsPage() {
               Visibility.
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
-              Stop managing fragmented PMS instances. Unified PMS gives chains and management
-              companies centralized control with property-level flexibility.
+              Stop managing fragmented PMS instances. Vimad gives chains and management companies
+              centralized control with property-level flexibility.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
@@ -102,7 +102,7 @@ export default function HotelChainsPage() {
           <div className="mb-16 text-center">
             <h2 className="text-3xl font-bold text-text-primary sm:text-4xl">Built for scale</h2>
             <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
-              Whether you manage 5 properties or 500, Unified PMS scales with your portfolio.
+              Whether you manage 5 properties or 500, Vimad scales with your portfolio.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

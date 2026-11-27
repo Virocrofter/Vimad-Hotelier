@@ -81,7 +81,7 @@ const endpoints = [
   },
 ];
 
-const codeExample = `curl -X GET https://api.unifiedpms.com/v1/reservations \\
+const codeExample = `curl -X GET https://api.efeohise@gmail.com/v1/reservations \\
   -H "Authorization: Bearer {API_KEY}" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -111,7 +111,7 @@ export default function ApiDocsPage() {
               Developer Portal
             </div>
             <h1 className="text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
-              Build on the <span className="text-secondary">Unified PMS</span> platform
+              Build on the <span className="text-secondary">Vimad</span> platform
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-text-secondary">
               RESTful API, webhooks, and comprehensive SDKs. Integrate reservations, guest data,

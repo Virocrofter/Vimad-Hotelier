@@ -147,7 +147,7 @@ export default function HiltonOnqAlternativePage() {
                 Hilton OnQ
               </div>
               <div className="px-6 py-4 text-sm font-semibold text-secondary text-center bg-secondary/5">
-                Unified PMS
+                Vimad
               </div>
             </div>
             {comparison.map((row, i) => (

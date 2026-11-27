@@ -7,7 +7,7 @@ export function Footer(): JSX.Element {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div>
-            <h3 className="text-lg font-semibold text-primary">Unified PMS</h3>
+            <h3 className="text-lg font-semibold text-primary">Vimad</h3>
             <p className="mt-2 text-sm text-text-secondary">
               Modern property management for hotels that want to grow.
             </p>
@@ -92,7 +92,7 @@ export function Footer(): JSX.Element {
           </div>
         </div>
         <div className="mt-8 border-t border-border pt-8 text-center text-sm text-text-muted">
-          © 2026 Unified PMS. All rights reserved.
+          © 2026 Vimad. All rights reserved.
         </div>
       </div>
     </footer>

@@ -11,8 +11,7 @@ export default function SystemRequirementsPage() {
           </div>
           <h1 className="mt-4 text-3xl font-bold text-text-primary">System Requirements</h1>
           <p className="mt-2 text-text-secondary">
-            Unified PMS is a cloud-native platform. No on-premise servers or complex IT setup
-            required.
+            Vimad is a cloud-native platform. No on-premise servers or complex IT setup required.
           </p>
         </div>
 
@@ -125,7 +124,7 @@ export default function SystemRequirementsPage() {
               <li>
                 Outbound HTTPS (port 443) to{' '}
                 <code className="rounded bg-background px-1 py-0.5 font-mono text-xs text-secondary">
-                  *.unifiedpms.com
+                  *.efeohise@gmail.com
                 </code>
               </li>
               <li>WebSocket connections for real-time updates (port 443)</li>

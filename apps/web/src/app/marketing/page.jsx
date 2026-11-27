@@ -523,7 +523,7 @@ function Features() {
             Everything you need to run a modern hotel
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
-            From reservations to revenue management, Unified PMS replaces your entire tech stack.
+            From reservations to revenue management, Vimad replaces your entire tech stack.
           </p>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -775,7 +775,7 @@ function FAQ() {
     },
     {
       q: 'Is my data secure and compliant?',
-      a: 'Unified PMS is PCI DSS Level 1 compliant, GDPR ready, and SOC 2 Type II certified. All data is encrypted at rest and in transit.',
+      a: 'Vimad is PCI DSS Level 1 compliant, GDPR ready, and SOC 2 Type II certified. All data is encrypted at rest and in transit.',
     },
     {
       q: 'Do you offer training and support?',
@@ -795,7 +795,7 @@ function FAQ() {
             Frequently asked questions
           </h2>
           <p className="mt-4 text-text-secondary">
-            Everything you need to know about switching to Unified PMS.
+            Everything you need to know about switching to Vimad.
           </p>
         </div>
 
@@ -846,7 +846,7 @@ function FinalCTA() {
           Ready to modernize your hotel?
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-text-secondary">
-          Join hundreds of hotels already using Unified PMS. Get a personalized 30-minute demo — no
+          Join hundreds of hotels already using Vimad. Get a personalized 30-minute demo — no
           pressure, no commitment.
         </p>
 
@@ -884,7 +884,7 @@ function FinalCTA() {
         <p className="mt-4 text-sm text-text-muted">
           Or call us:{' '}
           <a href="tel:+18005551234" className="text-secondary hover:underline">
-            +1-800-555-1234
+            +27 65 074 8802
           </a>
         </p>
 

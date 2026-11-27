@@ -1,0 +1,61 @@
+{
+  "note": "Quarantined legacy violations. Each file maps to its rebuild task in Vimad-Marketing-Plan-Addendum-v1.1 §3/§4 — remove an entry when its task ships. New violations outside this list fail the gate. Amend the register (§2), never weaken the rules.",
+  "files": {
+    "apps/web/src/app/marketing/page.jsx": {
+      "until": "Foundation: homepage Ember & Paper rebuild (new spine)",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/features/page.jsx": {
+      "until": "Content Mass: replaced by the nine module pages",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/alternatives/cloudbeds/page.jsx": {
+      "until": "Money Pages: replaced by /compare/vimad-vs-nightsbridge",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/alternatives/hilton-onq/page.jsx": {
+      "until": "Money Pages: replaced by compare set",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/alternatives/opera-5/page.jsx": {
+      "until": "Money Pages: replaced by compare set",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/case-studies/page.jsx": {
+      "until": "Field & Measure: real named pilot case studies",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/solutions/page.jsx": {
+      "until": "Content Mass: solution/role pages",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/solutions/boutique-hotels/page.jsx": {
+      "until": "Content Mass: solution pages",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/solutions/contactless-checkin/page.jsx": {
+      "until": "Content Mass: solution pages",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/solutions/hotel-chains/page.jsx": {
+      "until": "Content Mass: Armada page absorbs this",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/contact/page.jsx": {
+      "until": "Next batch: contact form wired to /v1/public/leads",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/demo/page.jsx": {
+      "until": "Next batch: demo form wired + DemoSession funnel",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/privacy/page.jsx": {
+      "until": "Legal-docs swap: real POPIA policy replaces template",
+      "rules": "all"
+    },
+    "apps/web/src/app/marketing/security/page.jsx": {
+      "until": "Legal-docs swap: honest security posture doc",
+      "rules": "all"
+    }
+  }
+}
