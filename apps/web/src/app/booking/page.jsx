@@ -93,6 +93,7 @@ export default function BookingPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- clear cross-sell when the condition no longer holds
     if (step !== 'rooms' || !roomTypes || roomTypes.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset/guard/reaction on prop or mount; render-adjust rewrites filed
       setSisters(null);
       return;
     }

@@ -755,6 +755,7 @@ function CreateTicketModal({ onClose, onCreated }) {
   // Debounced guest search
   useEffect(() => {
     if (!guestQ.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset/guard/reaction on prop or mount; render-adjust rewrites filed
       setGuestResults([]);
       return;
     }

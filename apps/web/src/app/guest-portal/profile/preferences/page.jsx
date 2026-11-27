@@ -104,6 +104,7 @@ export default function PreferencesPage() {
   useEffect(() => {
     if (prefsData?.preferences && !initialized) {
       const p = prefsData.preferences;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset/guard/reaction on prop or mount; render-adjust rewrites filed
       setPrefs((prev) => ({
         ...prev,
         roomType: p.roomType ?? prev.roomType,

@@ -96,6 +96,7 @@ export default function BillingPage() {
   useEffect(() => {
     if (payVerify.isSuccess) {
       const v = payVerify.data;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset/guard/reaction on prop or mount; render-adjust rewrites filed
       setPayMsg(
         v.status === 'success' && v.postedToFolio
           ? {

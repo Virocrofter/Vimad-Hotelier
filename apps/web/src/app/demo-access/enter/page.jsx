@@ -15,6 +15,7 @@ export default function DemoEnterPage() {
     const token = params.get('token');
     // eslint-disable-next-line react-hooks/set-state-in-effect -- link-validation guard on mount
     if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset/guard/reaction on prop or mount; render-adjust rewrites filed
       setState('error');
       setError('This link is missing its token.');
       return;

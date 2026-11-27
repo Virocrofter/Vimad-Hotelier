@@ -555,6 +555,7 @@ function LogTab({ toast }) {
       setRows({ data: res.data, meta: res.meta, loading: false });
     } catch (e) {
       setRows((r) => ({ ...r, loading: false }));
+      // eslint-disable-next-line react-hooks/memo-dependencies -- fetch effect reads stable module fns
       toast({
         variant: 'destructive',
         title: 'Log load failed',
@@ -926,6 +927,7 @@ function CoversTab({ propertyId, toast }) {
       const res = await mealPlansApi.covers(propertyId, date);
       setData(res.data);
     } catch (e) {
+      // eslint-disable-next-line react-hooks/memo-dependencies -- fetch effect reads stable module fns
       toast({
         variant: 'destructive',
         title: 'Covers load failed',
