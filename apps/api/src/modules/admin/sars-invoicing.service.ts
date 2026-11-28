@@ -9,7 +9,10 @@ import { prisma } from '../../common/prisma.js';
 import { getPlan, resolvePlanFee } from './plan-catalog.service.js';
 import { resolveMonthlyFee } from './contracts.service.js';
 
-export const VAT_RATE = 0.15;
+// VAT is ENV-DRIVEN: Vimad is not SARS-registered yet, so invoices legally
+// cannot charge VAT. Set VIMAD_VAT_RATE=0.15 (and VIMAD_VAT_NUMBER) once SARS
+// registration lands; all NEW invoices then become proper tax invoices.
+export const VAT_RATE = Number(process.env.VIMAD_VAT_RATE ?? 0);
 export const round2 = (n: number) => Math.round(n * 100) / 100;
 export const vatOn = (amountEx: number) => round2(amountEx * VAT_RATE);
 

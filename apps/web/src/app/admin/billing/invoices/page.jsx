@@ -306,6 +306,7 @@ export default function InvoicesPage() {
                             <div className="vb2-muted" style={{ marginTop: 8, fontSize: 12 }}>
                               Invoice {sars.number}
                               {sars.supplierVat ? ' · Supplier VAT no: ' + sars.supplierVat : ''}
+                              {sars.vatRate === 0 ? ' · Not VAT-registered — no VAT charged' : ''}
                               {Array.isArray(attempts) && attempts.length > 0
                                 ? ' · Dunning: ' + attempts.length + ' reminder(s)'
                                 : ''}
