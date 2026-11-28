@@ -250,6 +250,14 @@ export async function login(input: LoginInput) {
   });
   const refreshToken = await generateRefreshToken(user.id);
 
+  // Flag control-plane identities so the client can route them to /admin
+  // after sign-in (hotels continue to /app).
+  const iaCheck = (await prisma.$queryRawUnsafe(
+    `SELECT 1 AS ok FROM "internal_admin_users" WHERE lower(email) = lower($1) AND "isActive" LIMIT 1`,
+    user.email
+  )) as any[];
+  const isPlatformAdmin = iaCheck.length > 0;
+
   return {
     token,
     refreshToken,
@@ -260,6 +268,7 @@ export async function login(input: LoginInput) {
       lastName: user.lastName,
       role: user.role,
       tenantId: user.tenantId,
+      isPlatformAdmin,
     },
   };
 }
@@ -597,6 +606,15 @@ export async function verifyTotpLogin(pendingToken: string, code: string) {
     role: user.role,
   });
   const refreshToken = await generateRefreshToken(user.id);
+
+  // Flag control-plane identities so the client can route them to /admin
+  // after sign-in (hotels continue to /app).
+  const iaCheck = (await prisma.$queryRawUnsafe(
+    `SELECT 1 AS ok FROM "internal_admin_users" WHERE lower(email) = lower($1) AND "isActive" LIMIT 1`,
+    user.email
+  )) as any[];
+  const isPlatformAdmin = iaCheck.length > 0;
+
   return {
     token,
     refreshToken,
@@ -607,6 +625,7 @@ export async function verifyTotpLogin(pendingToken: string, code: string) {
       lastName: user.lastName,
       role: user.role,
       tenantId: user.tenantId,
+      isPlatformAdmin,
     },
   };
 }

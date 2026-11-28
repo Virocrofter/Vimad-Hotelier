@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useAuthStore } from '../../stores/authStores';
 
 export default function LoginForm() {
   const [tenantSlug, setTenantSlug] = useState('');
@@ -21,7 +22,8 @@ export default function LoginForm() {
 
     if (result.success) {
       const redirect = searchParams.get('redirect');
-      navigate(redirect || '/app/dashboard', { replace: true });
+      const isAdmin = (useAuthStore.getState().user as any)?.isPlatformAdmin;
+      navigate(redirect || (isAdmin ? '/admin' : '/app/dashboard'), { replace: true });
     } else {
       setLocalError(result.error ?? 'Login failed');
     }
