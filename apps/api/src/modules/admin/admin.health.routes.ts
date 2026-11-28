@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { requireAdminRole } from './admin.middleware.js';
 import * as health from './admin.health.service.js';
+import * as opsDaily from './ops-daily.service.js';
 
 export const adminHealthRouter = Router();
 const wrap = (fn: any) => async (req: any, res: any) => {
@@ -76,6 +77,21 @@ adminHealthRouter.get(
   '/health/tenants/:id/snapshots',
   requireAdminRole,
   wrap(async (req: any) => health.getTenantSnapshots(req.params.id, Number(req.query.days ?? 30)))
+);
+
+/* TenantOpsDaily: fleet MRR series + day-over-day movement (F-A20) */
+adminHealthRouter.get(
+  '/health/ops-daily',
+  requireAdminRole,
+  wrap(async (req: any) => opsDaily.getFleetDaily(Number(req.query.days ?? 30)))
+);
+
+adminHealthRouter.get(
+  '/health/ops-daily/:tenantId',
+  requireAdminRole,
+  wrap(async (req: any) =>
+    opsDaily.getTenantDaily(req.params.tenantId, Number(req.query.days ?? 90))
+  )
 );
 adminHealthRouter.get(
   '/health/journeys',

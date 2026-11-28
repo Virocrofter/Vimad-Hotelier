@@ -71,6 +71,7 @@ import './jobs/contracts.renewal.job.js'; // [CONTRACTS] renewal/expiry scan (se
 import { startReportsScheduler } from './jobs/reports.job.js';
 import { startTenantHealthScheduler } from './jobs/tenant-health.job.js';
 import { startDunningScheduler } from './jobs/dunning.job.js';
+import { startTenantOpsDailyScheduler } from './jobs/tenant-ops-daily.job.js';
 import { startExceptionsCadence } from './modules/exceptions/exceptions.routes.js';
 startExceptionsCadence();
 import { startWebhooksCadence } from './modules/webhooks/webhooks.service.js';
@@ -653,6 +654,7 @@ async function bootstrap() {
   void startReportsScheduler(); // [REPORTS] due scheduled reports (every min)
   void startTenantHealthScheduler(); // [PHASE1] tenant health snapshot (daily 05:00)
   void startDunningScheduler(); // [PHASE1] SaaS dunning day-0 (daily 06:05)
+  void startTenantOpsDailyScheduler(); // [PHASE2] TenantOpsDaily rollup (daily 05:10)
 
   // ─── Graceful Shutdown ───
   const shutdown = async (signal: string) => {
