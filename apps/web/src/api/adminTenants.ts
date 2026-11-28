@@ -82,3 +82,16 @@ export async function replayFleetDelivery(id: string): Promise<any> {
 export async function getWebhookStats(): Promise<any> {
   return client.get('/admin/webhooks/stats');
 }
+
+/* Impersonation (Phase 3b bridge). */
+export async function startImpersonation(
+  tenantId: string,
+  mode: string,
+  ticket: string
+): Promise<any> {
+  return client.post('/admin/impersonation/start', { tenantId, mode, ticket });
+}
+
+export async function enterImpersonationSession(id: string): Promise<any> {
+  return client.post('/admin/impersonation/' + encodeURIComponent(id) + '/enter', {});
+}

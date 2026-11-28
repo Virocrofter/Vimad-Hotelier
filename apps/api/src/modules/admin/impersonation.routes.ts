@@ -11,6 +11,7 @@ import {
   startImpersonation,
   endImpersonation,
   activeImpersonations,
+  enterImpersonation,
 } from './internal-admin.service.js';
 
 export const impersonationRouter = Router();
@@ -62,3 +63,18 @@ impersonationRouter.post('/:id/end', async (req: Request, res: Response, next: N
     return next(err);
   }
 });
+
+/* Token exchange: swap an active session for a tenant-scoped impersonation
+ * JWT (TTL = session's remaining minutes). FOUNDER-only. */
+impersonationRouter.post(
+  '/:id/enter',
+  requireInternalRole('FOUNDER'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const admin = (req as any).internalAdmin;
+      return res.json(await enterImpersonation(req.params.id, admin.email));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);

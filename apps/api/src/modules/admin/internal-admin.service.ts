@@ -5,7 +5,10 @@
  * self-provisions as FOUNDER — the founder can never lock himself out.
  * Once the table holds any row, the table wins (env list stops granting).
  * TOTP enrolment + full audit-log integration land in Phase 3b. */
+import jwt from 'jsonwebtoken';
 import { prisma } from '../../common/prisma.js';
+import { env } from '../../common/env.js';
+import { AppError } from '../../common/errors.js';
 import { logger } from '../../common/logger.js';
 
 export interface InternalAdmin {
@@ -174,4 +177,63 @@ export async function activeImpersonations(adminEmail?: string): Promise<Imperso
      ORDER BY "startedAt" DESC LIMIT 100`,
     ...(adminEmail ? [adminEmail] : [])
   )) as any[];
+}
+
+/* Token exchange: a FOUNDER holding an active session swaps it for a
+ * short-lived impersonation JWT scoped to the target tenant. Extra claims
+ * (impersonatedBy/mode/ticket) ride along for audit + the UI banner; the
+ * app scopes by tenantId claim. TTL = the session's remaining minutes. */
+export async function enterImpersonation(id: string, adminEmail: string) {
+  const rows = (await prisma.$queryRawUnsafe(
+    `SELECT id, "tenantId", mode, ticket, "expiresAt"::text AS "expiresAt"
+     FROM "impersonation_sessions"
+     WHERE id = $1 AND lower("adminEmail") = lower($2)
+       AND "endedAt" IS NULL AND "expiresAt" > now()
+     LIMIT 1`,
+    id,
+    adminEmail
+  )) as any[];
+  const session = rows[0];
+  if (!session) {
+    throw new AppError(403, 'No active impersonation session for this id', 'FORBIDDEN');
+  }
+  const user = await prisma.user.findFirst({
+    where: { email: adminEmail },
+    orderBy: { createdAt: 'asc' },
+  });
+  if (!user) {
+    throw new AppError(
+      400,
+      'No app user matches this admin email — log in once first',
+      'BAD_REQUEST'
+    );
+  }
+  const ttlSeconds = Math.max(
+    60,
+    Math.floor((new Date(session.expiresAt).getTime() - Date.now()) / 1000)
+  );
+  const token = jwt.sign(
+    {
+      userId: user.id,
+      tenantId: session.tenantId,
+      email: adminEmail,
+      role: user.role ?? 'owner',
+      impersonatedBy: adminEmail,
+      impersonationMode: session.mode,
+      ticket: session.ticket,
+    },
+    env.JWT_SECRET,
+    { expiresIn: ttlSeconds }
+  );
+  logger.warn(
+    { admin: adminEmail, tenantId: session.tenantId, mode: session.mode, ttlSeconds },
+    'impersonation token issued'
+  );
+  return {
+    token,
+    sessionId: session.id,
+    tenantId: session.tenantId,
+    mode: session.mode,
+    expiresAt: session.expiresAt,
+  };
 }

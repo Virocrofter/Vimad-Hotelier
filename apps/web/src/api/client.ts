@@ -10,6 +10,7 @@ import {
 } from '../stores/authStores';
 import { getCurrentPropertyId, usePropertyStore } from '../stores/propertyStore';
 import { installOfflineInterceptors } from '../lib/offline/axios';
+import { isImpersonating, exitImpersonationAndRestore } from '../lib/impersonation';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 
@@ -174,6 +175,13 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isGuestPortalRequest(originalRequest)) {
+        return Promise.reject(error);
+      }
+
+      // Impersonation tokens are refreshless; a 401 ends the session and
+      // restores the founder's own tokens instead of logging out.
+      if (isImpersonating()) {
+        await exitImpersonationAndRestore();
         return Promise.reject(error);
       }
 
