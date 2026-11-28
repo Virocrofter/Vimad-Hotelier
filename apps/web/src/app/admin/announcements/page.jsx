@@ -50,13 +50,17 @@ export default function AnnouncementsPage() {
     Promise.resolve().then(load);
   }, [load]);
 
+  const isScheduled = (r) => r.scheduledAt && !r.publishedAt;
+
   const filtered = useMemo(() => {
     let list = rows || [];
-    if (tab !== 'all') list = list.filter((r) => (r.status || 'draft') === tab);
+    if (tab === 'scheduled') list = list.filter(isScheduled);
+    else if (tab !== 'all') list = list.filter((r) => (r.status || 'draft') === tab);
     if (debouncedQ) {
       const s = debouncedQ.toLowerCase();
       list = list.filter(
-        (r) => (r.title || '').toLowerCase().includes(s) || (r.body || '').toLowerCase().includes(s)
+        (r) =>
+          (r.title || '').toLowerCase().includes(s) || (r.message || '').toLowerCase().includes(s)
       );
     }
     return list;
@@ -69,7 +73,7 @@ export default function AnnouncementsPage() {
       { l: 'Total', v: list.length },
       { l: 'Published', v: cnt('published') },
       { l: 'Drafts', v: cnt('draft') },
-      { l: 'Scheduled', v: cnt('scheduled') },
+      { l: 'Scheduled', v: list.filter(isScheduled).length },
     ];
   }, [rows]);
 
@@ -101,7 +105,7 @@ export default function AnnouncementsPage() {
         </div>
         <input
           className="vb2-search"
-          placeholder="Search title, body…"
+          placeholder="Search title, message…"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
@@ -151,11 +155,15 @@ export default function AnnouncementsPage() {
                 {filtered.map((r) => (
                   <tr key={r.id} style={{ cursor: 'default' }}>
                     <td className="vb2-num">{r.title}</td>
-                    <td className="vb2-muted">{r.audience || 'all'}</td>
+                    <td className="vb2-muted">
+                      {Array.isArray(r.targetAudience) && r.targetAudience.length
+                        ? r.targetAudience.join(', ')
+                        : 'all'}
+                    </td>
                     <td>
                       <span className={'vb2-badge ' + badge(r.status)}>{r.status || 'draft'}</span>
                     </td>
-                    <td className="vb2-muted">{fmtDate(r.publishAt)}</td>
+                    <td className="vb2-muted">{fmtDate(r.publishedAt || r.scheduledAt)}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                         {r.status !== 'published' && (
@@ -169,7 +177,13 @@ export default function AnnouncementsPage() {
                         {r.status !== 'archived' && (
                           <button
                             className="vb2-btn small"
-                            onClick={() => act(r, api.archiveAnnouncement, 'Archived')}
+                            onClick={() =>
+                              act(
+                                r,
+                                (id) => api.updateAnnouncement(id, { status: 'archived' }),
+                                'Archived'
+                              )
+                            }
                           >
                             Archive
                           </button>
@@ -216,7 +230,14 @@ function CreateAnnouncementModal({ onClose, onDone, notify }) {
     if (!form.title.trim() || !form.body.trim()) return notify('Title and body are required', true);
     setBusy(true);
     try {
-      await api.createAnnouncement({ ...form, publishAt: new Date().toISOString() });
+      await api.createAnnouncement({
+        title: form.title,
+        message: form.body,
+        type: 'general',
+        priority: 'normal',
+        status: 'draft',
+        targetAudience: [form.audience],
+      });
       onDone();
     } catch (e) {
       notify(e.message, true);
@@ -236,7 +257,7 @@ function CreateAnnouncementModal({ onClose, onDone, notify }) {
           />
         </div>
         <div className="vb2-field">
-          <label>Body</label>
+          <label>Message</label>
           <textarea
             className="vb2-textarea"
             value={form.body}
