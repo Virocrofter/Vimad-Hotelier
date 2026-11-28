@@ -7,7 +7,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { KeyRound, RefreshCw, ShieldCheck, Users } from 'lucide-react';
-import { listInternalAdmins, setInternalAdminActive } from '@/api/adminTenants';
+import {
+  listInternalAdmins,
+  setInternalAdminActive,
+  beginInternalTotp,
+  confirmInternalTotp,
+  disableInternalTotp,
+} from '@/api/adminTenants';
+import { useAuthStore } from '@/stores/authStores';
 
 const ROLE_META = {
   FOUNDER: { label: 'Founder — Supreme Mode', cls: 'border-accent/30 bg-accent/10 text-accent' },
@@ -27,6 +34,15 @@ export default function AdminUsersPage() {
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [totp, setTotp] = useState({
+    step: 'idle',
+    secret: '',
+    url: '',
+    code: '',
+    busy: false,
+    error: null,
+  });
+  const myEmail = useAuthStore((s) => s.user?.email);
 
   const notify = (msg, isErr) => {
     setToast({ msg, isErr });
@@ -105,6 +121,148 @@ export default function AdminUsersPage() {
             the account password.
           </li>
         </ul>
+      </div>
+
+      <div className="rounded-lg border border-border bg-surface p-4">
+        <div className="flex items-center gap-2 text-sm font-semibold text-text-primary">
+          <KeyRound className="h-4 w-4" />
+          Two-factor authentication (this identity)
+        </div>
+        <p className="mt-1 text-xs text-text-secondary">
+          TOTP via any authenticator app. Once enrolled, every login asks for a code — the secret
+          lives on the control-plane identity, separate from hotel-staff 2FA.
+        </p>
+        {totp.step === 'idle' && (
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={async () => {
+                setTotp({ ...totp, busy: true, error: null });
+                try {
+                  const r = await beginInternalTotp();
+                  setTotp({
+                    ...totp,
+                    step: 'begin',
+                    secret: r.secret,
+                    url: r.otpauthUrl,
+                    busy: false,
+                  });
+                } catch (e) {
+                  setTotp({ ...totp, busy: false, error: e.message });
+                }
+              }}
+              disabled={totp.busy}
+              className="h-9 rounded-md border border-accent/30 px-3 text-sm text-accent hover:bg-accent/10 disabled:opacity-50"
+            >
+              Enrol 2FA
+            </button>
+            {rows?.some((r) => r.email === myEmail && r.totpEnabled) && (
+              <button
+                type="button"
+                onClick={() => setTotp({ ...totp, step: 'disable', code: '', error: null })}
+                className="h-9 rounded-md border border-danger/30 px-3 text-sm text-danger hover:bg-danger/10"
+              >
+                Disable
+              </button>
+            )}
+          </div>
+        )}
+        {totp.step === 'begin' && (
+          <div className="mt-3 space-y-2">
+            <p className="font-mono text-xs break-all text-text-secondary">{totp.secret}</p>
+            <p className="font-mono text-[10px] break-all text-text-muted">{totp.url}</p>
+            <input
+              value={totp.code}
+              onChange={(e) => setTotp({ ...totp, code: e.target.value })}
+              placeholder="6-digit code from authenticator"
+              className="h-9 w-full rounded-md border border-border bg-background px-3 font-mono text-sm text-text-primary"
+            />
+            {totp.error && <p className="text-xs text-danger">{totp.error}</p>}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={totp.busy || totp.code.length !== 6}
+                onClick={async () => {
+                  setTotp({ ...totp, busy: true, error: null });
+                  try {
+                    await confirmInternalTotp(totp.code);
+                    setTotp({
+                      step: 'idle',
+                      secret: '',
+                      url: '',
+                      code: '',
+                      busy: false,
+                      error: null,
+                    });
+                    notify('2FA enabled');
+                    await load();
+                  } catch (e) {
+                    setTotp({ ...totp, busy: false, error: e.message });
+                  }
+                }}
+                className="h-9 flex-1 rounded-md bg-accent text-sm font-medium text-white disabled:opacity-50"
+              >
+                {totp.busy ? 'Verifying…' : 'Confirm & enable'}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setTotp({ step: 'idle', secret: '', url: '', code: '', busy: false, error: null })
+                }
+                className="h-9 rounded-md border border-border px-3 text-sm text-text-secondary"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+        {totp.step === 'disable' && (
+          <div className="mt-3 space-y-2">
+            <input
+              value={totp.code}
+              onChange={(e) => setTotp({ ...totp, code: e.target.value })}
+              placeholder="Current 6-digit code to confirm"
+              className="h-9 w-full rounded-md border border-border bg-background px-3 font-mono text-sm text-text-primary"
+            />
+            {totp.error && <p className="text-xs text-danger">{totp.error}</p>}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={totp.busy || totp.code.length !== 6}
+                onClick={async () => {
+                  setTotp({ ...totp, busy: true, error: null });
+                  try {
+                    await disableInternalTotp(totp.code);
+                    setTotp({
+                      step: 'idle',
+                      secret: '',
+                      url: '',
+                      code: '',
+                      busy: false,
+                      error: null,
+                    });
+                    notify('2FA disabled');
+                    await load();
+                  } catch (e) {
+                    setTotp({ ...totp, busy: false, error: e.message });
+                  }
+                }}
+                className="h-9 flex-1 rounded-md border border-danger/30 text-sm text-danger hover:bg-danger/10 disabled:opacity-50"
+              >
+                Confirm disable
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setTotp({ step: 'idle', secret: '', url: '', code: '', busy: false, error: null })
+                }
+                className="h-9 rounded-md border border-border px-3 text-sm text-text-secondary"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border bg-surface">

@@ -6,6 +6,8 @@
  * Once the table holds any row, the table wins (env list stops granting).
  * TOTP enrolment + full audit-log integration land in Phase 3b. */
 import jwt from 'jsonwebtoken';
+import { randomBytes } from 'crypto';
+import { base32Encode, verifyTotp } from '../auth/auth.service.js';
 import { prisma } from '../../common/prisma.js';
 import { env } from '../../common/env.js';
 import { AppError } from '../../common/errors.js';
@@ -236,4 +238,57 @@ export async function enterImpersonation(id: string, adminEmail: string) {
     mode: session.mode,
     expiresAt: session.expiresAt,
   };
+}
+
+/* ─── Phase 3b: internal-admin TOTP (RFC 6238 via auth.service helpers) ─── */
+
+export async function beginInternalTotp(email: string) {
+  const admin = await getInternalAdminByEmail(email);
+  if (!admin || !admin.isActive) throw new AppError(400, 'Unknown admin', 'BAD_REQUEST');
+  const secret = base32Encode(randomBytes(20));
+  await prisma.$executeRawUnsafe(
+    `UPDATE "internal_admin_users" SET "totpPendingSecret" = $2 WHERE lower(email) = lower($1)`,
+    email,
+    secret
+  );
+  return {
+    secret,
+    otpauthUrl: `otpauth://totp/Vimad%20Admin:${encodeURIComponent(email)}?secret=${secret}&issuer=Vimad`,
+  };
+}
+
+export async function confirmInternalTotp(email: string, code: string) {
+  const rows = (await prisma.$queryRawUnsafe(
+    `SELECT "totpPendingSecret" FROM "internal_admin_users" WHERE lower(email) = lower($1) LIMIT 1`,
+    email
+  )) as any[];
+  const pending = rows[0]?.totpPendingSecret;
+  if (!pending) throw new AppError(400, 'Run 2FA setup first', 'VALIDATION_ERROR');
+  if (!verifyTotp(pending, code)) throw new AppError(400, 'Invalid code', 'INVALID_CODE');
+  await prisma.$executeRawUnsafe(
+    `UPDATE "internal_admin_users"
+     SET "totpSecret" = "totpPendingSecret", "totpEnabled" = true, "totpPendingSecret" = NULL
+     WHERE lower(email) = lower($1)`,
+    email
+  );
+  return { enabled: true };
+}
+
+export async function disableInternalTotp(email: string, code: string) {
+  const rows = (await prisma.$queryRawUnsafe(
+    `SELECT "totpSecret", "totpEnabled" FROM "internal_admin_users" WHERE lower(email) = lower($1) LIMIT 1`,
+    email
+  )) as any[];
+  const r = rows[0];
+  if (!r?.totpEnabled || !r?.totpSecret) {
+    throw new AppError(400, '2FA not enabled', 'VALIDATION_ERROR');
+  }
+  if (!verifyTotp(r.totpSecret, code)) throw new AppError(400, 'Invalid code', 'INVALID_CODE');
+  await prisma.$executeRawUnsafe(
+    `UPDATE "internal_admin_users"
+     SET "totpSecret" = NULL, "totpEnabled" = false, "totpPendingSecret" = NULL
+     WHERE lower(email) = lower($1)`,
+    email
+  );
+  return { enabled: false };
 }

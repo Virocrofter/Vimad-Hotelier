@@ -95,3 +95,16 @@ export async function startImpersonation(
 export async function enterImpersonationSession(id: string): Promise<any> {
   return client.post('/admin/impersonation/' + encodeURIComponent(id) + '/enter', {});
 }
+
+/* Internal-admin 2FA (self-service). */
+export async function beginInternalTotp(): Promise<any> {
+  return client.post('/admin/internal-admins/me/totp/begin', {});
+}
+
+export async function confirmInternalTotp(code: string): Promise<any> {
+  return client.post('/admin/internal-admins/me/totp/confirm', { code });
+}
+
+export async function disableInternalTotp(code: string): Promise<any> {
+  return client.post('/admin/internal-admins/me/totp/disable', { code });
+}

@@ -193,6 +193,29 @@ export async function login(input: LoginInput) {
     return { twoFactorRequired: true, pendingToken };
   }
 
+  // Phase 3b: internal admins (control plane) carry their own TOTP secret on
+  // internal_admin_users. Same pending-token flow; /auth/login/2fa verifies
+  // against the internal secret when the token carries internalAdmin.
+  const iaRows = (await prisma.$queryRawUnsafe(
+    `SELECT "totpEnabled" FROM "internal_admin_users"
+     WHERE lower(email) = lower($1) AND "isActive" AND "totpSecret" IS NOT NULL
+     LIMIT 1`,
+    input.email
+  )) as any[];
+  if (iaRows[0]?.totpEnabled) {
+    const pendingToken = jwt.sign(
+      {
+        userId: user.id,
+        tenantId: user.tenantId,
+        twoFactorPending: true,
+        internalAdmin: true,
+      },
+      JWT_SECRET,
+      { expiresIn: '5m' }
+    );
+    return { twoFactorRequired: true, pendingToken };
+  }
+
   await recordAuthEvent(user.tenantId, user.id, 'login');
   const token = signToken({
     userId: user.id,
@@ -502,11 +525,12 @@ export async function disableTotp(userId: string, code: string) {
  * session. The code is the actual second factor; the pending token carries a
  * 5-minute window (reuse within it still requires a fresh valid code). */
 export async function verifyTotpLogin(pendingToken: string, code: string) {
-  let payload: { userId?: string; twoFactorPending?: boolean };
+  let payload: { userId?: string; twoFactorPending?: boolean; internalAdmin?: boolean };
   try {
     payload = jwt.verify(pendingToken, JWT_SECRET) as {
       userId?: string;
       twoFactorPending?: boolean;
+      internalAdmin?: boolean;
     };
   } catch {
     throw new AppError(401, 'Pending session expired — log in again', 'UNAUTHORIZED');
@@ -515,11 +539,30 @@ export async function verifyTotpLogin(pendingToken: string, code: string) {
     throw new AppError(401, 'Invalid pending session', 'UNAUTHORIZED');
   }
   const user = await prisma.user.findUnique({ where: { id: payload.userId } });
-  if (!user || user.status !== 'active' || !user.totpEnabled || !user.totpSecret) {
+  if (!user || user.status !== 'active') {
     throw new AppError(401, 'Invalid pending session', 'UNAUTHORIZED');
   }
-  if (!verifyTotp(user.totpSecret, code)) {
-    throw new AppError(401, 'Invalid code', 'INVALID_CODE');
+
+  if (payload.internalAdmin) {
+    // Phase 3b: the second factor for control-plane identities lives on
+    // internal_admin_users — never on the app user row.
+    const iaRows = (await prisma.$queryRawUnsafe(
+      `SELECT "totpSecret" FROM "internal_admin_users"
+       WHERE lower(email) = lower($1) AND "isActive" AND "totpEnabled"
+       LIMIT 1`,
+      user.email
+    )) as any[];
+    const secret = iaRows[0]?.totpSecret;
+    if (!secret || !verifyTotp(secret, code)) {
+      throw new AppError(401, 'Invalid code', 'INVALID_CODE');
+    }
+  } else {
+    if (!user.totpEnabled || !user.totpSecret) {
+      throw new AppError(401, 'Invalid pending session', 'UNAUTHORIZED');
+    }
+    if (!verifyTotp(user.totpSecret, code)) {
+      throw new AppError(401, 'Invalid code', 'INVALID_CODE');
+    }
   }
   await recordAuthEvent(user.tenantId, user.id, 'login');
   const token = signToken({

@@ -44,7 +44,13 @@ import { contractsRouter } from './contracts.routes.js';
 import { billingAdapterRouter } from './billing-adapter.routes.js';
 import { impersonationRouter } from './impersonation.routes.js';
 import { webhookCenterRouter } from './webhook-center.routes.js';
-import { listInternalAdmins, setInternalAdminActive } from './internal-admin.service.js';
+import {
+  listInternalAdmins,
+  setInternalAdminActive,
+  beginInternalTotp,
+  confirmInternalTotp,
+  disableInternalTotp,
+} from './internal-admin.service.js';
 
 extendZodWithOpenApi(z);
 
@@ -642,6 +648,47 @@ adminRouter.post(
     try {
       await setInternalAdminActive(req.params.id, (req.body as any)?.isActive !== false);
       return res.json({ ok: true });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/* ─── Phase 3b: internal-admin 2FA (self-service, any active identity) ─── */
+adminRouter.post(
+  '/internal-admins/me/totp/begin',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const admin = (req as any).internalAdmin;
+      return res.json(await beginInternalTotp(admin.email));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.post(
+  '/internal-admins/me/totp/confirm',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const admin = (req as any).internalAdmin;
+      return res.json(
+        await confirmInternalTotp(admin.email, String((req.body as any)?.code ?? ''))
+      );
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+adminRouter.post(
+  '/internal-admins/me/totp/disable',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const admin = (req as any).internalAdmin;
+      return res.json(
+        await disableInternalTotp(admin.email, String((req.body as any)?.code ?? ''))
+      );
     } catch (err) {
       return next(err);
     }
