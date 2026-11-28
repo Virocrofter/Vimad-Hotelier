@@ -1,29 +1,50 @@
 /* apps/api/src/jobs/dunning.job.ts
- * Dunning day-0 (Phase 1): the morning an invoice crosses its due date the
- * owner gets the first reminder, the invoice flips sent -> overdue, and the
- * attempt is persisted in items.dunning.attempts so the sweep is idempotent
- * per invoice per day. Ladder days 3/7/14/21 land in Phase 2. Registered
- * LAST in index.ts (positional heartbeat labels). */
+ * SaaS dunning ladder (Phase 2, 2026-11-28). Daily 06:05 sweep over overdue
+ * invoices, max ONE email per invoice per day, escalating:
+ *   day 0  — first notice (invoice flips sent -> overdue)
+ *   day 3  — reminder
+ *   day 7  — urgent
+ *   day 14 — final warning before grace
+ *   day 21 — GRACE: final notice + tenant -> past_due (PMS read-only
+ *            enforcement middleware lands with the Phase 3 access work).
+ * Idempotent: attempts recorded in items.dunning.attempts; one catch-up
+ * step fires per sweep so a missed sweep never email-bombs a hotel.
+ * Registered LAST in index.ts bootstrap (positional heartbeat labels). */
 import { prisma } from '../common/prisma.js';
 import { logger } from '../common/logger.js';
 import { sendEmail } from './email.queue.js';
 import cron from 'node-cron';
 
+const STEPS = [
+  { day: 0, tone: 'notice' },
+  { day: 3, tone: 'reminder' },
+  { day: 7, tone: 'urgent' },
+  { day: 14, tone: 'final' },
+  { day: 21, tone: 'grace' },
+] as const;
+
 export async function runDunningDay0(): Promise<number> {
   const now = new Date();
-  const today = now.toISOString().slice(0, 10);
   const overdue = await prisma.invoice.findMany({
-    where: { status: 'sent', dueDate: { lt: now }, totalAmount: { gt: 0 } },
+    where: { status: { in: ['sent', 'overdue'] }, dueDate: { lt: now }, totalAmount: { gt: 0 } },
     orderBy: { dueDate: 'asc' },
     take: 500,
   });
   let sent = 0;
   for (const inv of overdue as any[]) {
-    const attempts = (inv.items as any)?.dunning?.attempts;
-    const list = Array.isArray(attempts) ? attempts : [];
-    if (list.some((a: any) => a.day === 0 && String(a.sentAt ?? '').slice(0, 10) === today)) {
-      continue; // already reminded today
-    }
+    const dunning = (inv.items as any)?.dunning ?? {};
+    const attempts: any[] = Array.isArray(dunning.attempts) ? dunning.attempts : [];
+    const daysOverdue = Math.max(
+      0,
+      Math.floor((now.getTime() - new Date(inv.dueDate).getTime()) / 86400_000)
+    );
+
+    // Highest ladder step that is due and not yet attempted (one per sweep).
+    const step = [...STEPS]
+      .reverse()
+      .find((s) => daysOverdue >= s.day && !attempts.some((a) => a.day === s.day));
+    if (!step) continue;
+
     const owner =
       (await prisma.user.findFirst({
         where: { tenantId: inv.tenantId, role: { in: ['owner', 'admin'] } },
@@ -36,49 +57,71 @@ export async function runDunningDay0(): Promise<number> {
     if (!owner?.email) {
       logger.warn(
         { invoiceId: inv.id, tenantId: inv.tenantId },
-        'dunning day-0: no owner email, skipped'
+        'dunning: no owner email, skipped'
       );
       continue;
     }
-    const daysOverdue = Math.max(
-      0,
-      Math.floor((now.getTime() - new Date(inv.dueDate).getTime()) / 86400_000)
-    );
+
+    const invoiceNo = (inv.items as any)?.sars?.number ?? inv.id;
+    const toneSubject: Record<string, string> = {
+      notice: `Payment reminder: invoice ${invoiceNo} is ${daysOverdue} day${daysOverdue === 1 ? '' : 's'} overdue`,
+      reminder: `2nd notice: invoice ${invoiceNo} remains unpaid (${daysOverdue} days)`,
+      urgent: `Urgent: invoice ${invoiceNo} is ${daysOverdue} days overdue — please settle`,
+      final: `Final notice: invoice ${invoiceNo} — account enters grace in 7 days`,
+      grace: `Account grace: invoice ${invoiceNo} is ${daysOverdue} days overdue`,
+    };
     await sendEmail({
       to: owner.email,
-      subject: `Payment reminder: invoice ${inv.id} is ${daysOverdue} day${daysOverdue === 1 ? '' : 's'} overdue`,
+      subject: toneSubject[step.tone],
       template: 'generic',
       payload: {
         invoiceId: inv.id,
+        invoiceNumber: invoiceNo,
         amount: Number(inv.totalAmount),
         currency: inv.currency,
         daysOverdue,
+        tone: step.tone,
         viewUrl: `${process.env.WEB_URL}/app/billing/invoice/${inv.id}`,
       },
       tenantId: inv.tenantId,
       relatedType: 'invoice',
       relatedId: inv.id,
     });
+
+    const nextAttempts = [...attempts, { day: step.day, sentAt: now.toISOString() }];
+    const enteringGrace = step.day === 21 && !dunning.graceAt;
     await prisma.invoice.update({
       where: { id: inv.id },
       data: {
         status: 'overdue',
         items: {
           ...(inv.items ?? {}),
-          dunning: { attempts: [...list, { day: 0, sentAt: now.toISOString() }] },
+          dunning: {
+            ...dunning,
+            attempts: nextAttempts,
+            ...(enteringGrace ? { graceAt: now.toISOString() } : {}),
+          },
         },
       },
     });
+    if (enteringGrace) {
+      await prisma.tenant.updateMany({
+        where: { id: inv.tenantId, status: 'active' },
+        data: { status: 'past_due' },
+      });
+      logger.warn(
+        { invoiceId: inv.id, tenantId: inv.tenantId },
+        'dunning day-21: tenant -> past_due'
+      );
+    }
     sent++;
   }
-  logger.info({ sent, candidates: overdue.length }, 'dunning day-0 sweep complete');
+  logger.info({ sent, candidates: overdue.length }, 'dunning sweep complete');
   return sent;
 }
 
-// Registered LAST in index.ts bootstrap: heartbeat.ts maps loop labels
-// positionally to node-cron schedule call order.
 export function startDunningScheduler() {
   cron.schedule('5 6 * * *', () => {
-    runDunningDay0().catch((err) => logger.error(err, 'dunning-day-0 failed'));
+    runDunningDay0().catch((err) => logger.error(err, 'dunning sweep failed'));
   });
 }

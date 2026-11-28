@@ -1,5 +1,6 @@
 /* apps/api/src/modules/admin/admin.service.ts */
 import { resolvePlanFee, getPlan } from './plan-catalog.service.js';
+import { createSarsInvoice } from './sars-invoicing.service.js';
 import { resolveMonthlyFee } from './contracts.service.js';
 import { prisma } from '../../common/prisma.js';
 import { logger } from '../../common/logger.js';
@@ -950,45 +951,11 @@ export async function generateAdminInvoice(input: {
   periodStart: string;
   periodEnd: string;
 }) {
-  const t: any = await prisma.tenant.findUnique({ where: { id: input.tenantId } });
-  if (!t) throw new Error('tenant not found: ' + input.tenantId);
-  if (t.plan === 'trial') throw new Error('trial tenants are not invoiced');
-  const pStart = new Date(input.periodStart);
-  const pEnd = new Date(input.periodEnd);
-  const existing = await prisma.invoice.findFirst({
-    where: { tenantId: t.id, periodStart: pStart, periodEnd: pEnd },
-  });
-  if (existing) return existing; // return-existing: never double-bill a period
-
-  const genRooms = await prisma.room.count({ where: { tenantId: t.id } });
-  const base = await resolveMonthlyFee(t.id, await resolvePlanFee(t.plan, genRooms));
-  const usage = await prisma.usageRecord.groupBy({
-    by: ['metric'],
-    where: { tenantId: t.id, recordedAt: { gte: pStart, lt: pEnd } },
-    _sum: { quantity: true },
-  });
-  const lines = [
-    { type: 'base', description: t.plan + ' plan — monthly base fee', amount: base },
-    ...usage.map((u: any) => ({
-      type: 'usage',
-      description: 'usage: ' + u.metric + ' × ' + u._sum.quantity,
-      amount: 0,
-    })),
-  ];
-  return prisma.invoice.create({
-    data: {
-      tenantId: t.id,
-      periodStart: pStart,
-      periodEnd: pEnd,
-      dueDate: new Date(pEnd.getTime() + 14 * 86400_000),
-      plan: t.plan,
-      baseAmount: base,
-      overageAmount: 0,
-      totalAmount: base,
-      currency: 'ZAR',
-      status: 'sent',
-      items: { lines, vatIncluded: false, meteredRatesPending: true },
-    },
+  return createSarsInvoice({
+    tenantId: input.tenantId,
+    periodStart: new Date(input.periodStart),
+    periodEnd: new Date(input.periodEnd),
+    source: 'admin',
   });
 }
 
@@ -1053,7 +1020,12 @@ export async function createAdminCreditNote(input: {
       totalAmount: -input.amount,
       currency: parent.currency,
       status: 'sent',
-      items: { creditOf: parent.id, reason: input.reason, status: 'pending' },
+      items: {
+        creditOf: parent.id,
+        creditOfNumber: (parent.items as any)?.sars?.number ?? null,
+        reason: input.reason,
+        status: 'pending',
+      },
     },
   });
 }
@@ -1083,20 +1055,27 @@ export async function getAdminDunning(invoiceId?: string) {
   });
   return overdue
     .filter((i) => !invoiceId || i.id === invoiceId)
-    .map((i) => ({
-      id: 'dun-' + i.id,
-      invoiceId: i.id,
-      attempt: 1,
-      status: 'sent',
-      sentAt: i.dueDate instanceof Date ? i.dueDate.toISOString() : String(i.dueDate),
-    }));
+    .map((i) => {
+      const dunning = (i.items as any)?.dunning;
+      const attempts = Array.isArray(dunning?.attempts) ? dunning.attempts : [];
+      const last = attempts[attempts.length - 1];
+      return {
+        id: 'dun-' + i.id,
+        invoiceId: i.id,
+        attempt: attempts.length,
+        status: dunning?.graceAt ? 'grace' : attempts.length > 0 ? 'sent' : 'pending',
+        sentAt:
+          last?.sentAt ?? (i.dueDate instanceof Date ? i.dueDate.toISOString() : String(i.dueDate)),
+      };
+    });
 }
 
 export async function triggerAdminDunning(invoiceId: string) {
   const inv: any = await getAdminInvoiceById(invoiceId);
   if (inv.status === 'paid') throw new Error('paid invoices are not dunned: ' + invoiceId);
-  // v1: the reminder is dispatched via the existing email queue; the visible
-  // event is derived (see getAdminDunning). Persistence lands with batch C.
+  // Manual nudge for the UI. Real dispatch runs daily via jobs/dunning.job.ts
+  // (day-0 notice, 3/7/14 ladder, 21-day grace); this derived record keeps
+  // the action button honest.
   return {
     id: 'dun-' + inv.id,
     invoiceId: inv.id,
