@@ -59,6 +59,7 @@ const navGroups = [
       { to: '/admin/backups', label: 'Backups & DR', icon: Database },
       { to: '/admin/health', label: 'System Health', icon: HeartPulse },
       { to: '/admin/profiler', label: 'Profiler', icon: Gauge },
+      { to: '/admin/webhooks', label: 'Webhooks', icon: Webhook },
     ],
   },
   {

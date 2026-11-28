@@ -43,6 +43,7 @@ import { adminReportsRouter } from './admin.reports.routes.js';
 import { contractsRouter } from './contracts.routes.js';
 import { billingAdapterRouter } from './billing-adapter.routes.js';
 import { impersonationRouter } from './impersonation.routes.js';
+import { webhookCenterRouter } from './webhook-center.routes.js';
 import { listInternalAdmins, setInternalAdminActive } from './internal-admin.service.js';
 
 extendZodWithOpenApi(z);
@@ -153,6 +154,7 @@ adminRouter.use(authMiddleware, requireAdminRole);
 adminRouter.use('/billing/contracts', contractsRouter);
 adminRouter.use('/billing', billingAdapterRouter);
 adminRouter.use('/impersonation', impersonationRouter);
+adminRouter.use('/webhooks', webhookCenterRouter);
 
 /* ─── GET /admin/kpis ─── */
 registry.registerPath({

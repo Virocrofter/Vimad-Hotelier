@@ -64,3 +64,21 @@ export async function setInternalAdminActive(id: string, isActive: boolean): Pro
     isActive,
   });
 }
+
+/* Fleet webhook center (Phase 3, blueprint Pillar 5 Tab 2). */
+export async function listFleetDeliveries(params: Record<string, string>): Promise<any> {
+  const qs = new URLSearchParams(params).toString();
+  return client.get('/admin/webhooks/deliveries' + (qs ? '?' + qs : ''));
+}
+
+export async function getFleetDelivery(id: string): Promise<any> {
+  return client.get('/admin/webhooks/deliveries/' + encodeURIComponent(id));
+}
+
+export async function replayFleetDelivery(id: string): Promise<any> {
+  return client.post('/admin/webhooks/deliveries/' + encodeURIComponent(id) + '/replay', {});
+}
+
+export async function getWebhookStats(): Promise<any> {
+  return client.get('/admin/webhooks/stats');
+}
