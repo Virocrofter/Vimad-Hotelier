@@ -71,6 +71,12 @@ adminHealthRouter.get(
   requireAdminRole,
   wrap(async (req: any) => health.getTenantHealthDetail(req.params.id))
 );
+
+adminHealthRouter.get(
+  '/health/tenants/:id/snapshots',
+  requireAdminRole,
+  wrap(async (req: any) => health.getTenantSnapshots(req.params.id, Number(req.query.days ?? 30)))
+);
 adminHealthRouter.get(
   '/health/journeys',
   requireAdminRole,

@@ -33,6 +33,8 @@ export const LOOPS: LoopDef[] = [
   { label: 'abandoned-deposits', expectedMs: 3_600_000 },
   { label: 'dlq-alerts', expectedMs: 3_600_000 },
   { label: 'scheduled-reports', expectedMs: 120_000 },
+  { label: 'tenant-health-snapshot', expectedMs: 300_000 },
+  { label: 'dunning-day-0', expectedMs: 120_000 },
 ];
 
 let scheduleCounter = 0;

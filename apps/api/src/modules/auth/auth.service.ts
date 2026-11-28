@@ -131,6 +131,21 @@ export async function register(input: RegisterInput) {
   };
 }
 
+// Phase 1 (2026-11-28): login telemetry feeding the tenant health-score
+// logins pillar. Fire-and-forget — a failed insert must never block login.
+async function recordAuthEvent(tenantId: string, userId: string, kind: string) {
+  try {
+    await prisma.$executeRawUnsafe(
+      'INSERT INTO auth_events (id, "tenantId", "userId", kind, "at") VALUES (gen_random_uuid()::text, $1, $2, $3, now())',
+      tenantId,
+      userId,
+      kind
+    );
+  } catch {
+    /* telemetry only */
+  }
+}
+
 export async function login(input: LoginInput) {
   const tenant = await prisma.tenant.findUnique({
     where: { slug: input.tenantSlug },
@@ -178,6 +193,7 @@ export async function login(input: LoginInput) {
     return { twoFactorRequired: true, pendingToken };
   }
 
+  await recordAuthEvent(user.tenantId, user.id, 'login');
   const token = signToken({
     userId: user.id,
     tenantId: user.tenantId,
@@ -505,6 +521,7 @@ export async function verifyTotpLogin(pendingToken: string, code: string) {
   if (!verifyTotp(user.totpSecret, code)) {
     throw new AppError(401, 'Invalid code', 'INVALID_CODE');
   }
+  await recordAuthEvent(user.tenantId, user.id, 'login');
   const token = signToken({
     userId: user.id,
     tenantId: user.tenantId,

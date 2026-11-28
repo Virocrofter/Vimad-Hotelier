@@ -341,8 +341,52 @@ export async function updateIncident(id: string, patch: { status?: string; note?
   return q<any[]>(`SELECT * FROM "incidents" WHERE "id" = $1`, id);
 }
 
-// ── Per-tenant health score (0-100, every component from real rows) ──
-export async function getTenantScores() {
+// ── Per-tenant health score v2 (2026-11-28) ──
+// v1 bug: 100-minus-deductions meant a dead hotel (no payments, no emails,
+// no exceptions) scored 100 GREEN, and the platform-global failed_jobs count
+// was deducted from EVERY tenant. v2 is a weighted 0-100 model over real
+// usage/logins/ops/billing signals plus hard churn triggers.
+// Weights are hypotheses — govern weekly; bump HEALTH_WEIGHTS_VERSION on change.
+export const HEALTH_WEIGHTS = { usage: 0.4, logins: 0.3, ops: 0.2, billing: 0.1 };
+export const HEALTH_WEIGHTS_VERSION = 'v2-2026-11-28';
+const BAND_GREEN_MIN = 75; // design doc: Green >= 75 / Amber 50-74 / Red < 50
+const ONBOARDING_GRACE_DAYS = 14;
+
+export type HealthBand = 'green' | 'amber' | 'red' | 'new';
+
+export function band(score: number): HealthBand {
+  return score >= BAND_GREEN_MIN ? 'green' : score >= 50 ? 'amber' : 'red';
+}
+
+interface TenantSignalRow {
+  id: string;
+  name: string;
+  slug: string | null;
+  plan: string;
+  status: string;
+  createdAt: string | Date;
+  pay_ok: number;
+  pay_bad: number;
+  pay_total: number;
+  email_sent: number;
+  email_total: number;
+  reservations_30d: number;
+  exceptions_open: number;
+  exceptions_24h: number;
+  logins_7d: number;
+  overdueInvoice: boolean;
+}
+
+async function getTenantSignalRows(): Promise<TenantSignalRow[]> {
+  const overdueRows = await prisma.invoice.findMany({
+    where: {
+      status: { in: ['sent', 'overdue'] },
+      dueDate: { lt: new Date() },
+      totalAmount: { gt: 0 },
+    },
+    select: { tenantId: true },
+  });
+  const overdueSet = new Set(overdueRows.map((r) => r.tenantId));
   const rows = await q<any[]>(`
     WITH pay AS (
       SELECT "tenantId",
@@ -357,76 +401,195 @@ export async function getTenantScores() {
         count(*)::int AS total
       FROM "email_logs" WHERE "createdAt" > now() - interval '30 days' GROUP BY "tenantId"
     ),
+    res AS (
+      SELECT p."tenantId", count(r."id")::int AS made
+      FROM "reservations" r JOIN "properties" p ON p."id" = r."propertyId"
+      WHERE r."createdAt" > now() - interval '30 days' GROUP BY p."tenantId"
+    ),
     exc AS (
-      SELECT "tenantId", count(*)::int AS open FROM "exceptions" WHERE "status" = 'open' GROUP BY "tenantId"
+      SELECT "tenantId",
+        count(*) FILTER (WHERE "status" = 'open')::int AS open,
+        count(*) FILTER (WHERE "status" = 'open' AND "createdAt" >= now() - interval '24 hours')::int AS fresh24
+      FROM "exceptions" GROUP BY "tenantId"
     ),
-    jobs AS (
-      SELECT count(*)::int AS c FROM "failed_jobs"
-      WHERE "status" = 'pending' AND "createdAt" > now() - interval '24 hours'
-    ),
-    audit AS (
-      SELECT p."tenantId",
-        count(DISTINCT p."id")::int AS props,
-        count(DISTINCT na."id") FILTER (WHERE na."status" = 'completed')::int AS completed
-      FROM "properties" p
-      LEFT JOIN "night_audits" na
-        ON na."propertyId" = p."id" AND na."auditDate" = CURRENT_DATE - 1
-      GROUP BY p."tenantId"
+    login AS (
+      SELECT "tenantId", count(*)::int AS n FROM "auth_events"
+      WHERE "at" >= now() - interval '7 days' GROUP BY "tenantId"
     )
-    SELECT t."id", t."name", t."slug", t."plan", t."status",
+    SELECT t."id", t."name", t."slug", t."plan", t."status", t."createdAt",
       COALESCE(pay.ok,0) AS pay_ok, COALESCE(pay.bad,0) AS pay_bad, COALESCE(pay.total,0) AS pay_total,
       COALESCE(email.sent,0) AS email_sent, COALESCE(email.total,0) AS email_total,
-      COALESCE(exc.open,0) AS exceptions_open, (SELECT c FROM jobs) AS failed_jobs_24h,
-      COALESCE(audit.props,0) AS props, COALESCE(audit.completed,0) AS audits_completed
+      COALESCE(res.made,0) AS reservations_30d,
+      COALESCE(exc.open,0) AS exceptions_open, COALESCE(exc.fresh24,0) AS exceptions_24h,
+      COALESCE(login.n,0) AS logins_7d
     FROM "tenants" t
     LEFT JOIN pay ON pay."tenantId" = t."id"
     LEFT JOIN email ON email."tenantId" = t."id"
+    LEFT JOIN res ON res."tenantId" = t."id"
     LEFT JOIN exc ON exc."tenantId" = t."id"
-    LEFT JOIN audit ON audit."tenantId" = t."id"
+    LEFT JOIN login ON login."tenantId" = t."id"
     ORDER BY t."createdAt" DESC LIMIT 500`);
+  return rows.map((r) => ({ ...r, overdueInvoice: overdueSet.has(r.id) }));
+}
+
+interface SubScores {
+  usage: number;
+  logins: number;
+  ops: number;
+  billing: number;
+}
+
+function computeScore(s: TenantSignalRow): {
+  score: number;
+  band: HealthBand;
+  triggers: string[];
+  subScores: SubScores;
+} {
+  const payRate = s.pay_total > 0 ? s.pay_ok / s.pay_total : 0;
+  const emailRate = s.email_total > 0 ? s.email_sent / s.email_total : 0;
+  const resActivity = Math.min(1, s.reservations_30d / 10);
+  const usage = Math.round(100 * (0.45 * payRate + 0.25 * emailRate + 0.3 * resActivity));
+  const logins = Math.min(100, Math.round((s.logins_7d / 5) * 100));
+  const ops = Math.max(
+    0,
+    100 - Math.min(60, s.exceptions_open * 5) - Math.min(40, s.exceptions_24h * 20)
+  );
+  const billingBase: Record<string, number> = {
+    active: 100,
+    trial: 70,
+    past_due: 20,
+    suspended: 20,
+    cancelled: 0,
+    inactive: 0,
+  };
+  const billing = s.overdueInvoice
+    ? Math.max(0, (billingBase[s.status] ?? 50) - 20)
+    : (billingBase[s.status] ?? 50);
+  let score = Math.round(
+    usage * HEALTH_WEIGHTS.usage +
+      logins * HEALTH_WEIGHTS.logins +
+      ops * HEALTH_WEIGHTS.ops +
+      billing * HEALTH_WEIGHTS.billing
+  );
+  const triggers: string[] = [];
+  if (s.overdueInvoice) triggers.push('overdue-invoice');
+  const paying = s.status === 'active' || s.status === 'trial';
+  if (paying && s.logins_7d === 0) triggers.push('no-logins-7d');
+  if (
+    paying &&
+    s.logins_7d === 0 &&
+    s.reservations_30d === 0 &&
+    s.pay_total === 0 &&
+    s.email_total === 0
+  ) {
+    score = Math.min(score, 30); // a dead tenant can never look healthy
+    triggers.push('no-activity-30d');
+  }
+  const isNew = Date.now() - new Date(s.createdAt).getTime() < ONBOARDING_GRACE_DAYS * 86400_000;
   return {
-    tenants: rows.map((r) => ({ ...r, score: tenantScore(r), band: band(tenantScore(r)) })),
+    score,
+    band: isNew ? 'new' : band(score),
+    triggers,
+    subScores: { usage, logins, ops, billing },
   };
 }
 
-function tenantScore(r: any) {
-  let s = 100;
-  if (r.pay_total > 0) s -= Math.min(40, (r.pay_bad / r.pay_total) * 100);
-  if (r.email_total > 0) s -= Math.min(20, (1 - r.email_sent / r.email_total) * 50);
-  s -= Math.min(20, r.exceptions_open * 2);
-  s -= Math.min(10, r.failed_jobs_24h);
-  if (r.props > 0) s -= Math.min(10, ((r.props - r.audits_completed) / r.props) * 10);
-  return Math.max(0, Math.round(s));
+export async function getTenantScores() {
+  const rows = await getTenantSignalRows();
+  return {
+    tenants: rows.map((s) => {
+      const r = computeScore(s);
+      return {
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        plan: s.plan,
+        status: s.status,
+        score: r.score,
+        band: r.band,
+        triggers: r.triggers,
+        subScores: r.subScores,
+        weightsVersion: HEALTH_WEIGHTS_VERSION,
+        logins7d: s.logins_7d,
+        payments30d: s.pay_total,
+        emails30d: s.email_total,
+        exceptions24h: s.exceptions_24h,
+      };
+    }),
+  };
 }
-const band = (s: number) => (s >= 80 ? 'green' : s >= 50 ? 'amber' : 'red');
 
 export async function getTenantHealthDetail(tenantId: string) {
-  const payments = await q<any[]>(
-    `SELECT "status", count(*)::int AS c FROM "payments"
-     WHERE "tenantId" = $1 AND "createdAt" > now() - interval '30 days' GROUP BY "status"`,
-    tenantId
+  const { tenants } = await getTenantScores();
+  const t = tenants.find((r) => r.id === tenantId);
+  if (!t) throw new Error('tenant not found');
+  const [payments, emails, exceptions, audits, failedJobs, streakRows, snapshots] =
+    await Promise.all([
+      q<any[]>(
+        `SELECT "status", count(*)::int AS c FROM "payments"
+         WHERE "tenantId" = $1 AND "createdAt" > now() - interval '30 days' GROUP BY "status"`,
+        tenantId
+      ),
+      q<any[]>(
+        `SELECT "status", count(*)::int AS c FROM "email_logs"
+         WHERE "tenantId" = $1 AND "createdAt" > now() - interval '30 days' GROUP BY "status"`,
+        tenantId
+      ),
+      q<any[]>(
+        `SELECT "type","severity","title","createdAt" FROM "exceptions"
+         WHERE "tenantId" = $1 AND "status" = 'open' ORDER BY "createdAt" DESC LIMIT 20`,
+        tenantId
+      ),
+      q<any[]>(
+        `SELECT na."auditDate", na."status", p."name" AS property FROM "night_audits" na
+         JOIN "properties" p ON p."id" = na."propertyId"
+         WHERE p."tenantId" = $1 ORDER BY na."auditDate" DESC LIMIT 14`,
+        tenantId
+      ),
+      q<any[]>(
+        `SELECT "jobName","queue","failReason","createdAt" FROM "failed_jobs"
+         WHERE "createdAt" > now() - interval '24 hours' ORDER BY "createdAt" DESC LIMIT 20`
+      ),
+      q<any[]>(
+        `WITH ordered AS (
+           SELECT date, band FROM "tenant_health_snapshots"
+           WHERE "tenantId" = $1 ORDER BY date DESC LIMIT 60
+         )
+         SELECT count(*)::int AS streak FROM ordered
+         WHERE band = 'red'
+           AND date >= (SELECT coalesce(max(date), '1970-01-01'::date) FROM ordered WHERE band <> 'red')`,
+        tenantId
+      ),
+      getTenantSnapshots(tenantId, 30),
+    ]);
+  return {
+    payments,
+    emails,
+    exceptions,
+    audits,
+    failedJobs,
+    healthScore: t.score,
+    band: t.band,
+    triggers: t.triggers,
+    subScores: t.subScores,
+    weightsVersion: HEALTH_WEIGHTS_VERSION,
+    logins7d: t.logins7d,
+    emails30d: t.emails30d,
+    exceptions24h: t.exceptions24h,
+    failedJobs30d: 0, // v1 platform-global deduction removed: no per-tenant source exists
+    consecutiveRedDays: streakRows[0]?.streak ?? 0,
+    sparkline: snapshots.map((x: any) => x.score),
+  };
+}
+
+export async function getTenantSnapshots(tenantId: string, days = 30) {
+  return q<any[]>(
+    `SELECT date::text AS date, score, band, "subScores", triggers, "weightsVersion"
+     FROM "tenant_health_snapshots" WHERE "tenantId" = $1
+     ORDER BY date DESC LIMIT $2`,
+    tenantId,
+    Math.min(365, Math.max(1, days))
   );
-  const emails = await q<any[]>(
-    `SELECT "status", count(*)::int AS c FROM "email_logs"
-     WHERE "tenantId" = $1 AND "createdAt" > now() - interval '30 days' GROUP BY "status"`,
-    tenantId
-  );
-  const exceptions = await q<any[]>(
-    `SELECT "type","severity","title","createdAt" FROM "exceptions"
-     WHERE "tenantId" = $1 AND "status" = 'open' ORDER BY "createdAt" DESC LIMIT 20`,
-    tenantId
-  );
-  const audits = await q<any[]>(
-    `SELECT na."auditDate", na."status", p."name" AS property FROM "night_audits" na
-     JOIN "properties" p ON p."id" = na."propertyId"
-     WHERE p."tenantId" = $1 ORDER BY na."auditDate" DESC LIMIT 14`,
-    tenantId
-  );
-  const failedJobs = await q<any[]>(
-    `SELECT "jobName","queue","failReason","createdAt" FROM "failed_jobs"
-     WHERE "createdAt" > now() - interval '24 hours' ORDER BY "createdAt" DESC LIMIT 20`
-  );
-  return { payments, emails, exceptions, audits, failedJobs };
 }
 
 // ── Guest-journey SLIs per property ──
