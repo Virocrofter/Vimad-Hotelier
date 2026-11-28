@@ -32,7 +32,7 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   // Optional for internal admins (email is the identity; tenant resolved
   // from the users table). Required in practice for hotel staff.
-  tenantSlug: z.string().min(1).optional(),
+  tenantSlug: z.string().max(200).optional(), // '' = admin slug-less sign-in
   email: z.string().email(),
   password: z.string().min(1),
 });
