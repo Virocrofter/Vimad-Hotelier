@@ -189,7 +189,10 @@ export default function InvoicesPage() {
                     onClick={() => openDetail(inv)}
                   >
                     <td className="vb2-num">
-                      {inv.number || inv.billingPeriod || inv.id.slice(0, 8)}
+                      {inv.items?.sars?.number ||
+                        inv.number ||
+                        inv.billingPeriod ||
+                        inv.id.slice(0, 8)}
                     </td>
                     <td>
                       {inv.tenant?.name || inv.tenantName || inv.tenantId?.slice(0, 8) || '—'}
@@ -222,7 +225,9 @@ export default function InvoicesPage() {
           <aside className="vb2-panel" role="complementary">
             <div className="vb2-panel-head">
               <div>
-                <div className="vb2-panel-title">{detail?.number || 'Invoice'}</div>
+                <div className="vb2-panel-title">
+                  {detail?.items?.sars?.number || detail?.number || 'Invoice'}
+                </div>
                 {detail && (
                   <span className={'vb2-badge ' + badgeClass(detail.status)}>
                     {detail.status || 'draft'}
@@ -267,36 +272,84 @@ export default function InvoicesPage() {
                     <div className="vb2-section" style={{ marginBottom: 8 }}>
                       Line items
                     </div>
-                    <div className="vb2-items">
-                      {(detail.items || []).map((it, i) => (
-                        <div className="vb2-item-row" key={i}>
-                          <span>{it.description || it.label || 'Item'}</span>
-                          <span style={{ fontWeight: 600 }}>{fmt(it.amount)}</span>
+                    {(() => {
+                      const sars = detail.items?.sars;
+                      const lines = Array.isArray(sars?.lines) ? sars.lines : null;
+                      if (lines) {
+                        const attempts = detail.items?.dunning?.attempts;
+                        return (
+                          <div>
+                            <div className="vb2-items">
+                              {lines.map((l, i) => (
+                                <div className="vb2-item-row" key={i}>
+                                  <span>{l.description}</span>
+                                  <span style={{ fontWeight: 600 }}>{fmt(l.amountEx)}</span>
+                                </div>
+                              ))}
+                              <div className="vb2-item-row">
+                                <span className="vb2-muted">
+                                  VAT ({Math.round((sars.vatRate ?? 0.15) * 100)}%)
+                                </span>
+                                <span>{fmt(sars.vatAmount)}</span>
+                              </div>
+                              <div className="vb2-total-row">
+                                <span>Total (incl. VAT)</span>
+                                <span>{fmt(sars.totalInc)}</span>
+                              </div>
+                              <div className="vb2-item-row">
+                                <span className="vb2-muted">Balance due</span>
+                                <span style={{ fontWeight: 700 }}>
+                                  {fmt(detail.balance ?? sars.totalInc)}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="vb2-muted" style={{ marginTop: 8, fontSize: 12 }}>
+                              Invoice {sars.number}
+                              {sars.supplierVat ? ' · Supplier VAT no: ' + sars.supplierVat : ''}
+                              {Array.isArray(attempts) && attempts.length > 0
+                                ? ' · Dunning: ' + attempts.length + ' reminder(s)'
+                                : ''}
+                              {detail.items?.dunning?.graceAt
+                                ? ' · GRACE since ' + fmtDate(detail.items.dunning.graceAt)
+                                : ''}
+                            </div>
+                          </div>
+                        );
+                      }
+                      const legacy = Array.isArray(detail.items) ? detail.items : [];
+                      return (
+                        <div className="vb2-items">
+                          {legacy.map((it, i) => (
+                            <div className="vb2-item-row" key={i}>
+                              <span>{it.description || it.label || 'Item'}</span>
+                              <span style={{ fontWeight: 600 }}>{fmt(it.amount)}</span>
+                            </div>
+                          ))}
+                          {legacy.length === 0 && (
+                            <div className="vb2-item-row">
+                              <span className="vb2-muted">Base subscription</span>
+                              <span style={{ fontWeight: 600 }}>{fmt(detail.baseAmount)}</span>
+                            </div>
+                          )}
+                          {Number(detail.overageAmount) > 0 && (
+                            <div className="vb2-item-row">
+                              <span>Usage overages</span>
+                              <span style={{ fontWeight: 600 }}>{fmt(detail.overageAmount)}</span>
+                            </div>
+                          )}
+                          <div className="vb2-total-row">
+                            <span>Total (incl. VAT)</span>
+                            <span>{fmt(detail.totalAmount)}</span>
+                          </div>
+                          <div className="vb2-item-row">
+                            <span className="vb2-muted">Balance due</span>
+                            <span style={{ fontWeight: 700 }}>
+                              {fmt(detail.balance ?? detail.totalAmount)}
+                            </span>
+                          </div>
                         </div>
-                      ))}
-                      {(detail.items || []).length === 0 && (
-                        <div className="vb2-item-row">
-                          <span className="vb2-muted">Base subscription</span>
-                          <span style={{ fontWeight: 600 }}>{fmt(detail.baseAmount)}</span>
-                        </div>
-                      )}
-                      {Number(detail.overageAmount) > 0 && (
-                        <div className="vb2-item-row">
-                          <span>Usage overages</span>
-                          <span style={{ fontWeight: 600 }}>{fmt(detail.overageAmount)}</span>
-                        </div>
-                      )}
-                      <div className="vb2-total-row">
-                        <span>Total (incl. VAT)</span>
-                        <span>{fmt(detail.totalAmount)}</span>
-                      </div>
-                      <div className="vb2-item-row">
-                        <span className="vb2-muted">Balance due</span>
-                        <span style={{ fontWeight: 700 }}>
-                          {fmt(detail.balance ?? detail.totalAmount)}
-                        </span>
-                      </div>
-                    </div>
+                      );
+                    })()}
                   </div>
                   <div className="vb2-actions">
                     {detail.status !== 'paid' && detail.status !== 'void' && (
@@ -556,7 +609,9 @@ function RecordPaymentModal({ invoice, onClose, onDone, notify }) {
   return (
     <div className="vb2-modal-backdrop" onClick={onClose}>
       <div className="vb2-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="vb2-modal-title">Record payment — {invoice.number || ''}</div>
+        <div className="vb2-modal-title">
+          Record payment — {invoice.items?.sars?.number || invoice.number || ''}
+        </div>
         <div className="vb2-kv">
           <dt>Total</dt>
           <dd>{fmt(invoice.totalAmount)}</dd>
@@ -643,7 +698,9 @@ function CreditNoteModal({ invoice, onClose, onDone, notify }) {
   return (
     <div className="vb2-modal-backdrop" onClick={onClose}>
       <div className="vb2-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="vb2-modal-title">Issue credit note — {invoice.number || ''}</div>
+        <div className="vb2-modal-title">
+          Issue credit note — {invoice.items?.sars?.number || invoice.number || ''}
+        </div>
         <div className="vb2-field">
           <label>Amount (ZAR)</label>
           <input
