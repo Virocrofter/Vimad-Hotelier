@@ -54,7 +54,7 @@ export async function runTenantOpsDailyRollup(): Promise<number> {
  * design: "churned" = row existed yesterday and not today. */
 export async function getFleetDaily(days = 30) {
   const rows = (await prisma.$queryRawUnsafe(
-    `SELECT date::text AS date, "tenantId", status, "mrrCents", "healthBand"
+    `SELECT date::text AS date, "tenantId", status, "mrrCents", "healthBand", rooms, "healthScore"
      FROM "tenant_ops_daily"
      WHERE date >= current_date - make_interval(days => $1)
      ORDER BY date ASC`,
@@ -73,7 +73,11 @@ export async function getFleetDaily(days = 30) {
       date: d,
       mrrCents: list.reduce((s: number, r: any) => s + r.mrrCents, 0),
       tenants: list.length,
+      rooms: list.reduce((s: number, r: any) => s + (r.rooms ?? 0), 0),
       redTenants: list.filter((r: any) => r.healthBand === 'red').length,
+      avgHealth: Math.round(
+        list.reduce((s: number, r: any) => s + (r.healthScore ?? 0), 0) / Math.max(1, list.length)
+      ),
     };
   });
 
@@ -115,7 +119,21 @@ export async function getFleetDaily(days = 30) {
       netCents: newCents + expansionCents - contractionCents - churnedCents,
     };
   }
-  return { series, movement };
+  // Live dunning position (not part of the daily rollup - invoice state).
+  const overdueAgg = await prisma.invoice.aggregate({
+    _sum: { totalAmount: true },
+    _count: { id: true },
+    where: {
+      status: { in: ['sent', 'overdue'] },
+      dueDate: { lt: new Date() },
+      totalAmount: { gt: 0 },
+    },
+  });
+  const dunning = {
+    overdueCents: Math.round(Number(overdueAgg._sum.totalAmount ?? 0) * 100),
+    count: overdueAgg._count.id,
+  };
+  return { series, movement, dunning };
 }
 
 export async function getTenantDaily(tenantId: string, days = 90) {

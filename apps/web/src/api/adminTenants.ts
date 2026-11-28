@@ -48,3 +48,8 @@ export async function listAdminTenants(): Promise<AdminTenant[]> {
   const rows = Array.isArray(res) ? res : (res?.data ?? res?.tenants ?? []);
   return (rows ?? []).map(normalizeAdminTenant);
 }
+
+/* Command Center strip: fleet MRR/movement/hotels/health + dunning position. */
+export async function getFleetOpsDaily(): Promise<any> {
+  return client.get('/admin/health/ops-daily');
+}

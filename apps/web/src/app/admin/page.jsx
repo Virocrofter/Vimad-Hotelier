@@ -7,7 +7,7 @@
  * fabricates state locally. */
 import { useMemo, useState } from 'react';
 import { useApiFetch } from '@/hooks/useApiFetch';
-import { listAdminTenants } from '@/api/adminTenants';
+import { listAdminTenants, getFleetOpsDaily } from '@/api/adminTenants';
 import { fetchAdminKpis } from '@/api/dashboard';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -24,6 +24,7 @@ import {
   Users,
   TrendingUp,
   Activity,
+  AlertTriangle,
 } from 'lucide-react';
 import { TenantStatusBadge, PlanBadge, StatCard, TenantAvatar } from './components';
 import { formatCurrency } from './lib';
@@ -36,6 +37,7 @@ const fmtDate = (d) =>
 export default function AdminTenantsPage() {
   const { data: tenants, loading, error, refetch } = useApiFetch(listAdminTenants, []);
   const { data: kpis } = useApiFetch(fetchAdminKpis, []);
+  const { data: ops } = useApiFetch(getFleetOpsDaily, []);
 
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -81,34 +83,51 @@ export default function AdminTenantsPage() {
   const handleSort = (key) =>
     setSort((s) => ({ key, dir: s.key === key && s.dir === 'asc' ? 'desc' : 'asc' }));
 
+  const opsLatest = ops?.series?.length ? ops.series[ops.series.length - 1] : null;
+  const movement = ops?.movement ?? null;
+  const dunning = ops?.dunning ?? { overdueCents: 0, count: 0 };
+
   const kpiCards = [
     {
-      label: 'Total Tenants',
-      value: kpis?.totalTenants?.value ?? '—',
-      icon: Building2,
-      color: 'text-accent',
-      subtext: 'Live from /admin/kpis',
-    },
-    {
-      label: 'MRR (ZAR)',
-      value: kpis?.mrr?.value != null ? formatCurrency(kpis.mrr.value) : '—',
+      label: 'MRR',
+      value: opsLatest
+        ? formatCurrency(opsLatest.mrrCents / 100)
+        : kpis?.mrr?.value != null
+          ? formatCurrency(kpis.mrr.value)
+          : '—',
       icon: DollarSign,
       color: 'text-secondary',
-      subtext: 'Platform recurring revenue',
+      subtext: movement
+        ? (movement.netCents >= 0 ? '+' : '-') +
+          formatCurrency(Math.abs(movement.netCents) / 100) +
+          ` net (${movement.newCount} new / ${movement.churnedCount} churned)`
+        : 'From TenantOpsDaily',
     },
     {
-      label: 'Active Users',
-      value: kpis?.activeUsers?.value ?? '—',
-      icon: Users,
-      color: 'text-info',
-      subtext: kpis?.activeUsers?.change ? '+' + kpis.activeUsers.change + '% vs last month' : '',
+      label: 'Active Hotels',
+      value: opsLatest?.tenants ?? kpis?.totalTenants?.value ?? '—',
+      icon: Building2,
+      color: 'text-accent',
+      subtext: opsLatest ? `${opsLatest.rooms} rooms · ${opsLatest.redTenants} red-flag` : 'Live',
     },
     {
-      label: 'Churn Rate',
-      value: kpis?.churnRate?.value != null ? kpis.churnRate.value + '%' : '—',
-      icon: TrendingUp,
-      color: 'text-warning',
-      subtext: kpis?.churnRate?.change ? kpis.churnRate.change + '% vs last month' : '',
+      label: 'Dunning Overdue',
+      value: formatCurrency(dunning.overdueCents / 100),
+      icon: AlertTriangle,
+      color: dunning.overdueCents > 0 ? 'text-warning' : 'text-accent',
+      subtext: `${dunning.count} overdue invoice${dunning.count === 1 ? '' : 's'}`,
+    },
+    {
+      label: 'Avg Health',
+      value: opsLatest?.avgHealth ?? '—',
+      icon: Activity,
+      color:
+        opsLatest?.avgHealth >= 75
+          ? 'text-accent'
+          : opsLatest?.avgHealth >= 50
+            ? 'text-warning'
+            : 'text-danger',
+      subtext: 'fleet average (v2 score)',
     },
   ];
 
