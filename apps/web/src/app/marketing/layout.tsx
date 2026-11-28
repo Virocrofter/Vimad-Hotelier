@@ -238,6 +238,12 @@ export default function MarketingLayout() {
 
           <div className="flex items-center gap-3">
             <Link
+              to="/auth/login"
+              className="hidden h-10 items-center justify-center rounded-full border border-[var(--mk-hairline)] px-5 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--mk-espresso)] transition-colors hover:border-[var(--mk-espresso)] sm:inline-flex"
+            >
+              Sign in
+            </Link>
+            <Link
               to="/contact"
               className="hidden h-10 items-center justify-center rounded-full bg-[var(--mk-ember)] px-5 text-[11px] font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[var(--mk-ember-soft)] sm:inline-flex"
             >
@@ -267,6 +273,13 @@ export default function MarketingLayout() {
                   {link.label}
                 </Link>
               ))}
+              <Link
+                to="/auth/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-sm font-medium text-[var(--mk-espresso-soft)] hover:text-[var(--mk-espresso)]"
+              >
+                Sign in
+              </Link>
               <Link
                 to="/contact"
                 onClick={() => setMobileMenuOpen(false)}
@@ -334,6 +347,7 @@ export default function MarketingLayout() {
             <Link to="/status">Live status</Link>
             <Link to="/help">Help center</Link>
             <Link to="/contact">Contact</Link>
+            <Link to="/auth/login">Sign in</Link>
           </div>
         </div>
         <div className="mkh-footer-base">
