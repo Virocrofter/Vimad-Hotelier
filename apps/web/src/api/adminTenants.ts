@@ -53,3 +53,14 @@ export async function listAdminTenants(): Promise<AdminTenant[]> {
 export async function getFleetOpsDaily(): Promise<any> {
   return client.get('/admin/health/ops-daily');
 }
+
+/* Internal admin directory (control-plane identities, Phase 3b). */
+export async function listInternalAdmins(): Promise<any> {
+  return client.get('/admin/internal-admins');
+}
+
+export async function setInternalAdminActive(id: string, isActive: boolean): Promise<any> {
+  return client.post('/admin/internal-admins/' + encodeURIComponent(id) + '/set-active', {
+    isActive,
+  });
+}

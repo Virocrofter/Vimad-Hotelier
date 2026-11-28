@@ -4,7 +4,7 @@ import { OpenAPIRegistry, extendZodWithOpenApi } from '@asteasolutions/zod-to-op
 import { z } from 'zod';
 import { adminJobsRouter } from './admin.jobs.routes.js';
 import { authMiddleware } from '../auth/auth.middleware.js';
-import { requireAdminRole } from './admin.middleware.js';
+import { requireAdminRole, requireInternalRole } from './admin.middleware.js';
 import { ErrorResponseSchema } from '../../common/openapi-schemas.js';
 import {
   getAdminKpis,
@@ -43,6 +43,7 @@ import { adminReportsRouter } from './admin.reports.routes.js';
 import { contractsRouter } from './contracts.routes.js';
 import { billingAdapterRouter } from './billing-adapter.routes.js';
 import { impersonationRouter } from './impersonation.routes.js';
+import { listInternalAdmins, setInternalAdminActive } from './internal-admin.service.js';
 
 extendZodWithOpenApi(z);
 
@@ -616,6 +617,29 @@ adminRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       return res.status(201).json(await triggerAdminDunning(req.params.id));
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/* ─── Phase 3b: internal admin directory (control-plane identities) ─── */
+adminRouter.get('/internal-admins', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    return res.json({ data: await listInternalAdmins() });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/* FOUNDER-only: activate / deactivate a control-plane identity. */
+adminRouter.post(
+  '/internal-admins/:id/set-active',
+  requireInternalRole('FOUNDER'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await setInternalAdminActive(req.params.id, (req.body as any)?.isActive !== false);
+      return res.json({ ok: true });
     } catch (err) {
       return next(err);
     }
