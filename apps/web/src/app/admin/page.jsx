@@ -7,7 +7,13 @@
  * fabricates state locally. */
 import { useMemo, useState } from 'react';
 import { useApiFetch } from '@/hooks/useApiFetch';
-import { listAdminTenants, getFleetOpsDaily } from '@/api/adminTenants';
+import {
+  listAdminTenants,
+  getFleetOpsDaily,
+  startImpersonation,
+  enterImpersonationSession,
+} from '@/api/adminTenants';
+import { enterImpersonation } from '@/lib/impersonation';
 import { fetchAdminKpis } from '@/api/dashboard';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -43,6 +49,7 @@ export default function AdminTenantsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [planFilter, setPlanFilter] = useState('all');
   const [selected, setSelected] = useState(null);
+  const [imp, setImp] = useState(null); // impersonation modal: {ticket, mode, busy, error}
   const [sort, setSort] = useState({ key: 'name', dir: 'asc' });
 
   const rows = useMemo(() => tenants || [], [tenants]);
@@ -327,6 +334,75 @@ export default function AdminTenantsPage() {
               ))}
               <div className="flex items-start gap-2 rounded-lg border border-border bg-surface p-3 text-xs text-text-muted">
                 <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setImp({ ticket: '', mode: 'READ_ONLY', busy: false, error: null })
+                  }
+                  className="h-9 w-full rounded-md border border-accent/30 text-sm text-accent hover:bg-accent/10"
+                >
+                  Impersonate (ticket required)
+                </button>
+                {imp && (
+                  <div className="space-y-2 rounded-lg border border-accent/30 bg-surface p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+                      Impersonate {selected.name}
+                    </p>
+                    <input
+                      value={imp.ticket}
+                      onChange={(e) => setImp({ ...imp, ticket: e.target.value })}
+                      placeholder="Support ticket #"
+                      className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary"
+                    />
+                    <select
+                      value={imp.mode}
+                      onChange={(e) => setImp({ ...imp, mode: e.target.value })}
+                      className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-text-primary"
+                    >
+                      <option value="READ_ONLY">Read-only</option>
+                      <option value="FULL_WRITE">Full write</option>
+                    </select>
+                    {imp.error && <p className="text-xs text-danger">{imp.error}</p>}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={imp.busy || imp.ticket.trim().length < 3}
+                        onClick={async () => {
+                          setImp({ ...imp, busy: true, error: null });
+                          try {
+                            const session = await startImpersonation(
+                              selected.id,
+                              imp.mode,
+                              imp.ticket.trim()
+                            );
+                            const entered = await enterImpersonationSession(session.id);
+                            await enterImpersonation({
+                              token: entered.token,
+                              sessionId: session.id,
+                              tenantId: selected.id,
+                              tenantName: selected.name,
+                              mode: session.mode,
+                              ticket: session.ticket,
+                              expiresAt: session.expiresAt,
+                            });
+                          } catch (e) {
+                            setImp({ ...imp, busy: false, error: e.message });
+                          }
+                        }}
+                        className="h-9 flex-1 rounded-md bg-accent text-sm font-medium text-white disabled:opacity-50"
+                      >
+                        {imp.busy ? 'Starting…' : 'Start 60-min session'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setImp(null)}
+                        className="h-9 rounded-md border border-border px-3 text-sm text-text-secondary"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
                 The 7-tab tenant workspace (billing, usage, staff, audit, lifecycle controls) ships
                 with the Tenants pillar on real endpoints - controls here never mutate local state.
               </div>
