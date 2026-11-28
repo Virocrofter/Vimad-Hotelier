@@ -108,3 +108,17 @@ export async function confirmInternalTotp(code: string): Promise<any> {
 export async function disableInternalTotp(code: string): Promise<any> {
   return client.post('/admin/internal-admins/me/totp/disable', { code });
 }
+
+/* CRM / Durban funnel (Phase 3, blueprint Pillar 6). */
+export async function listLeads(params: Record<string, string>): Promise<any> {
+  const qs = new URLSearchParams(params).toString();
+  return client.get('/admin/crm/leads' + (qs ? '?' + qs : ''));
+}
+
+export async function updateLead(id: string, patch: Record<string, unknown>): Promise<any> {
+  return client.patch('/admin/crm/leads/' + encodeURIComponent(id), patch);
+}
+
+export async function convertLead(id: string): Promise<any> {
+  return client.post('/admin/crm/leads/' + encodeURIComponent(id) + '/convert', {});
+}

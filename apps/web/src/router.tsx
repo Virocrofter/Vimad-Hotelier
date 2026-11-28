@@ -208,6 +208,7 @@ export const router = createBrowserRouter([
       { path: 'profiler', ...page(() => import('./app/admin/profiler/page')) },
       { path: 'users', ...page(() => import('./app/admin/users/page')) },
       { path: 'webhooks', ...page(() => import('./app/admin/webhooks/page')) },
+      { path: 'crm', ...page(() => import('./app/admin/crm/page')) },
       {
         path: 'billing',
         ...page(() => import('./app/admin/billing/layout')),

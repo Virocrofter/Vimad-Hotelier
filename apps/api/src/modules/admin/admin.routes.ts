@@ -44,6 +44,7 @@ import { contractsRouter } from './contracts.routes.js';
 import { billingAdapterRouter } from './billing-adapter.routes.js';
 import { impersonationRouter } from './impersonation.routes.js';
 import { webhookCenterRouter } from './webhook-center.routes.js';
+import { crmRouter } from './crm.routes.js';
 import {
   listInternalAdmins,
   setInternalAdminActive,
@@ -161,6 +162,7 @@ adminRouter.use('/billing/contracts', contractsRouter);
 adminRouter.use('/billing', billingAdapterRouter);
 adminRouter.use('/impersonation', impersonationRouter);
 adminRouter.use('/webhooks', webhookCenterRouter);
+adminRouter.use('/crm', crmRouter);
 
 /* ─── GET /admin/kpis ─── */
 registry.registerPath({
