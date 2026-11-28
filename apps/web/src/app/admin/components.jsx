@@ -24,7 +24,7 @@ import {
   getUsageColor,
   getUsageBarColor,
   formatCurrency,
-} from './data';
+} from './lib';
 
 /* ─── Status Badge ─── */
 export function TenantStatusBadge({ status }) {
