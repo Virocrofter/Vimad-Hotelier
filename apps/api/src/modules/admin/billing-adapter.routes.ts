@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { prisma } from '../../common/prisma.js';
 import { authMiddleware } from '../auth/auth.middleware.js';
 import { requireAdminRole } from './admin.middleware.js';
-import { planFee } from './plan-catalog.js';
+import { resolvePlanFee, listPlans, updatePlan } from './plan-catalog.service.js';
 import { resolveMonthlyFee } from './contracts.service.js';
 
 export const billingAdapterRouter = Router();
@@ -44,9 +44,14 @@ async function audit(
 billingAdapterRouter.get('/summary', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const tenants = await prisma.tenant.findMany({ where: { status: 'active' } });
+    const roomCounts = await prisma.room.groupBy({ by: ['tenantId'], _count: { tenantId: true } });
+    const roomsByTenant = new Map(roomCounts.map((r) => [r.tenantId, r._count.tenantId]));
     let mrr = 0;
     for (const t of tenants) {
-      mrr += await resolveMonthlyFee(t.id, planFee(t.plan));
+      mrr += await resolveMonthlyFee(
+        t.id,
+        await resolvePlanFee(t.plan, roomsByTenant.get(t.id) ?? 0)
+      );
     }
     const invoices = await prisma.invoice.findMany();
     const now = new Date();
@@ -351,12 +356,20 @@ billingAdapterRouter.get('/tenants', async (_req: Request, res: Response, next: 
   }
 });
 /* GET /analytics - Revenue drawer: MRR curve (daily/weekly/monthly) + forecast + movement + pipeline */
-async function mrrAt(tenants: any[], cutoff: Date): Promise<number> {
+async function mrrAt(
+  tenants: any[],
+  cutoff: Date,
+  roomsByTenant: Map<string, number>
+): Promise<number> {
   const inBucket = tenants.filter(
     (t: any) => t.createdAt < cutoff && t.status === 'active' && t.plan !== 'trial'
   );
   let mrr = 0;
-  for (const t of inBucket) mrr += await resolveMonthlyFee(t.id, planFee(t.plan));
+  for (const t of inBucket)
+    mrr += await resolveMonthlyFee(
+      t.id,
+      await resolvePlanFee(t.plan, roomsByTenant.get(t.id) ?? 0)
+    );
   return Math.round(mrr * 100) / 100;
 }
 
@@ -368,13 +381,15 @@ billingAdapterRouter.get('/analytics', async (_req: Request, res: Response, next
     const tenants = await prisma.tenant.findMany({
       select: { id: true, plan: true, status: true, createdAt: true },
     });
+    const roomCounts = await prisma.room.groupBy({ by: ['tenantId'], _count: { tenantId: true } });
+    const roomsByTenant = new Map(roomCounts.map((r) => [r.tenantId, r._count.tenantId]));
 
     // Monthly: last 12 months
     const monthly: any[] = [];
     for (let i = 11; i >= 0; i--) {
       const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
       const end = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1));
-      monthly.push({ label: monthKey(d), mrr: await mrrAt(tenants, end) });
+      monthly.push({ label: monthKey(d), mrr: await mrrAt(tenants, end, roomsByTenant) });
     }
 
     // Weekly: last 12 weeks (7-day buckets ending at now)
@@ -382,14 +397,20 @@ billingAdapterRouter.get('/analytics', async (_req: Request, res: Response, next
     for (let i = 11; i >= 0; i--) {
       const end = new Date(now.getTime() - i * 7 * DAY);
       const start = new Date(end.getTime() - 7 * DAY);
-      weekly.push({ label: start.toISOString().slice(5, 10), mrr: await mrrAt(tenants, end) });
+      weekly.push({
+        label: start.toISOString().slice(5, 10),
+        mrr: await mrrAt(tenants, end, roomsByTenant),
+      });
     }
 
     // Daily: last 30 days
     const daily: any[] = [];
     for (let i = 29; i >= 0; i--) {
       const end = new Date(now.getTime() - i * DAY);
-      daily.push({ label: end.toISOString().slice(5, 10), mrr: await mrrAt(tenants, end) });
+      daily.push({
+        label: end.toISOString().slice(5, 10),
+        mrr: await mrrAt(tenants, end, roomsByTenant),
+      });
     }
 
     const currentMrr = monthly.length ? monthly[monthly.length - 1].mrr : 0;
@@ -467,7 +488,7 @@ billingAdapterRouter.get('/analytics', async (_req: Request, res: Response, next
     let planOnlyMrr = 0;
     for (const t of tenants) {
       if (t.status === 'active' && t.plan !== 'trial' && !contractedIds.has(t.id))
-        planOnlyMrr += planFee(t.plan);
+        planOnlyMrr += await resolvePlanFee(t.plan, roomsByTenant.get(t.id) ?? 0);
     }
 
     res.json({
@@ -550,8 +571,16 @@ billingAdapterRouter.get('/finances', async (_req: Request, res: Response, next:
       feeByTenant[p.tenantId] = (feeByTenant[p.tenantId] || 0) + num(p.feeMinor) / 100;
 
     const margins = [];
+    const finRoomCounts = await prisma.room.groupBy({
+      by: ['tenantId'],
+      _count: { tenantId: true },
+    });
+    const finRoomsByTenant = new Map(finRoomCounts.map((r) => [r.tenantId, r._count.tenantId]));
     for (const t of tenants.filter((t: any) => t.status === 'active' && t.plan !== 'trial')) {
-      const revenue = await resolveMonthlyFee(t.id, planFee(t.plan));
+      const revenue = await resolveMonthlyFee(
+        t.id,
+        await resolvePlanFee(t.plan, finRoomsByTenant.get(t.id) ?? 0)
+      );
       const costs = Math.round(((feeByTenant[t.id] || 0) + 0) * 100) / 100;
       const marginPct = revenue > 0 ? Math.round(((revenue - costs) / revenue) * 1000) / 10 : null;
       margins.push({ id: t.id, name: t.name, revenue: Math.round(revenue), costs, marginPct });
@@ -582,3 +611,45 @@ billingAdapterRouter.get('/finances', async (_req: Request, res: Response, next:
     return;
   }
 });
+
+/* GET /plans - DB-backed plan catalog (list-price source of truth) */
+billingAdapterRouter.get('/plans', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.json(await listPlans());
+    return;
+  } catch (err) {
+    next(err);
+    return;
+  }
+});
+
+const PlanPatchSchema = z.object({
+  label: z.string().min(1).optional(),
+  bandMinZar: z.number().int().min(0).optional(),
+  bandMaxZar: z.number().int().min(0).nullable().optional(),
+  monthlyZar: z.number().int().min(0).optional(),
+  perRoomZar: z.number().int().min(0).optional(),
+  includedRooms: z.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
+});
+
+/* PUT /plans/:code - founder edits list price without a deploy */
+billingAdapterRouter.put(
+  '/plans/:code',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const body = PlanPatchSchema.parse(req.body ?? {});
+      const updated = await updatePlan(req.params.code, body);
+      if (!updated) {
+        res.status(404).json({ error: 'plan not found: ' + req.params.code });
+        return;
+      }
+      await audit(actorOf(req), 'plan_catalog_updated', 'plan', req.params.code, null, body);
+      res.json(updated);
+      return;
+    } catch (err) {
+      next(err);
+      return;
+    }
+  }
+);

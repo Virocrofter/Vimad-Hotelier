@@ -3,6 +3,8 @@ import { enqueue, createWorker } from '../common/queue.js';
 import { prisma } from '../common/prisma.js';
 import { logger } from '../common/logger.js';
 import { sendInvoiceEmail } from './email.queue.js';
+import { getPlan, resolvePlanFee } from '../modules/admin/plan-catalog.service.js';
+import { resolveMonthlyFee } from '../modules/admin/contracts.service.js';
 
 export const BILLING_QUEUE = 'billing';
 
@@ -41,24 +43,8 @@ async function getUsageForPeriod(
   return usage;
 }
 
-// ─── Plan Limits ───
-const PLAN_LIMITS: Record<
-  string,
-  { apiCalls: number; storageGb: number; sms: number; includedProperties: number }
-> = {
-  starter: { apiCalls: 10_000, storageGb: 1, sms: 100, includedProperties: 1 },
-  professional: { apiCalls: 100_000, storageGb: 10, sms: 1_000, includedProperties: 3 },
-  enterprise: { apiCalls: 1_000_000, storageGb: 100, sms: 10_000, includedProperties: 10 },
-};
-
-const OVERAGE_RATES: Record<
-  string,
-  { perThousandApiCalls: number; perGbStorage: number; perSms: number; perExtraProperty: number }
-> = {
-  starter: { perThousandApiCalls: 0.5, perGbStorage: 5.0, perSms: 0.05, perExtraProperty: 49 },
-  professional: { perThousandApiCalls: 0.3, perGbStorage: 3.0, perSms: 0.03, perExtraProperty: 29 },
-  enterprise: { perThousandApiCalls: 0.15, perGbStorage: 1.5, perSms: 0.02, perExtraProperty: 19 },
-};
+// ─── Plan limits/rates/base live in the DB plan_catalog table
+// (Phase 2, 2026-11-28) — editable via PUT /admin/billing/plans/:code. ───
 
 // ─── Worker ───
 export const billingWorker = createWorker<InvoiceJobData>(BILLING_QUEUE, async (job) => {
@@ -73,20 +59,21 @@ export const billingWorker = createWorker<InvoiceJobData>(BILLING_QUEUE, async (
 
   const owner = tenant.users[0];
   const plan = tenant.plan.toLowerCase();
-  const planRates: Record<string, number> = {
-    starter: 99,
-    professional: 299,
-    enterprise: 799,
-  };
-  const baseRate = planRates[plan] ?? 99;
+  const catalogPlan = await getPlan(plan);
+  if (!catalogPlan) throw new Error(`Plan not in catalog: ${plan}`);
+  const propertyCountForBase = await prisma.property.count({ where: { tenantId } });
+  const baseRate = await resolveMonthlyFee(
+    tenantId,
+    await resolvePlanFee(plan, propertyCountForBase)
+  );
 
   // ─── REAL USAGE METERING ───
   const start = new Date(periodStart);
   const end = new Date(periodEnd);
   const usage = await getUsageForPeriod(tenantId, start, end);
 
-  const limits = PLAN_LIMITS[plan] ?? PLAN_LIMITS.starter;
-  const rates = OVERAGE_RATES[plan] ?? OVERAGE_RATES.starter;
+  const limits = (catalogPlan.usageLimits ?? {}) as Record<string, number>;
+  const rates = (catalogPlan.overageRates ?? {}) as Record<string, number>;
 
   // Calculate overages
   const apiCalls = usage['api_calls'] ?? 0;

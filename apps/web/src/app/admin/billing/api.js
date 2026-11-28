@@ -89,3 +89,8 @@ export const contractAction = (id, action, payload) =>
   });
 export const getAnalytics = () => req('/analytics');
 export const getFinances = () => req('/finances');
+
+// ─── Plans (Phase 2: DB-backed catalog) ───
+export const listPlans = () => req('/plans');
+export const updatePlan = (code, patch) =>
+  req('/plans/' + encodeURIComponent(code), { method: 'PUT', body: patch });

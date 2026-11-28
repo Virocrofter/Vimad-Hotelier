@@ -1,5 +1,5 @@
 /* apps/api/src/modules/admin/admin.service.ts */
-import { planFee } from './plan-catalog.js';
+import { resolvePlanFee, getPlan } from './plan-catalog.service.js';
 import { resolveMonthlyFee } from './contracts.service.js';
 import { prisma } from '../../common/prisma.js';
 import { logger } from '../../common/logger.js';
@@ -643,7 +643,7 @@ export async function getAdminTenants(): Promise<AdminTenantItem[]> {
   }));
 }
 // ─── B1/B3: platform billing (Commercial Monetisation Plan, 2026-10-29) ───
-// Base fee via planFee() seam (contracts plug in later); usage itemised in
+// Base fee via DB plan_catalog (contract-aware resolveMonthlyFee); usage itemised in
 // `items`; trials never invoice; churn/upgrade/downgrade stay 0 (§9 honesty —
 // no event sources yet). Subscriptions are DERIVED views over tenants + DB
 // counts — no Subscription table (contracts stay flexible per deal).
@@ -652,8 +652,15 @@ const DAY_MS = 86400_000;
 const iso = (d: any) => (d instanceof Date ? d.toISOString() : d ? String(d) : '');
 
 async function resolveTenantMrr(tenants: any[]): Promise<number> {
+  const roomCounts = await prisma.room.groupBy({
+    by: ['tenantId'],
+    where: { tenantId: { in: tenants.map((t) => t.id) } },
+    _count: { tenantId: true },
+  });
+  const roomsByTenant = new Map(roomCounts.map((r) => [r.tenantId, r._count.tenantId]));
   let s = 0;
-  for (const t of tenants) s += await resolveMonthlyFee(t.id, planFee(t.plan));
+  for (const t of tenants)
+    s += await resolveMonthlyFee(t.id, await resolvePlanFee(t.plan, roomsByTenant.get(t.id) ?? 0));
   return s;
 }
 
@@ -752,11 +759,16 @@ export async function getAdminRevenueByPlan(): Promise<
     orderBy: { plan: 'asc' },
   });
   const byPlan = new Map<string, any>();
+  const roomCounts = await prisma.room.groupBy({ by: ['tenantId'], _count: { tenantId: true } });
+  const roomsByTenant = new Map(roomCounts.map((r) => [r.tenantId, r._count.tenantId]));
   for (const t of rows as any[]) {
     const cur = byPlan.get(t.plan) ?? { plan: t.plan, tenants: 0, properties: 0, mrr: 0 };
     cur.tenants += 1;
     cur.properties += t._count?.properties ?? 0;
-    cur.mrr += await resolveMonthlyFee(t.id, planFee(t.plan));
+    cur.mrr += await resolveMonthlyFee(
+      t.id,
+      await resolvePlanFee(t.plan, roomsByTenant.get(t.id) ?? 0)
+    );
     byPlan.set(t.plan, cur);
   }
   return [...byPlan.values()];
@@ -791,13 +803,13 @@ export async function getAdminMrrHistory(
 
 // ─── B3: derived subscriptions (views over tenants — no table) ───
 async function deriveSubscription(t: any): Promise<any> {
-  const monthlyFee = await resolveMonthlyFee(t.id, planFee(t.plan));
+  const subRooms = await prisma.room.count({ where: { tenantId: t.id } });
+  const monthlyFee = await resolveMonthlyFee(t.id, await resolvePlanFee(t.plan, subRooms));
   const periodStart = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1));
   const periodEnd = new Date(
     Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 1)
   );
-  const [rooms, apiCalls] = await Promise.all([
-    prisma.room.count({ where: { tenantId: t.id } }),
+  const [apiCalls] = await Promise.all([
     prisma.usageRecord.aggregate({
       _sum: { quantity: true },
       where: { tenantId: t.id, recordedAt: { gte: periodStart } },
@@ -814,7 +826,7 @@ async function deriveSubscription(t: any): Promise<any> {
     cancelAtPeriodEnd: false,
     usage: {
       properties: t._count?.properties ?? 0,
-      rooms,
+      rooms: subRooms,
       users: t._count?.users ?? 0,
       apiCalls: Number(apiCalls._sum.quantity ?? 0),
     },
@@ -861,8 +873,8 @@ export async function getAdminSubscriptionById(id: string) {
 
 export async function updateAdminSubscription(id: string, data: { plan?: string }) {
   if (data.plan) {
-    const { PLAN_CATALOG } = await import('./plan-catalog.js');
-    if (!PLAN_CATALOG[data.plan.toLowerCase()]) throw new Error('unknown plan: ' + data.plan);
+    const p = await getPlan(data.plan.toLowerCase());
+    if (!p || !p.isActive) throw new Error('unknown or inactive plan: ' + data.plan);
     await prisma.tenant.update({ where: { id }, data: { plan: data.plan.toLowerCase() } });
   }
   return getAdminSubscriptionById(id);
@@ -948,7 +960,8 @@ export async function generateAdminInvoice(input: {
   });
   if (existing) return existing; // return-existing: never double-bill a period
 
-  const base = await resolveMonthlyFee(t.id, planFee(t.plan));
+  const genRooms = await prisma.room.count({ where: { tenantId: t.id } });
+  const base = await resolveMonthlyFee(t.id, await resolvePlanFee(t.plan, genRooms));
   const usage = await prisma.usageRecord.groupBy({
     by: ['metric'],
     where: { tenantId: t.id, recordedAt: { gte: pStart, lt: pEnd } },
