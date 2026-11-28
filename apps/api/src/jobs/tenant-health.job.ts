@@ -5,6 +5,7 @@
 import { getTenantScores, HEALTH_WEIGHTS_VERSION } from '../modules/admin/admin.health.service.js';
 import { prisma } from '../common/prisma.js';
 import { logger } from '../common/logger.js';
+import cron from 'node-cron';
 
 export async function runTenantHealthSnapshot(): Promise<number> {
   const { tenants } = await getTenantScores();
@@ -29,4 +30,12 @@ export async function runTenantHealthSnapshot(): Promise<number> {
   }
   logger.info({ written }, 'tenant health snapshot complete');
   return written;
+}
+
+// Registered LAST in index.ts bootstrap: heartbeat.ts maps loop labels
+// positionally to node-cron schedule call order.
+export function startTenantHealthScheduler() {
+  cron.schedule('0 5 * * *', () => {
+    runTenantHealthSnapshot().catch((err) => logger.error(err, 'tenant-health-snapshot failed'));
+  });
 }

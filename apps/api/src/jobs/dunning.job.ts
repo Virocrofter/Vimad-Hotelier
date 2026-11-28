@@ -7,6 +7,7 @@
 import { prisma } from '../common/prisma.js';
 import { logger } from '../common/logger.js';
 import { sendEmail } from './email.queue.js';
+import cron from 'node-cron';
 
 export async function runDunningDay0(): Promise<number> {
   const now = new Date();
@@ -72,4 +73,12 @@ export async function runDunningDay0(): Promise<number> {
   }
   logger.info({ sent, candidates: overdue.length }, 'dunning day-0 sweep complete');
   return sent;
+}
+
+// Registered LAST in index.ts bootstrap: heartbeat.ts maps loop labels
+// positionally to node-cron schedule call order.
+export function startDunningScheduler() {
+  cron.schedule('5 6 * * *', () => {
+    runDunningDay0().catch((err) => logger.error(err, 'dunning-day-0 failed'));
+  });
 }

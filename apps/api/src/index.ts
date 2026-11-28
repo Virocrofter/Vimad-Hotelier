@@ -69,6 +69,8 @@ import { arWorker, startArScheduler } from './jobs/ar.job.js';
 import './jobs/contracts.renewal.job.js'; // [CONTRACTS] renewal/expiry scan (self-starts)
 // [REPORTS] tenant-scoped reports — due-schedule runner
 import { startReportsScheduler } from './jobs/reports.job.js';
+import { startTenantHealthScheduler } from './jobs/tenant-health.job.js';
+import { startDunningScheduler } from './jobs/dunning.job.js';
 import { startExceptionsCadence } from './modules/exceptions/exceptions.routes.js';
 startExceptionsCadence();
 import { startWebhooksCadence } from './modules/webhooks/webhooks.service.js';
@@ -649,6 +651,8 @@ async function bootstrap() {
   void startDepositCaptureScheduler(); // [A1'] advance-deposit auto-capture from saved cards (daily 06:23)
   void startDlqAlertScheduler(); // [B3] notify tenants on unresolved dead-lettered jobs (hourly)
   void startReportsScheduler(); // [REPORTS] due scheduled reports (every min)
+  void startTenantHealthScheduler(); // [PHASE1] tenant health snapshot (daily 05:00)
+  void startDunningScheduler(); // [PHASE1] SaaS dunning day-0 (daily 06:05)
 
   // ─── Graceful Shutdown ───
   const shutdown = async (signal: string) => {
