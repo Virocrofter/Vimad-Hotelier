@@ -42,6 +42,7 @@ import {
 import { adminReportsRouter } from './admin.reports.routes.js';
 import { contractsRouter } from './contracts.routes.js';
 import { billingAdapterRouter } from './billing-adapter.routes.js';
+import { impersonationRouter } from './impersonation.routes.js';
 
 extendZodWithOpenApi(z);
 
@@ -150,6 +151,7 @@ export const adminRouter = Router();
 adminRouter.use(authMiddleware, requireAdminRole);
 adminRouter.use('/billing/contracts', contractsRouter);
 adminRouter.use('/billing', billingAdapterRouter);
+adminRouter.use('/impersonation', impersonationRouter);
 
 /* ─── GET /admin/kpis ─── */
 registry.registerPath({
