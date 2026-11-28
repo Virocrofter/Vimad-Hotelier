@@ -36,14 +36,13 @@ export default function LoginForm() {
       {displayError && <div className="auth-form__error">{displayError}</div>}
 
       <label htmlFor="tenantSlug">
-        Tenant Slug
+        Tenant Slug <span className="auth-form__hint">(admins can leave blank)</span>
         <input
           id="tenantSlug"
           type="text"
           value={tenantSlug}
           onChange={(e) => setTenantSlug(e.target.value)}
-          placeholder="your-hotel"
-          required
+          placeholder="your-hotel (admins can leave blank)"
           autoComplete="organization"
         />
       </label>

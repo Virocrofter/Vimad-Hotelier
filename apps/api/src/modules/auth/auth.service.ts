@@ -30,7 +30,9 @@ export const registerSchema = z.object({
 });
 
 export const loginSchema = z.object({
-  tenantSlug: z.string().min(1),
+  // Optional for internal admins (email is the identity; tenant resolved
+  // from the users table). Required in practice for hotel staff.
+  tenantSlug: z.string().min(1).optional(),
   email: z.string().email(),
   password: z.string().min(1),
 });
@@ -147,8 +149,31 @@ async function recordAuthEvent(tenantId: string, userId: string, kind: string) {
 }
 
 export async function login(input: LoginInput) {
+  let tenantSlug = input.tenantSlug ?? '';
+
+  // Phase 3b: internal admins sign in WITHOUT a hotel slug — the email is
+  // the identity; the account's own tenant is resolved from the users table.
+  // Hotel staff still sign in with their tenant slug (unchanged).
+  if (!tenantSlug) {
+    const adminEmails = (process.env.PLATFORM_ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    if (adminEmails.includes(input.email.trim().toLowerCase())) {
+      const adminUser = await prisma.user.findFirst({
+        where: { email: { equals: input.email.trim(), mode: 'insensitive' } },
+        orderBy: { createdAt: 'desc' },
+        include: { tenant: { select: { slug: true } } },
+      });
+      if (adminUser?.tenant?.slug) tenantSlug = adminUser.tenant.slug;
+    }
+    if (!tenantSlug) {
+      throw new AppError(401, 'Invalid credentials', 'UNAUTHORIZED');
+    }
+  }
+
   const tenant = await prisma.tenant.findUnique({
-    where: { slug: input.tenantSlug },
+    where: { slug: tenantSlug },
   });
   if (!tenant) {
     throw new AppError(401, 'Invalid credentials', 'UNAUTHORIZED');
